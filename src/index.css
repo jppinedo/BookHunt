@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  background-image: url("images/BookHuntLoginBG.jpg");
+}
+
 a {
   font-weight: 500;
   color: #646cff;

@@ -1,42 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Volkhov:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 #root {
   max-width: 1280px;
+  text-align: center;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.site-title {
+  width: 500px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.site-title h1 {
+  margin: 0 0 50px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.sign-in-area {
+  background-color: white;
+  position: relative;
+  width: 500px;
+  height: 700px;
+  border-radius: 20px;
+  color: #343434;
+  font-family: "Volkhov", sans-serif;
+  align-content: center;
 }
 
-.card {
-  padding: 2em;
+.sign-in-area form h1{
+  margin: 0 0 50px;
 }
 
-.read-the-docs {
-  color: #888;
+.sign-in-area form #logName, .sign-in-area form #logPass {
+  width: 300px;
 }
+
+.sign-in-area form #logButton {
+  width: 300px;
+}
+
+.register-section {
+  padding-bottom: 50px;
+}
+
+

@@ -1,34 +1,91 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+//import { useState } from 'react'
 import './App.css'
+import {Button, TextField} from "@mui/material";
+
+import logo from "./images/BookHuntLogoSmall.png";
 
 function App() {
-  const [count, setCount] = useState(0)
+  //const [count, setCount] = useState(0);
+
+  const LoginPage = () => (
+    <>
+        <div className={"site-title"}>
+            <h1 className={"appName"}>Book Hunt <img src={logo} alt="BookHuntLogo" width={45} height={45}/></h1>
+        </div>
+        <div className={"sign-in-area"}>
+            <form id={"log-in"} method={"post"}>
+                <h1>Welcome</h1>
+                <TextField
+                    id={"logName"}
+                    label={"Username/Email"}
+                    variant={"outlined"}
+                    sx={{
+                        m: 5,
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "black",
+                            borderWidth: "2px",
+                        },
+                        "& .Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "orange",
+                                color: "orange",
+                            },
+                        },
+                        "&:hover": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "orange",
+                            },
+                        },
+                        "& .MuiInputLabel-outlined": {
+                            color: "black",
+                            "&.Mui-focused": {
+                                color: "orange",
+                            },
+                        },
+                        }}
+                />
+                <TextField
+                    id={"logPass"}
+                    label={"Password"}
+                    variant={"outlined"}
+                    type={"password"}
+                    sx={{
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "black",
+                            borderWidth: "2px",
+                        },
+                        "& .Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "orange",
+                                color: "orange",
+                            },
+                        },
+                        "&:hover": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "orange",
+                            },
+                        },
+                        "& .MuiInputLabel-outlined": {
+                            color: "black",
+                            "&.Mui-focused": {
+                                color: "orange",
+                            },
+                        },
+                    }}
+                />
+                <Button id={"logButton"} variant="contained" sx={{m: 2}}>
+                    Login
+                </Button>
+            </form>
+            <div className={"register-section"}>
+                <p>Don't have an account? Register</p>
+            </div>
+        </div>
+    </>
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <LoginPage></LoginPage>
   )
 }
 
