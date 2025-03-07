@@ -1,0 +1,18 @@
+.book-card {
+  border: 1px solid #fff;
+}
+
+.book-card .book-card-description {
+  color: #666;
+  font-size: 12px;
+}
+
+.book-card:hover {
+  background-color: #daeaff;
+  cursor: pointer;
+  border: 1px solid #92c1ff;
+}
+
+.book-card:hover .book-card-title {
+  color: #00357b;
+}
