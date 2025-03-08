@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { isBookCode, cleanQuery } from '@utils/search-utils';
 
-const API_KEY = 'AIzaSyCfsjZkwqw0JUBNTd-yCiVUmUqMIEVO_F0';
+const API_KEY = import.meta.env.VITE_GOOLE_BOOKS_KEY;
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 export async function searchBooks(query) {
