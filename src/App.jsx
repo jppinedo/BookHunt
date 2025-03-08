@@ -13,8 +13,10 @@ function App() {
       <Router>
         <MenuNav />
         <Routes>
-          <Route path="/search" element={<SearchPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/results" element={<SearchPage />} />
+          
           {/* <Route path="/" element={<Root />} /> */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} /> {/* Catch-all route */}
         </Routes>

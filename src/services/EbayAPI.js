@@ -1,31 +1,16 @@
 import axios from 'axios';
 
-export const getEbayToken = async () => {
-  const clientId = import.meta.env.VITE_EBAY_CLIENT_ID;
-  const clientSecret = import.meta.env.VITE_EBAY_CLIENT_SECRET;
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const url = 'https://cors-anywhere.herokuapp.com//https://api.ebay.com/identity/v1/oauth2/token';
-
-  const headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  };
-
-  const data = new URLSearchParams();
-  data.append('grant_type', 'client_credentials');
-  data.append('scope', 'https://api.ebay.com/oauth/api_scope');
-
+export const searchEbay = async (query) => {
   try {
-    const response = await axios.post(url, data, {
-      headers,
-      auth: {
-        username: clientId,
-        password: clientSecret,
-      },
+    const response = await axios.get(`${backendUrl}/api/ebay/search`, {
+      params: { query },
     });
-
-    return response.data.access_token;
+    console.log('eBay Search Results:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error fetching eBay token:', error.response?.data || error.message);
+    console.error('Error searching eBay:', error.response?.data || error.message);
     throw error;
   }
 };
