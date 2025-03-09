@@ -29,15 +29,15 @@
   margin: 0 0 50px;
 }
 
-.sign-in-area form #logName, .sign-in-area form #logPass {
+#logName, #logPass, #crEmail, #crPassword, #confirmPassword {
   width: 300px;
 }
 
-.sign-in-area form #logButton {
+#logButton, #crButton {
   width: 300px;
 }
 
-.register-section {
+.register-section, .login-section {
   padding-bottom: 50px;
 }
 
