@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '@state/AppContext';
 import MenuNav from '@custom/Navigation/MenuNav';
 import SearchPage from '@pages/SearchPage/SearchPage';
+import BookList from '@pages/BookList/BookList';
 import LoginPage from '@pages/LoginPage/LoginPage';
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/results" element={<SearchPage />} />
+          <Route path="/results" element={<BookList />} />
           
           {/* <Route path="/" element={<Root />} /> */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} /> {/* Catch-all route */}

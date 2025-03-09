@@ -3,11 +3,11 @@ import { Grid2, Card, CardMedia, CardContent, Typography, Button, Box } from '@m
 import { truncateText } from '@utils/search-utils';
 import './BookResults.css';
 
-const BookResults = ({ books }) => {
+const BookResults = ({ books, onClickItem }) => {
   return (
     <Grid2 container sx={{ pt: 3, maxWidth: '1600px' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
       {books.map((book) => (
-        <Card sx={{ display: 'flex', padding: 1 }} className='book-card'>
+        <Card key={`${book.id}-${book.etag}`} sx={{ display: 'flex', padding: 1 }} className='book-card' tabIndex={0} onClick={() => onClickItem(book)}>
           <CardMedia
             component="img"
             sx={{ width: 130, height: 200 }}
@@ -24,7 +24,7 @@ const BookResults = ({ books }) => {
                 component="div"
                 sx={{ color: 'text.secondary' }}
               >
-                <strong>Author(s):</strong> {book.authors || 'Unknown'}
+                <strong>Author(s):</strong> {Array.isArray(book.authors) ? book.authors?.join(', ') : 'Unknown'}
               </Typography>
             </CardContent>
             <Box sx={{ display: 'flex', alignItems: 'left', pl: 2, pb: 1 }}>
