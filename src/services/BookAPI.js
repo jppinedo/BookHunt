@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { isBookCode, cleanQuery } from '../utils/search-utils';
 
-const API_KEY = 'AIzaSyCfsjZkwqw0JUBNTd-yCiVUmUqMIEVO_F0';
+const API_KEY = import.meta.env.VITE_GOOLE_BOOKS_KEY;
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 export async function searchBooks(query) {
@@ -16,13 +16,18 @@ export async function searchBooks(query) {
       },
     });
 
+    console.log(response.data.items);
+
     const books = response.data.items.map((item) => ({
       id: item.id,
+      etag: item.etag,
       title: item.volumeInfo.title,
-      authors: item.volumeInfo.authors?.join(', ') || 'Unknown Author',
+      authors: item.volumeInfo.authors || null,
       description: item.volumeInfo.description || 'No description available.',
-      thumbnail: item.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/128x196', // Fallback image
-      isbn: item.volumeInfo.industryIdentifiers?.find((id) => id.type === 'ISBN_13')?.identifier || 'N/A',
+      thumbnail: item.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/128x196',
+      isbn: item.volumeInfo.industryIdentifiers?.find((id) => id.type === 'ISBN_13')?.identifier || null,
+      publisher: item.volumeInfo?.publisher || 'N/A',
+      year: item.volumeInfo.publishedDate ? item.volumeInfo.publishedDate.split('-')[0] : null
     }));
 
     return books;
