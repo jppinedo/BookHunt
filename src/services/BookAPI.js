@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isBookCode, cleanQuery } from '@utils/search-utils';
+import { isBookCode, cleanQuery } from '../utils/search-utils';
 
 const API_KEY = 'AIzaSyCfsjZkwqw0JUBNTd-yCiVUmUqMIEVO_F0';
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
@@ -11,7 +11,7 @@ export async function searchBooks(query) {
       params: {
         q: isISBN ? cleanQuery(query) : `intitle:${query}`, // Search by title`
         orderBy: 'relevance',   // Sort by relevance
-        maxResults: 20,   
+        maxResults: 20,
         key: API_KEY,
       },
     });
