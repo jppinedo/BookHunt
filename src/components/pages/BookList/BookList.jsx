@@ -1,9 +1,15 @@
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { searchEbay } from "@services/EbayAPI";
+import { AppContext } from "@state/AppContext";
+import { formatEbayBook } from '@utils/search-utils';
 
 const BookList = () => {
+  const { setCurrentBook } = useContext(AppContext);
+  const navigate = useNavigate();
+
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,8 +25,6 @@ const BookList = () => {
     .filter(([key, value]) => value !== null && value !== undefined && value !== '')
     .map(([key, value]) => `${key}:${value}`)
     .join('+');
-
-  console.log('query: ', query)
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -42,6 +46,12 @@ const BookList = () => {
     }
   }, [query]);
 
+  const handleBookClick = (item) => {
+    const ebayBook = formatEbayBook(item);
+    setCurrentBook(ebayBook);
+    navigate(`/book/${ebayBook.sellerType}/${ebayBook.id}`);
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -59,7 +69,13 @@ const BookList = () => {
       <h2>eBay Search Results</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
         {results.map((item) => (
-          <div key={item.itemId} style={{ border: '1px solid #ccc', padding: '10px', width: '200px' }}>
+          <div 
+            key={item.itemId} 
+            style={{ border: '1px solid #ccc', padding: '10px', width: '200px' }}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleBookClick(item)}
+          >
             <img src={item.image?.imageUrl} alt={item.title} style={{ width: '100%', height: 'auto' }} />
             <h3>{item.title}</h3>
             <p><strong>Price:</strong> {item.price?.value} {item.price?.currency}</p>

@@ -25,3 +25,19 @@ export function truncateText(text, maxLength, ellipsis = '...') {
 
   return truncatedText + ellipsis;
 }
+
+export function formatEbayBook(item) {
+  return {
+    id: item.itemId,
+    title: item.title,
+    thumbnail: item.image.imageUrl,
+    images: item.additionalImages,
+    condition: item.condition,
+    sellerType: 'eBay',
+    URL: item.itemWebUrl,
+    sellerName: item.seller.username,
+    sellerEmail: null,
+    price: item.price.value,
+    currency: item.price.currency
+  }
+}
