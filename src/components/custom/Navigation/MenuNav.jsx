@@ -2,11 +2,32 @@ import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { auth } from "../../../../firebase.js";
+import { signOut } from "firebase/auth";
 
 const MenuNav = () => {
 
   const [anchorEl, setAnchorEl] = useState(null); 
   const open = Boolean(anchorEl);
+
+  //Check if the current user is currently logged in.
+  let user = auth.currentUser;
+
+  if (user) {
+      console.log(`Welcome back ${user.email}`);
+  }
+
+  //Should print null once logged out.
+  async function handleLogout() {
+      try {
+          await signOut(auth);
+          user = auth.currentUser
+          console.log(user);
+      }
+      catch (error) {
+          console.log(error)
+      }
+  }
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -43,6 +64,9 @@ const MenuNav = () => {
           open={open}
           onClose={handleMenuClose}
         >
+          <MenuItem component={Link} to="/login" onClick={handleLogout}>
+              Log out
+          </MenuItem>
           <MenuItem component={Link} to="/search" onClick={handleMenuClose}>
             Search
           </MenuItem>
