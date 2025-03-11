@@ -3,10 +3,10 @@ import React, { createContext, useState } from 'react';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [eBayToken, setEBayToken] = useState('');
+  const [currentBook, setCurrentBook] = useState(null);
 
   return (
-    <AppContext.Provider value={{ eBayToken, setEBayToken }}>
+    <AppContext.Provider value={{ currentBook, setCurrentBook }}>
       {children}
     </AppContext.Provider>
   );
