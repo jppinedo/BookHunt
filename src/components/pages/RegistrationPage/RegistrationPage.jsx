@@ -1,9 +1,9 @@
 import React, {useState} from "react";
 import {Button, TextField} from "@mui/material";
-import logo from '../../../assets/images/BookHuntLogoSmall.png'
+import logo from '@images/BookHuntLogoSmall.png'
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword} from "firebase/auth";
-import { auth } from "../../../../firebase.js";
+import { auth } from "@/../firebase.js";
 
 const RegistrationPage = () => {
     const navigate = useNavigate();
