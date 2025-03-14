@@ -39,42 +39,43 @@ const MenuNav = () => {
 
     return (
         <AppBar position="absolute" sx={{top:5, right:5, width: 'auto', }}>
-
-            <IconButton
-                color="inherit"
-                aria-label="menu"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenuOpen}
-            >
-                <MenuIcon />
-            </IconButton>
-            <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                open={open}
-                onClose={handleMenuClose}
-            >
-                <MenuItem component={Link} to="/login" onClick={handleLogout}>
-                    Log out
-                </MenuItem>
-                <MenuItem component={Link} to="/search" onClick={handleMenuClose}>
-                    Search
-                </MenuItem>
-                <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
-                    Login
-                </MenuItem>
-            </Menu>
-
+        <IconButton
+          color="inherit"
+          aria-label="menu"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleMenuOpen}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={open}
+          onClose={handleMenuClose}
+        >
+          <MenuItem component={Link} to="/login" onClick={handleLogout}>
+            Log out
+          </MenuItem>
+          <MenuItem component={Link} to="/search" onClick={handleMenuClose}>
+            Search
+          </MenuItem>
+          <MenuItem component={Link} to="/sell" onClick={handleMenuClose}>
+            Sell Book
+          </MenuItem>
+          <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
+            Login
+          </MenuItem>
+        </Menu>
         </AppBar>
     )
 }
