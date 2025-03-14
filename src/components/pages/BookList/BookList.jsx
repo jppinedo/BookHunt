@@ -32,10 +32,12 @@ const BookList = () => {
       setError(null);
 
       try {
-        const data = await searchEbay(query);
-        setResults(data.itemSummaries || []); // Adjust based on the actual API response structure
+        // const [ebayData, bdData] = await Promise.all([searchEbay(query), searchDBBooks(query)]);
+        const [ebayData] = await Promise.all([searchEbay(query)]);
+        // setResults([...ebayData.itemSummaries, ...bdData.itemSummaries]);
+        setResults([...ebayData.itemSummaries]);
       } catch (err) {
-        setError(err.message || 'Failed to fetch eBay results');
+        setError(err.message || 'Failed to fetch results');
       } finally {
         setLoading(false);
       }
@@ -45,6 +47,8 @@ const BookList = () => {
       fetchResults();
     }
   }, [query]);
+
+  
 
   const handleBookClick = (item) => {
     const ebayBook = formatEbayBook(item);
