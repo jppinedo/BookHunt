@@ -26,6 +26,22 @@ export function truncateText(text, maxLength, ellipsis = '...') {
   return truncatedText + ellipsis;
 }
 
+export function transformEbayItem(ebayItem) {
+  return {
+    id: ebayItem.itemId, // Use the itemId from eBay
+    title: ebayItem.title, // Use the title from eBay
+    thumbnail: ebayItem.image?.imageUrl || '', // Use the primary image URL
+    images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], // Map additional images
+    condition: ebayItem.condition, // Use the condition from eBay
+    sellerType: 'eBay', // Hardcoded as 'eBay'
+    URL: ebayItem.itemWebUrl, // Use the item URL from eBay
+    sellerName: ebayItem.seller?.username || '', // Use the seller's username
+    sellerEmail: null, // Hardcoded as null (eBay doesn't provide seller email)
+    price: ebayItem.price?.value || '0.00', // Use the price value
+    currency: ebayItem.price?.currency || 'USD', // Use the price currency
+  };
+}
+
 export function formatEbayBook(item) {
   return {
     id: item.itemId,
