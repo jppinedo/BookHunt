@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { searchBooks } from '../../../services/BookAPI';
+import { searchGoogleBooks } from '@services/BookAPI';
 import { useNavigate } from 'react-router';
-import SearchInput from '../../custom/Search/SearchInput';
-import BookResults from '../../custom/Search/BookResults';
+import SearchInput from '@custom/Search/SearchInput';
+import BookResults from '@custom/Search/BookResults';
 
 const SearchPage = () => {
   const [books, setBooks] = useState([]);
   const navigate = useNavigate();
 
   const handleSearch = async (query) => {
-      const results = await searchBooks(query);
+      const results = await searchGoogleBooks(query);
       setBooks(results);
   };
 

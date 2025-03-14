@@ -41,3 +41,34 @@ export function formatEbayBook(item) {
     currency: item.price.currency
   }
 }
+
+export function formatGoogleBook(googleBook) {
+  // Extract relevant data from the Google Books API object
+  const volumeInfo = googleBook.volumeInfo || {};
+  const industryIdentifiers = volumeInfo.industryIdentifiers || [];
+  const imageLinks = volumeInfo.imageLinks || {};
+
+  // Find ISBN-13 (preferred) or ISBN-10
+  const isbn13 = industryIdentifiers.find((id) => id.type === 'ISBN_13')?.identifier;
+  const isbn10 = industryIdentifiers.find((id) => id.type === 'ISBN_10')?.identifier;
+  const isbn = isbn13 || isbn10 || '';
+
+  return {
+    title: volumeInfo.title || '',
+    isbn: isbn,
+    price: '0.00', // Default price (can be updated by the user)
+    currency: 'USD', // Default currency
+    condition: 'Good', // Default condition (can be updated by the user)
+    description: volumeInfo.description || '',
+    thumbnail: imageLinks.thumbnail || '',
+    images: [],
+    sellerName: '', // To be filled by the user
+    sellerEmail: '', // To be filled by the user
+    sellerType: 'user', // Default seller type
+    URL: '',
+    publisher: volumeInfo?.publisher || 'N/A',
+    authors: volumeInfo.authors || null,
+    etag: googleBook.etag,
+    year: volumeInfo.publishedDate ? volumeInfo.publishedDate.split('-')[0] : null
+  };
+}

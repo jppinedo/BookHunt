@@ -70,6 +70,9 @@ const MenuNav = () => {
           <MenuItem component={Link} to="/search" onClick={handleMenuClose}>
             Search
           </MenuItem>
+          <MenuItem component={Link} to="/sell" onClick={handleMenuClose}>
+            Sell Book
+          </MenuItem>
           <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
             Login
           </MenuItem>
