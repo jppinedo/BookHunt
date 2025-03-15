@@ -2,14 +2,14 @@ import React, { useContext, useEffect } from "react";
 import { useParams } from "react-router";
 import { AppContext } from "@state/AppContext";
 import { getEbayItem } from "@services/EbayAPI";
-import { Container } from '@mui/material';
+import { Container, Backdrop, CircularProgress } from '@mui/material';
 import { transformEbayItem } from "@utils/search-utils";
 import BookCard from '@custom/Books/BookCard';
 
 
 const BookSinglePage = () => {
-    const { type, id } = useParams();
-    const { currentBook, setCurrentBook } = useContext(AppContext);
+  const { type, id } = useParams();
+  const { currentBook, setCurrentBook } = useContext(AppContext);
 
   useEffect(() => {
     const callEbayItem  = async ()  =>  {
@@ -26,14 +26,18 @@ const BookSinglePage = () => {
   }, [currentBook]);
 
     
-    if(!currentBook) {
-      return ( <p>Loading...</p> )
-    }
+  if (!currentBook) {
     return (
-      <Container maxWidth="md">
-        <BookCard book={currentBook} type="view" />
-      </Container>
-    )
+      <Backdrop open={true}>
+         <CircularProgress color="inherit" />
+      </Backdrop>
+    );
+  }
+  return (
+    <Container maxWidth="md">
+      <BookCard book={currentBook} type="view" isSingle={true} />
+    </Container>
+  )
 }
 
 export default BookSinglePage;

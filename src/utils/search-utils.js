@@ -26,40 +26,42 @@ export function truncateText(text, maxLength, ellipsis = '...') {
   return truncatedText + ellipsis;
 }
 
+// eBay single item to BookHunt Book
 export function transformEbayItem(ebayItem) {
   return {
-    id: ebayItem.itemId, // Use the itemId from eBay
-    title: ebayItem.title, // Use the title from eBay
-    thumbnail: ebayItem.image?.imageUrl || '', // Use the primary image URL
-    images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], // Map additional images
-    condition: ebayItem.condition, // Use the condition from eBay
-    sellerType: 'eBay', // Hardcoded as 'eBay'
-    URL: ebayItem.itemWebUrl, // Use the item URL from eBay
-    sellerName: ebayItem.seller?.username || '', // Use the seller's username
-    sellerEmail: null, // Hardcoded as null (eBay doesn't provide seller email)
-    price: ebayItem.price?.value || '0.00', // Use the price value
-    currency: ebayItem.price?.currency || 'USD', // Use the price currency
+    id: ebayItem.itemId, 
+    title: ebayItem.title, 
+    thumbnail: ebayItem.image?.imageUrl || '',
+    images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], 
+    condition: ebayItem.condition, 
+    sellerType: 'eBay', 
+    URL: ebayItem.itemWebUrl, 
+    sellerName: ebayItem.seller?.username || '', 
+    sellerEmail: null, 
+    price: ebayItem.price?.value || '0.00', 
+    currency: ebayItem.price?.currency || 'USD', 
   };
 }
 
+// eBay list items to BookHunt Book
 export function formatEbayBook(item) {
   return {
     id: item.itemId,
     title: item.title,
-    thumbnail: item.image.imageUrl,
+    thumbnail: item.image?.imageUrl || '',
     images: item.additionalImages,
     condition: item.condition,
     sellerType: 'eBay',
     URL: item.itemWebUrl,
-    sellerName: item.seller.username,
+    sellerName: item.seller?.username || '',
     sellerEmail: null,
-    price: item.price.value,
-    currency: item.price.currency
+    price: item.price?.value || '0.00',
+    currency: item.price?.currency || 'USD'
   }
 }
 
+// Google list items to BookHunt Book
 export function formatGoogleBook(googleBook) {
-  // Extract relevant data from the Google Books API object
   const volumeInfo = googleBook.volumeInfo || {};
   const industryIdentifiers = volumeInfo.industryIdentifiers || [];
   const imageLinks = volumeInfo.imageLinks || {};
@@ -72,15 +74,15 @@ export function formatGoogleBook(googleBook) {
   return {
     title: volumeInfo.title || '',
     isbn: isbn,
-    price: '0.00', // Default price (can be updated by the user)
-    currency: 'USD', // Default currency
-    condition: 'Good', // Default condition (can be updated by the user)
+    price: '0.00', 
+    currency: 'USD', 
+    condition: '', 
     description: volumeInfo.description || '',
     thumbnail: imageLinks.thumbnail || '',
     images: [],
-    sellerName: '', // To be filled by the user
-    sellerEmail: '', // To be filled by the user
-    sellerType: 'user', // Default seller type
+    sellerName: '', 
+    sellerEmail: '',
+    sellerType: 'user', 
     URL: '',
     publisher: volumeInfo?.publisher || 'N/A',
     authors: volumeInfo.authors || null,
