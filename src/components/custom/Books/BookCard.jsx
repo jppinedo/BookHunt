@@ -5,65 +5,96 @@ import {
   CardMedia, 
   CardContent, 
   CardActions,
+  CardActionArea,
   Button, 
   Box } from '@mui/material';
 
-const BookCard = ({ book, type }) => {
+const BookCard = ({ book, type, onCardClick, isSingle }) => {
+
+  const isClickable = typeof onCardClick === 'function';
+  const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit'};
+
+  const handleCardClick = () => {
+    if(isClickable) onCardClick(book);
+  }
+
+  const CardWrapper = ({ children}) => {
+    if(isClickable) return (
+      <Card>
+        <CardActionArea 
+          onClick={handleCardClick}
+          sx={{'&:hover': {backgroundColor: '#ddecff'}, ...wrapperStyles }}
+        >
+          {children}
+        </CardActionArea>
+      </Card>
+    );
+    return <Card sx={wrapperStyles}>{children}</Card>
+  }
+
+  const BookCardContent = () => (
+    <CardContent>
+      <Typography variant="h6" sx={{lineHeight: 1.2, mb: 1, fontWeight: 'bold'}}>
+          {book.title}
+        </Typography>
+        {book.authors?.length && (
+          <Typography variant="body1">
+            Authors: {book.authors.join(', ')}
+          </Typography>
+        )}
+        {(type === 'view' || type === 'grid') && (
+          <>
+            <Typography variant="body1">
+              Condition: {book.condition}
+            </Typography>
+            <Typography variant="body1">
+              Sold by: {book.sellerName} ({book.sellerType})
+            </Typography>
+            <Typography variant="h6" color="primary">
+              {`$${book.price} ${book.currency}`}
+            </Typography>
+          </>
+        )}
+    </CardContent>
+  )
+
+  const BookCardActions = () => (
+    <CardActions>
+      {type === 'view' && book.sellerType === 'eBay' && (
+        <Button
+          variant="contained"
+          href={book.URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on eBay
+        </Button>
+      )}
+      {type === 'view' && book.sellerType === 'user' &&  (
+        <Button
+          variant="contained"
+          href={`mailto:${book.sellerEmail}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Contact seller
+        </Button>
+      )}
+    </CardActions>
+  )
+
   return (
-    <Card sx={{ display: 'flex', textAlign: 'left'}}>
+    <CardWrapper>
       <CardMedia
         component="img"
         image={book.thumbnail}
         alt={book.title}
-        sx={{ width: '100%', height: 'auto', maxWidth: '190px', objectFit: "contain", alignSelf: 'flex-start'}}
+        sx={{ width: 'auto', height: '100%', objectFit: "contain", alignSelf: 'flex-start', maxWidth: isSingle ? '290px' : 'none' }}
       />
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{lineHeight: 1.2, mb: 1, fontWeight: 'bold'}}>
-              {book.title}
-            </Typography>
-            {book.authors?.length && (
-              <Typography variant="body1">
-                Authors: {book.authors.join(', ')}
-              </Typography>
-            )}
-            {/* show condition and seller if in view mode */}
-            {type === 'view' && (
-              <>
-                <Typography variant="body1">
-                  Condition: {book.condition}
-                </Typography>
-                <Typography variant="body1">
-                  Sold by: {book.sellerName} ({book.sellerType})
-                </Typography>
-                <Typography variant="h6" color="primary">
-                  {`$${book.price} ${book.currency}`}
-                </Typography>
-              </>
-            )}
-        </CardContent>
-        <CardActions>
-          {type === 'view' && book.sellerType === 'eBay' && (
-            <Button
-              variant="contained"
-              href={book.URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on eBay
-            </Button>
-          )}
-          {type === 'view' && book.sellerType === 'user' &&  (
-            <Button
-              variant="contained"
-              href={`mailto:${book.sellerEmail}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Contact seller
-            </Button>
-          )}
-        </CardActions>
+        <BookCardContent />
+        {(type !== 'grid' && !isClickable) && <BookCardActions />}
+        
         {/* Additional Images Grid ...if we have time for this */}
         {/* {type === 'view' && book.images?.length > 0 && (
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -82,7 +113,7 @@ const BookCard = ({ book, type }) => {
           </Grid>
         )} */}
       </Box>
-    </Card>
+    </CardWrapper>
   )
 }
 

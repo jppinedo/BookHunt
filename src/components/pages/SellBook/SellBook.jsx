@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { searchGoogleBooks } from '@services/BookAPI';
 import { useNavigate } from 'react-router';
 import { AppContext } from "@state/AppContext";
@@ -20,10 +20,6 @@ const SellBook = () => {
     setCurrentBook(book);
     navigate('/new');
   }
-
-  useEffect(() => {
-    console.log(currentBook)
-  }, [currentBook])
 
   return (
     <div>

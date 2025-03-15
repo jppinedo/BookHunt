@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router';
 import { searchEbay } from "@services/EbayAPI";
 import { AppContext } from "@state/AppContext";
 import { formatEbayBook } from '@utils/search-utils';
+import { Backdrop, CircularProgress, Container, Box } from "@mui/material";
+import BookCard from "@custom/Books/BookCard";
+import NoResults from "@custom/Search/NoResults";
 
 const BookList = () => {
   const { setCurrentBook } = useContext(AppContext);
@@ -35,7 +38,9 @@ const BookList = () => {
         // const [ebayData, bdData] = await Promise.all([searchEbay(query), searchDBBooks(query)]);
         const [ebayData] = await Promise.all([searchEbay(query)]);
         // setResults([...ebayData.itemSummaries, ...bdData.itemSummaries]);
-        setResults([...ebayData.itemSummaries]);
+        if(ebayData?.itemSummaries?.length) setResults([...ebayData?.itemSummaries]);
+        else setResults([]);
+        
       } catch (err) {
         setError(err.message || 'Failed to fetch results');
       } finally {
@@ -51,44 +56,31 @@ const BookList = () => {
   
 
   const handleBookClick = (item) => {
-    const ebayBook = formatEbayBook(item);
-    setCurrentBook(ebayBook);
-    navigate(`/book/${ebayBook.sellerType}/${ebayBook.id}`);
+    setCurrentBook(item);
+    navigate(`/book/${item.sellerType}/${item.id}`);
   }
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <Backdrop open={true}>
+         <CircularProgress color="inherit" />
+      </Backdrop>
+    );
   }
 
   if (results.length === 0) {
-    return <div>No results found.</div>;
+    return <NoResults />;
   }
 
   return (
-    <div>
+    <Container >
       <h2>eBay Search Results</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
         {results.map((item) => (
-          <div 
-            key={item.itemId} 
-            style={{ border: '1px solid #ccc', padding: '10px', width: '200px' }}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleBookClick(item)}
-          >
-            <img src={item.image?.imageUrl} alt={item.title} style={{ width: '100%', height: 'auto' }} />
-            <h3>{item.title}</h3>
-            <p><strong>Price:</strong> {item.price?.value} {item.price?.currency}</p>
-            <p><strong>Condition:</strong> {item.condition}</p>
-            <a href={item.itemWebUrl} target="_blank" rel="noopener noreferrer">View on eBay</a>
-          </div>
+          <BookCard book={formatEbayBook(item)} type="grid" onCardClick={handleBookClick} />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 }
 
