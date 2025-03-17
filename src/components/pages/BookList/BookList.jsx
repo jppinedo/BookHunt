@@ -120,7 +120,6 @@ const BookList = () => {
         {results.map((item, index) => (
           <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
         ))}
-        <LoadingResults sx={{mt:3, mb:8}}/>
       </InfiniteScroll>
     </Container>
 
