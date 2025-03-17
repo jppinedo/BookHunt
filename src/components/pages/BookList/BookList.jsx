@@ -11,6 +11,7 @@ import BookCard from "@custom/Books/BookCard";
 import NoResults from "@custom/Search/NoResults";
 import LoadingResults from "@custom/Search/LoadingResults";
 import NoMoreResults from "@custom/Search/NoMoreResults";
+import SearchInput from "@custom/Search/SearchInput";
 
 const BookList = () => {
   const navigate = useNavigate();
@@ -91,6 +92,10 @@ const BookList = () => {
     navigate(`/book/${item.sellerType}/${item.id}`);
   }
 
+  const handleSearch = (query) => {
+    navigate(`/search?query=${encodeURIComponent(query)}`);
+  }
+
   if (loading && !queryCompleted) {
     return (
       <Backdrop open={true}>
@@ -106,7 +111,7 @@ const BookList = () => {
   return (
 
     <Container>
-      <h2>eBay Search Results</h2>
+      <SearchInput onSearch={handleSearch} inputValue={title} sx={{mb:2}} />
       
       <InfiniteScroll
         dataLength={results.length}
