@@ -27,7 +27,7 @@ function App() {
             <Route path="/results" element={<BookList />} />
             <Route path="/book/:type/:id" element={<BookSinglePage />} />
             <Route path="/sell" element={<SellBook />} />
-            <Route path="/new" element={<NewBookPage />} />
+            <Route path="/new/:id" element={<NewBookPage />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<h1>404 - Page Not Found</h1>} /> {/* Catch-all route */}

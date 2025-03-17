@@ -34,6 +34,7 @@ export function transformEbayItem(ebayItem) {
     thumbnail: ebayItem.image?.imageUrl || '',
     images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], 
     condition: ebayItem.condition, 
+    description: ebayItem.shortDescription || '',
     sellerType: 'eBay', 
     URL: ebayItem.itemWebUrl, 
     sellerName: ebayItem.seller?.username || '', 
@@ -72,6 +73,7 @@ export function formatGoogleBook(googleBook) {
   const isbn = isbn13 || isbn10 || '';
 
   return {
+    id: googleBook.id,
     title: volumeInfo.title || '',
     isbn: isbn,
     price: '0.00', 

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
-import { searchGoogleBooks } from '@services/BookAPI';
+import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
-import { AppContext } from "@state/AppContext";
+// import { AppContext } from "@state/AppContext";
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
 
@@ -9,7 +9,7 @@ const SellBook = () => {
 
   const [books, setBooks] = useState([]);
   const navigate = useNavigate();
-  const { currentBook, setCurrentBook } = useContext(AppContext);
+  // const { setCurrentBook } = useContext(AppContext);
 
   const handleSearch = async (query) => {
     const results = await searchGoogleBooks(query);
@@ -17,8 +17,7 @@ const SellBook = () => {
 };
 
   const handleItemClick = (book) => {
-    setCurrentBook(book);
-    navigate('/new');
+    navigate(`/new/${book.id}`);
   }
 
   return (

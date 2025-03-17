@@ -1,7 +1,7 @@
-import React, { useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
-import { AppContext } from "@state/AppContext";
 import { getEbayItem } from "@services/EbayAPI";
+import { getBookById } from "@services/BookFirestore";
 import { Container, Backdrop, CircularProgress } from '@mui/material';
 import { transformEbayItem } from "@utils/search-utils";
 import BookCard from '@custom/Books/BookCard';
@@ -9,7 +9,8 @@ import BookCard from '@custom/Books/BookCard';
 
 const BookSinglePage = () => {
   const { type, id } = useParams();
-  const { currentBook, setCurrentBook } = useContext(AppContext);
+  const [ currentBook, setCurrentBook ] = useState(null);
+  const [ loading, setLoading ] = useState(true);
 
   useEffect(() => {
     const callEbayItem  = async ()  =>  {
@@ -17,16 +18,26 @@ const BookSinglePage = () => {
       return res;
     }
 
-    if(!currentBook && type === 'eBay') {
-      callEbayItem().then((results) => {
-        console.log(results); 
-        setCurrentBook(transformEbayItem(results)); 
+    const callFirestoreItem = async () => {
+      const res = await getBookById(id);
+      return res;
+    }
+
+    if(type === 'eBay' && loading) {
+      callEbayItem().then((result) => {
+        setCurrentBook(transformEbayItem(result)); 
+        setLoading(false);
+      });
+    } else if(type === 'user' && loading) {
+      callFirestoreItem().then((result) => {
+        setCurrentBook(result);
+        setLoading(false);
       });
     }
-  }, [currentBook]);
+  }, []);
 
     
-  if (!currentBook) {
+  if (loading) {
     return (
       <Backdrop open={true}>
          <CircularProgress color="inherit" />
