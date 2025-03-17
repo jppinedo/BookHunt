@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
@@ -6,6 +7,9 @@ import BookResults from '@custom/Search/BookResults';
 
 const SearchPage = () => {
   const [books, setBooks] = useState([]);
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get('query');
+
   const navigate = useNavigate();
 
   const handleSearch = async (query) => {
@@ -30,10 +34,16 @@ const SearchPage = () => {
     navigate(`/results?${query}`);
   }
 
+  useEffect(() => {
+    if(urlQuery.length) {
+      handleSearch(urlQuery);
+    }
+  }, [])
+
   return (
     <div>
       <h1>Find Your Textbook</h1>
-      <SearchInput onSearch={handleSearch} />
+      <SearchInput onSearch={handleSearch} inputValue={urlQuery || ''}/>
       <BookResults books={books} onClickItem={handleItemClick} />
     </div>
   );

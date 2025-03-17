@@ -6,8 +6,11 @@ import { InputBase, IconButton, Box} from '@mui/material';
 
 const SearchInput = ({
     onSearch,
+    inputValue,
+    sx
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(inputValue || '');
+  // const [inputValue, setInputValue] = useState(value);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -15,8 +18,10 @@ const SearchInput = ({
     }
   };
 
+  console.log(inputValue)
+
   return (
-  <Box sx={{textAlign:'center'}}>
+  <Box sx={{textAlign:'center', ...sx}}>
     <Paper
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', minWidth: 300, maxWidth: 600, width: '100%', marginLeft:'auto', marginRight: 'auto'}}
     >
@@ -26,6 +31,7 @@ const SearchInput = ({
         inputProps={{ 'aria-label': 'Find by title or ISBN' }}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
+        value={query}
       />
       <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={() => onSearch(query)}>
         <SearchIcon />
