@@ -6,6 +6,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 export const getEbayItem = async (itemId) => {
   try {
     const response = await axios.get(`${backendUrl}/api/ebay/item/${itemId}`);
+    console.log('eBay Search Result:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error getting item from eBay:', error.response?.data || error.message);
@@ -13,12 +14,11 @@ export const getEbayItem = async (itemId) => {
   } 
 };
 
-export const searchEbay = async (query) => {
+export const searchEbay = async (query, limit, offset) => {
   try {
     const response = await axios.get(`${backendUrl}/api/ebay/search`, {
-      params: { query },
+      params: { query, limit, offset },
     });
-    console.log('eBay Search Results:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error searching eBay:', error.response?.data || error.message);

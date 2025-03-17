@@ -12,7 +12,7 @@ import {
 const BookCard = ({ book, type, onCardClick, isSingle }) => {
 
   const isClickable = typeof onCardClick === 'function';
-  const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit'};
+  const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit', p: isSingle ? 0 : 1};
 
   const handleCardClick = () => {
     if(isClickable) onCardClick(book);
@@ -23,7 +23,7 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
       <Card>
         <CardActionArea 
           onClick={handleCardClick}
-          sx={{'&:hover': {backgroundColor: '#ddecff'}, ...wrapperStyles }}
+          sx={{height: '100%', '&:hover': {backgroundColor: '#ddecff'}, ...wrapperStyles }}
         >
           {children}
         </CardActionArea>
@@ -35,26 +35,37 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
   const BookCardContent = () => (
     <CardContent>
       <Typography variant="h6" sx={{lineHeight: 1.2, mb: 1, fontWeight: 'bold'}}>
-          {book.title}
+        {book.title}
+      </Typography>
+      {book.authors?.length && (
+        <Typography variant="body1">
+          Authors: {book.authors.join(', ')}
         </Typography>
-        {book.authors?.length && (
+      )}
+      {(type === 'view' || type === 'grid') && (
+        <>
           <Typography variant="body1">
-            Authors: {book.authors.join(', ')}
+            Condition: {book.condition}
           </Typography>
-        )}
-        {(type === 'view' || type === 'grid') && (
-          <>
-            <Typography variant="body1">
-              Condition: {book.condition}
-            </Typography>
-            <Typography variant="body1">
-              Sold by: {book.sellerName} ({book.sellerType})
-            </Typography>
-            <Typography variant="h6" color="primary">
-              {`$${book.price} ${book.currency}`}
-            </Typography>
-          </>
-        )}
+          <Typography variant="body1">
+            Sold by: {book.sellerName} ({book.sellerType})
+          </Typography>
+        </>
+      )}
+      {(isSingle && book.description?.length) && (
+        <Typography variant="body2" sx={{ mt:1, mb:1 }}>
+          {book.description}
+        </Typography>
+      )}
+      {type !== 'form' && (
+        <Typography variant="h6" color="primary">
+          {`$${book.price} ${book.currency}`}
+        </Typography>
+      )}
+      
+        
+      
+      
     </CardContent>
   )
 
@@ -89,7 +100,7 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
         component="img"
         image={book.thumbnail}
         alt={book.title}
-        sx={{ width: 'auto', height: '100%', objectFit: "contain", alignSelf: 'flex-start', maxWidth: isSingle ? '290px' : 'none' }}
+        sx={{ width: 'auto', height: '100%', objectFit: "contain", alignSelf: 'flex-start', maxWidth: isSingle ? '290px' : '200px', p: isSingle ? 2 : 0 }}
       />
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <BookCardContent />

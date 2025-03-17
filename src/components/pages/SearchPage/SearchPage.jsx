@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { searchGoogleBooks } from '@services/BookAPI';
+import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
