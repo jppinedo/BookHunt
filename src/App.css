@@ -23,7 +23,7 @@
 .sign-in-area form h1{
   margin: 0 0 50px;
 }
-#logName, #logPass, #crEmail, #crPassword, #confirmPassword {
+#logName, #logPass, #crEmail, #crPassword, #confirmPassword, #crFirstName, #crLastName {
   width: 300px;
 }
 #logButton, #crButton {
@@ -45,12 +45,6 @@
   margin: 0 auto;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
-@media (max-width: 600px) {
-  #hubNav {
-    width: 95%;
-    padding: 8px;
-  }
-}
 .profile-background {
   background-color: white;
   position: relative;
@@ -65,12 +59,33 @@
   height: min(90%, 2px);
   background-color: #343434;
 }
-.email-section, .old-pass-section, .new-pass-section {
+.email-section, .old-pass-section, .new-pass-section, .name-section {
   display: flex;
   width: 500px;
   align-items: center;
   justify-content: space-between;
 }
+.profile-side-nav {
+  background-color: white;
+  position: fixed;
+  width: 200px;
+  height: auto;
+  border-radius: 20px;
+  color: #343434;
+  font-family: \"Volkhov\", sans-serif;
+  left: 27%;
+}
+@media (max-width: 600px) {
+  #hubNav {
+    width: 95%;
+    padding: 8px;
+  }
+  .profile-side-nav {
+    width: 95%;
+    height: auto;
+  }
+}
+
 
 
 

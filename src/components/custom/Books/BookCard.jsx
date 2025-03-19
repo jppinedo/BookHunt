@@ -1,18 +1,76 @@
-import React from "react";
-import { 
-  Typography,
-  Card, 
-  CardMedia, 
-  CardContent, 
-  CardActions,
-  CardActionArea,
-  Button, 
-  Box } from '@mui/material';
+import React, {useContext, useEffect, useState} from "react";
+import { app } from "@/../firebase.js";
+import { AuthContext } from "@state/AuthContext";
+import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import {
+    Typography,
+    Card,
+    CardMedia,
+    CardContent,
+    CardActions,
+    CardActionArea,
+    Button,
+    Box,
+    IconButton
+} from '@mui/material';
 
 const BookCard = ({ book, type, onCardClick, isSingle }) => {
 
   const isClickable = typeof onCardClick === 'function';
   const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit', p: isSingle ? 0 : 1};
+  const { user } = useContext(AuthContext);
+  const db = getFirestore(app);
+
+  const [cardSaved, setCardSaved] = useState(false);
+
+  useEffect(() => {
+      if (!user) return;
+
+      const checkSavedStatus = async () => {
+          try {
+              const docRef = doc(db, "userInfo", user.uid);
+              const docSnap = await getDoc(docRef)
+
+              if (docSnap.exists()) {
+                  const booksSaved = docSnap.data().booksSaved || [];
+                  const isBookSaved = booksSaved.some(savedBook => JSON.stringify(savedBook.id) === JSON.stringify(book.id));
+                  setCardSaved(isBookSaved);
+              }
+          }
+          catch (error) {
+              console.error("Error checking saved status!", error);
+          }
+      };
+      checkSavedStatus();
+  }, [user, book]);
+
+  async function saveCard() {
+      if (!user) return;
+
+      let newCardSaved = !cardSaved;
+      setCardSaved(newCardSaved);
+
+      try {
+          const docRef = doc(db, "userInfo", user.uid);
+          const docSnap = await getDoc(docRef);
+          let booksSaved = docSnap.data().booksSaved || [];
+
+          if (docSnap.exists()) {
+              if (newCardSaved) {
+                  await updateDoc(docRef, {booksSaved: arrayUnion(book)});
+              }
+              else {
+                  const unsavedBook = booksSaved.filter(savedBook => savedBook.id !== book.id);
+                  await updateDoc(docRef, {booksSaved: unsavedBook});
+              }
+          }
+      }
+      catch (error) {
+          console.error("Error updating saved book!", error);
+      }
+  }
 
   const handleCardClick = () => {
     if(isClickable) onCardClick(book);
@@ -91,6 +149,9 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
           Contact seller
         </Button>
       )}
+        <IconButton  onClick={() => saveCard()}>
+            {cardSaved ? <BookmarkIcon />: <BookmarkBorderIcon />}
+        </IconButton>
     </CardActions>
   )
 
