@@ -4,6 +4,9 @@ import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
+import InfoBox from '@custom/Shared/InfoBox';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import LoadingResults from '@custom/Search/LoadingResults';
 
 const SearchPage = () => {
   const [books, setBooks] = useState([]);
@@ -34,19 +37,31 @@ const SearchPage = () => {
     navigate(`/results?${query}`);
   }
 
+  const setQueryParam = (query) => {
+    navigate(`/search?query=${encodeURIComponent(query)}`);
+  }
+
   useEffect(() => {
-    if(urlQuery.length) {
+    if(urlQuery?.length) {
       handleSearch(urlQuery);
     }
-  }, [])
+  }, [urlQuery])
 
   return (
     <div>
       <h1>Find Your Textbook</h1>
-      <SearchInput onSearch={handleSearch} inputValue={urlQuery || ''}/>
-      <BookResults books={books} onClickItem={handleItemClick} />
+      
+      <SearchInput onSearch={setQueryParam} inputValue={urlQuery || ''}/>
+      <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
+      {!books.length && urlQuery ? (
+        <LoadingResults sx={{mt: 3}} />
+      ) : (
+        <BookResults books={books} onClickItem={handleItemClick} />
+      )}
+      
     </div>
   );
 };
+
 
 export default SearchPage;
