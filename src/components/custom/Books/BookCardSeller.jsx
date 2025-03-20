@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import { app } from "@/../firebase.js";
 import { AuthContext } from "@state/AuthContext";
-import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, arrayRemove, deleteDoc } from "firebase/firestore";
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
     Typography,
@@ -14,15 +14,64 @@ import {
     Box,
     IconButton, InputLabel, Select, MenuItem, FormHelperText, FormControl,
 } from '@mui/material';
+import {useNavigate} from "react-router-dom";
 
 const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
 
   const isClickable = typeof onCardClick === 'function';
   const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit', p: isSingle ? 0 : 1};
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const db = getFirestore(app);
 
-  const [cardSaved, setCardSaved] = useState(false);
+  const [bookID, setBookID] = useState('');
+
+  useEffect(() => {
+      if (!user) return;
+
+      const getBookID = async () => {
+          try {
+              const docRef = doc(db, "userInfo", user.uid);
+              const docSnap = await getDoc(docRef)
+
+              if (docSnap.exists()) {
+                  const booksListed = docSnap.data().booksListed || [];
+                  const matchedBook = booksListed.find(listedBook => JSON.stringify(listedBook) === JSON.stringify(book.id));
+
+                  if (matchedBook) {
+                      setBookID(matchedBook);
+                  }
+                  else {
+                      console.log("Book not matched.")
+                      setBookID(null);
+                  }
+              }
+          }
+          catch (error) {
+              console.error("Error matching book!", error);
+          }
+      };
+      getBookID();
+      }, [user, book]);
+
+  async function deleteCard() {
+      if (!user) return
+
+      try {
+          const bookDocRef = doc(db, "books", bookID);
+          const userDocRef = doc(db, "userInfo", user.uid);
+          const docSnap = await getDoc(userDocRef);
+
+          if (docSnap.exists()) {
+              await updateDoc(userDocRef, {booksListed: arrayRemove(bookID)});
+              await deleteDoc(bookDocRef);
+              navigate("/profile");
+          }
+      }
+      catch (error) {
+          console.error("Couldn't find ID to delete!", error);
+      }
+  }
 
   const handleCardClick = () => {
     if(isClickable) onCardClick(book);
@@ -97,7 +146,7 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
           Contact seller
         </Button>
       )}
-        <IconButton>
+        <IconButton onClick={() => {deleteCard()}}>
             <DeleteIcon />
         </IconButton>
     </CardActions>
