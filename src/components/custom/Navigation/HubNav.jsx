@@ -37,9 +37,9 @@ const HubNav = () => {
                                             },
                                         }}
                 />
-                <BottomNavigationAction label={"Books Saved"}
+                <BottomNavigationAction label={"Books Saved"} value={"/saved"}
                                         sx={{
-                                            color: currentLocation.pathname === "/" ? "orange" : "black",
+                                            color: currentLocation.pathname === "/saved" ? "orange" : "black",
                                             width: 166,
                                             "& .MuiBottomNavigationAction-label": {
                                                 fontSize: "1.3rem"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { useParams } from "react-router";
 import { useNavigate } from 'react-router';
 import { getGoogleBookById } from '@services/GoogleAPI';
@@ -6,12 +6,15 @@ import { addBookToDB } from "@services/BookFirestore";
 import { formatGoogleBook } from "@utils/search-utils";
 import { Container } from '@mui/material';
 import BookCard from '@custom/Books/BookCard';
+import BookCardSeller from "@custom/Books/BookCardSeller";
 import BookAddForm from "@custom/Books/BookAddForm";
+import {AuthContext} from "@state/AuthContext.jsx";
 
 const NewBookPage = () => {
   const { id } = useParams();
   const [ currentBook, setCurrentBook ] = useState(null);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const callGoogleVolume  = async ()  =>  {
@@ -31,7 +34,8 @@ const NewBookPage = () => {
 
   const saveBook = (newBook) => {
     const { id, ...bookWithoutId } = newBook;
-    addBookToDB(bookWithoutId);
+    addBookToDB(bookWithoutId, user);
+    navigate("/search")
   }
 
   if(!currentBook) {
@@ -40,7 +44,7 @@ const NewBookPage = () => {
 
   return (
     <Container maxWidth="md">
-      <BookCard book={currentBook} type="form" isSingle={true}/>
+      <BookCardSeller book={currentBook} type="form" isSingle={true}/>
       <BookAddForm book={currentBook} onSaveBook={saveBook} />
     </Container>
   )

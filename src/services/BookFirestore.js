@@ -1,15 +1,21 @@
 import { db } from '../../firebase.js';
 import { isBookCode } from '@utils/search-utils';
-import { collection, addDoc, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 
-export async function addBookToDB(bookData) {
+export async function addBookToDB(bookData, user) {
   try {
     const docRef = await addDoc(collection(db, 'books'), bookData);
+    const userDocRef = await doc(db, "userInfo", user.uid)
+    await updateDoc(docRef, {id: docRef.id});
+    await updateDoc(docRef, {status: 'listed'});
+    await updateDoc(userDocRef, {booksListed: arrayUnion(docRef.id)});
+    await updateDoc(docRef, {sellerEmail: user.email})
+    await updateDoc(docRef, {sellerName: `${(await getDoc(userDocRef)).data().firstName} ${(await getDoc(userDocRef)).data().lastName}`})
     console.log('Book added with ID: ', docRef.id);
   } catch (error) {
     console.error('Error adding book: ', error);
   }
-};
+}
 
 export async function searchBookInDB(searchParams) {
   const { isbn, title, year, author } = searchParams;

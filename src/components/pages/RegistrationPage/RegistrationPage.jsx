@@ -3,32 +3,40 @@ import {Button, TextField} from "@mui/material";
 import logo from '@images/BookHuntLogoSmall.png'
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword} from "firebase/auth";
-import { auth } from "@/../firebase.js";
+import { auth, app } from "@/../firebase.js";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 const RegistrationPage = () => {
     const navigate = useNavigate();
 
+    const db = getFirestore(app);
+
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmedPassword, setConfirmedPassword] = useState('');
 
+    const [firstNameError, setFirstNameError] = useState(false);
+    const [lastNameError, setLastNameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
     const [confirmedPasswordError, setConfirmedPasswordError] = useState(false);
 
     async function handleSignUp(e){
         e.preventDefault();
-        if (!validateEmail()) {
-            setEmailError(true);
-            return
-        }
+        setFirstNameError(false);
+        setLastNameError(false);
         setEmailError(false);
         setConfirmedPasswordError(false);
+        if (!validateEmail() || !validateNameInput(firstName, "fName") || !validateNameInput(lastName, "lName")) {
+            return
+        }
         if (password === confirmedPassword) {
             createUserWithEmailAndPassword(auth, email, password)
                 .then((user) => {
-                    console.log(user);
                     alert("Account Created");
+                    writeInfo(user.user)
                     navigate("/login");
                 })
                 .catch((error) => {
@@ -40,9 +48,42 @@ const RegistrationPage = () => {
         }
     }
 
+    async function writeInfo(user) {
+        await setDoc(doc(db, "userInfo", user.uid), {
+            firstName: firstName,
+            lastName: lastName,
+            userID: user.uid,
+            booksSaved: [],
+            booksListed: []
+        });
+    }
+
     function validateEmail() {
         const emailRegex = /^[^\s@]+@[^\s@]+.\.[^\s@]+$/;
-        return emailRegex.test(email);
+        if (emailRegex.test(email)) {
+            return true
+        }
+        else {
+            setEmailError(true);
+            return false
+        }
+    }
+
+    function validateNameInput(e, type) {
+        const nameRegex = /^[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/;
+        if (e !== '' || nameRegex.test(e)) {
+            console.log("true")
+            return true
+        }
+        else {
+            if (type === "fName") {
+                setFirstNameError(true);
+            }
+            else if (type === "lName") {
+                setLastNameError(true);
+            }
+            return false
+        }
     }
 
     const handlePasswordInput = e => {
@@ -63,6 +104,66 @@ const RegistrationPage = () => {
             <div className={"sign-in-area"}>
                 <form id={"log-in"} method={"post"}>
                     <h1>Register</h1>
+                    <TextField
+                        id={"crFirstName"}
+                        label={"First Name"}
+                        value={firstName}
+                        error={firstNameError}
+                        helperText={firstNameError ? "Invalid characters" : ""}
+                        variant={"outlined"}
+                        margin={"normal"}
+                        onChange={(e) => {setFirstName(e.target.value)}}
+                        sx={{
+                            "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                    borderColor: "black",
+                                    borderWidth: "2px",
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: "orange", // Ensures hover effect applies
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: "orange",
+                                },
+                            },
+                            "& .MuiInputLabel-root": {
+                                color: "black",
+                                "&.Mui-focused": {
+                                    color: "orange",
+                                },
+                            },
+                        }}
+                    />
+                    <TextField
+                        id={"crLastName"}
+                        label={"Last Name"}
+                        value={lastName}
+                        error={lastNameError}
+                        helperText={lastNameError ? "Invalid characters" : ""}
+                        variant={"outlined"}
+                        margin={"normal"}
+                        onChange={(e) => {setLastName(e.target.value)}}
+                        sx={{
+                            "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                    borderColor: "black",
+                                    borderWidth: "2px",
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: "orange", // Ensures hover effect applies
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: "orange",
+                                },
+                            },
+                            "& .MuiInputLabel-root": {
+                                color: "black",
+                                "&.Mui-focused": {
+                                    color: "orange",
+                                },
+                            },
+                        }}
+                    />
                     <TextField
                         id={"crEmail"}
                         label={"Email"}
