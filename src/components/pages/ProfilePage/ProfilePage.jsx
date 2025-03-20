@@ -7,7 +7,7 @@ import { AuthContext } from "@state/AuthContext";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { getFirestore, doc, getDoc, deleteDoc } from "firebase/firestore";
 import { app } from "@/../firebase.js";
-import BookCard from "@custom/Books/BookCard.jsx";
+import BookCardSeller from "@custom/Books/BookCardSeller.jsx";
 
 const ProfilePage = () => {
     const { user } = useContext(AuthContext);
@@ -62,7 +62,15 @@ const ProfilePage = () => {
 
                 if (docSnap.exists()) {
                     const booksListed = docSnap.data().booksListed || [];
-                    setListedBooks(booksListed);
+
+                    const booksFetched = booksListed.map(async (bookID) => {
+                        const bookDocRef = doc(db, "books", bookID);
+                        const bookDocSnap = await getDoc(bookDocRef);
+                        return bookDocSnap.exists() ? { id: bookDocSnap.id, ...bookDocSnap.data() } : null;
+                    });
+
+                    const booksData = (await Promise.all(booksFetched)).filter(book => book !== null);
+                    setListedBooks(booksData);
                 }
             }
             catch (error) {
@@ -153,7 +161,7 @@ const ProfilePage = () => {
     }
 
     const handleBookClick = (item) => {
-        navigate(`/book/${item.sellerType}/${item.id}`);
+        navigate(`/bookConfig/${item.sellerType}/${item.id}`);
     }
 
     const BookListingView = () => (
@@ -173,11 +181,11 @@ const ProfilePage = () => {
             <IconButton onClick={showSideNav} sx={{display: "flex", ml: "15px"}}>
                 {sideNavVisible ? <ArrowForwardIosIcon/> : <ArrowBackIosNewIcon/>}
             </IconButton>
-            <Container>
+            <Container sx={{maxHeight: "500px", overflowY: "auto"}}>
                 {listedBooks.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '15rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                         {listedBooks.map((item, index) => (
-                            <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
+                            <BookCardSeller key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                         ))}
                     </div>
                 ) : (
