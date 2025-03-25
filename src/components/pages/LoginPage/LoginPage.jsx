@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import {Button, TextField} from "@mui/material";
+import {Button, TextField, Typography, Card} from "@mui/material";
 import logo from '@images/BookHuntLogoSmall.png'
 import { signInWithEmailAndPassword} from "firebase/auth";
 import { auth } from "@/../firebase.js";
@@ -24,41 +24,46 @@ const LoginPage = () => {
                 alert("Invalid credentials.");
             })
     }
+    const inputStyles = {
+        width: '100%',
+        maxWidth: '340px',
+        mt:1,
+        "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+                borderColor: "black",
+                borderWidth: "2px",
+            },
+            "&:hover fieldset": {
+                borderColor: "orange", // Ensures hover effect applies
+            },
+            "&.Mui-focused fieldset": {
+                borderColor: "orange",
+            },
+        },
+        "& .MuiInputLabel-root": {
+            color: "black",
+            "&.Mui-focused": {
+                color: "orange",
+            },
+        },
+    }
 
     return (
         <>
             <div className={"site-title"}>
                 <h1 className={"appName"}>Book Hunt <img src={logo} alt="BookHuntLogo" width={45} height={45}/></h1>
             </div>
-            <div className={"sign-in-area"}>
+            <Card sx={{ maxWidth: '24em', borderRadius: '1rem', padding: '2rem 0.5rem 0', margin: '0 auto'}}>
                 <form id={"log-in"} method={"post"}>
-                    <h1>Welcome</h1>
+                    <Typography variant='h4'>Welcome</Typography>
+                    <Typography variant='body'>Sing in with your email and password:</Typography>
                     <TextField
                         id={"logName"}
                         label={"Email"}
                         variant={"outlined"}
                         margin={"normal"}
                         onChange={(e) => {setEmail(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={{...inputStyles, ...{mt: 5}}}
                     />
                     <TextField
                         id={"logPass"}
@@ -67,28 +72,14 @@ const LoginPage = () => {
                         type={"password"}
                         margin={"normal"}
                         onChange={(e) => {setPassword(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={inputStyles}
                     />
-                    <Button id={"crButton"} variant="contained" onClick={(e) => {handleLogin(e)}} sx={{m: 2}}>
+                    <Button 
+                        id={"crButton"} 
+                        variant="contained" 
+                        onClick={(e) => {handleLogin(e)}} 
+                        sx={{mt: 2, mb:2, maxWidth: '340px', width: '100%'}}
+                    >
                         Login
                     </Button>
                 </form>
@@ -99,7 +90,7 @@ const LoginPage = () => {
                         </span>
                     </p>
                 </div>
-            </div>
+            </Card>
         </>
     );
 };

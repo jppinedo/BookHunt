@@ -1,10 +1,11 @@
 import React, {useState} from "react";
-import {Button, TextField} from "@mui/material";
+import {Button, TextField, Card, Divider, Typography} from "@mui/material";
 import logo from '@images/BookHuntLogoSmall.png'
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword} from "firebase/auth";
 import { auth, app } from "@/../firebase.js";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import './RegistrationPage.css';
 
 const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -96,14 +97,46 @@ const RegistrationPage = () => {
         }
     }
 
+    const intputStyles = {
+        maxWidth: '300px',
+        width: '100%',
+        "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+                borderColor: "black",
+                borderWidth: "2px",
+            },
+            "&:hover fieldset": {
+                borderColor: "orange", // Ensures hover effect applies
+            },
+            "&.Mui-focused fieldset": {
+                borderColor: "orange",
+            },
+        },
+        "& .MuiInputLabel-root": {
+            color: "black",
+            "&.Mui-focused": {
+                color: "orange",
+            },
+        },
+    }
+
     return (
-        <>
+        <div className='register-wrapper'>
             <div className={"site-title"}>
                 <h1 className={"appName"}>Book Hunt <img src={logo} alt="BookHuntLogo" width={45} height={45}/></h1>
             </div>
-            <div className={"sign-in-area"}>
-                <form id={"log-in"} method={"post"}>
-                    <h1>Register</h1>
+            <Card 
+                sx={{ 
+                maxWidth: '38.59rem',
+                borderRadius: '1rem', 
+                padding: '2rem 1.5rem 2rem', 
+                margin: '0 auto', 
+                }}
+                className="register-card"
+            >
+                <Typography variant='h4'>Register</Typography>
+                <Typography variant='body'>Fill out the form to create an account</Typography>
+                <form id={"log-in"} method={"post"} style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
                     <TextField
                         id={"crFirstName"}
                         label={"First Name"}
@@ -113,26 +146,7 @@ const RegistrationPage = () => {
                         variant={"outlined"}
                         margin={"normal"}
                         onChange={(e) => {setFirstName(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={intputStyles}
                     />
                     <TextField
                         id={"crLastName"}
@@ -143,26 +157,7 @@ const RegistrationPage = () => {
                         variant={"outlined"}
                         margin={"normal"}
                         onChange={(e) => {setLastName(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={intputStyles}
                     />
                     <TextField
                         id={"crEmail"}
@@ -173,27 +168,9 @@ const RegistrationPage = () => {
                         variant={"outlined"}
                         margin={"normal"}
                         onChange={(e) => {setEmail(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={intputStyles}
                     />
+                    <Divider component="div" sx={{flex: '0 0 100%'}}/>
                     <TextField
                         id={"crPassword"}
                         label={"Password"}
@@ -204,26 +181,7 @@ const RegistrationPage = () => {
                         type={"password"}
                         margin={"normal"}
                         onChange={(e) => {handlePasswordInput(e)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={intputStyles}
                     />
                     <TextField
                         id={"confirmPassword"}
@@ -235,40 +193,26 @@ const RegistrationPage = () => {
                         type={"password"}
                         margin={"normal"}
                         onChange={(e) => {setConfirmedPassword(e.target.value)}}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                    borderColor: "black",
-                                    borderWidth: "2px",
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputLabel-root": {
-                                color: "black",
-                                "&.Mui-focused": {
-                                    color: "orange",
-                                },
-                            },
-                        }}
+                        sx={intputStyles}
                     />
-                    <Button id={"logButton"} variant="contained" onClick={(e) => {handleSignUp(e)}} sx={{m: 2}}>
-                        Create
+                    <Button 
+                        id={"logButton"} 
+                        variant="contained" 
+                        onClick={(e) => {handleSignUp(e)}} 
+                        sx={{maxWidth: '340px', width: '100%', margin: '1rem auto'}}
+                    >
+                        Create account
                     </Button>
                 </form>
-                <div className={"login-section"}>
+                <div className="login-section">
                     <p>Already have an account?{" "}
                         <span style={{ color: "orange", cursor: "pointer" }} onClick={() => navigate("/login")}>
                                 Log in
                         </span>
                     </p>
                 </div>
-            </div>
-        </>
+            </Card>
+        </div>
     );
 };
 
