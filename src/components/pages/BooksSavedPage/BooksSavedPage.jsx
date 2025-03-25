@@ -3,7 +3,7 @@ import { app } from "@/../firebase.js";
 import { AuthContext } from "@state/AuthContext.jsx";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import BookCard from "@custom/Books/BookCard.jsx";
-import {Container} from "@mui/material";
+import {Box, Container} from "@mui/material";
 import {useNavigate} from "react-router";
 
 const BooksSavedPage = () => {
@@ -40,11 +40,11 @@ const BooksSavedPage = () => {
     }
 
     return (
-        <Container>
+        <Container sx={{padding: 0}}>
             <h2>Saved Books</h2>
 
             {savedBooks.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '15rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', maxWidth: '1140px'}}>
                     {savedBooks.map((item, index) => (
                         <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                     ))}
