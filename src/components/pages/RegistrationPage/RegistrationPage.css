@@ -1,0 +1,14 @@
+.register-wrapper {
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+}
+
+@media (max-width: 700px) {
+    .register-card {
+        max-width: 20rem !important;
+    }
+    .register-card .MuiFormControl-root {
+        max-width: inherit;
+
+    }
+}

@@ -2,11 +2,8 @@
 #root {
   text-align: center;
   margin: 0 auto;
-  padding: 2rem;
 }
-.site-title {
-  width: 500px;
-}
+
 .site-title h1 {
   margin: 0 0 50px;
 }
@@ -23,12 +20,7 @@
 .sign-in-area form h1{
   margin: 0 0 50px;
 }
-#logName, #logPass, #crEmail, #crPassword, #confirmPassword, #crFirstName, #crLastName {
-  width: 300px;
-}
-#logButton, #crButton {
-  width: 300px;
-}
+
 .register-section, .login-section {
   padding-bottom: 50px;
 }
