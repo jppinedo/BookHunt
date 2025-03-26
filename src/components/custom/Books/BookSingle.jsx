@@ -1,4 +1,5 @@
 import React from "react";
+import BookCard from "./BookCard";
 import { Container } from '@mui/material';
 
 const BookSingle = ({ type, book }) => {

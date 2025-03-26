@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import { app } from "@/../firebase.js";
 import { AuthContext } from "@state/AuthContext";
+import { AppContext } from '@state/AppContext';
 import { getFirestore, doc, getDoc, updateDoc, arrayRemove, deleteDoc } from "firebase/firestore";
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -12,9 +13,10 @@ import {
     CardActionArea,
     Button,
     Box,
-    IconButton, InputLabel, Select, MenuItem, FormHelperText, FormControl,
+    IconButton
 } from '@mui/material';
 import {useNavigate} from "react-router-dom";
+import './BookCard.css';
 
 const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
 
@@ -23,6 +25,8 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const db = getFirestore(app);
+
+  const { onShowError } = useContext(AppContext);
 
   const [bookID, setBookID] = useState('');
 
@@ -48,7 +52,7 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
               }
           }
           catch (error) {
-              console.error("Error matching book!", error);
+            onShowError(error);
           }
       };
       getBookID();
@@ -69,7 +73,7 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
           }
       }
       catch (error) {
-          console.error("Couldn't find ID to delete!", error);
+        onShowError(error);
       }
   }
 
@@ -79,7 +83,7 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
 
   const CardWrapper = ({ children}) => {
     if(isClickable) return (
-      <Card>
+      <Card className="book-single-card">
         <CardActionArea 
           onClick={handleCardClick}
           sx={{height: '100%', '&:hover': {backgroundColor: '#ddecff'}, ...wrapperStyles }}
@@ -88,7 +92,7 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
         </CardActionArea>
       </Card>
     );
-    return <Card sx={wrapperStyles}>{children}</Card>
+    return <Card className="book-single-card" sx={wrapperStyles}>{children}</Card>
   }
 
   const BookCardContent = () => (

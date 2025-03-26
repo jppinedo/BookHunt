@@ -15,6 +15,7 @@ import {
     Box,
     IconButton
 } from '@mui/material';
+import './BookCard.css';
 
 const BookCard = ({ book, type, onCardClick, isSingle }) => {
 
@@ -78,7 +79,7 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
 
   const CardWrapper = ({ children}) => {
     if(isClickable) return (
-      <Card>
+      <Card className={isSingle ? 'book-single-card': 'book-list-card'}>
         <CardActionArea 
           onClick={handleCardClick}
           sx={{height: '100%', '&:hover': {backgroundColor: '#ddecff'}, ...wrapperStyles }}
@@ -87,7 +88,14 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
         </CardActionArea>
       </Card>
     );
-    return <Card sx={wrapperStyles}>{children}</Card>
+    return (
+      <Card 
+        className={isSingle ? 'book-single-card': 'book-list-card'} 
+        sx={wrapperStyles}
+      >
+        {children}
+      </Card>
+    );
   }
 
   const BookCardContent = () => (

@@ -110,7 +110,7 @@ const BookList = () => {
 
   return (
 
-    <Container>
+    <Container sx={{paddingTop: '4rem'}}>
       <SearchInput onSearch={handleSearch} inputValue={title} sx={{mb:2}} />
       
       <InfiniteScroll
@@ -120,7 +120,7 @@ const BookList = () => {
         loader={<LoadingResults sx={{mt:3, mb:8}}/>}
         endMessage={<NoMoreResults />}
         scrollThreshold={1}
-        style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '15rem' }}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '15rem', justifyContent: 'center' }}
       >
         {results.map((item, index) => (
           <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />

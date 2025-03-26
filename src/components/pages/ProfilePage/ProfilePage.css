@@ -1,0 +1,13 @@
+@media (max-width: 450px) {
+    .email-section, .old-pass-section, .new-pass-section, .name-section {
+        display: block;
+        text-align: left;
+    }
+    .info-area .MuiFormControl-root, .info-area .MuiButtonBase-root {
+        width: 100%;
+    }
+    .delete-account-btn {
+        margin: 0 0 1rem !important;
+
+    }
+}

@@ -1,0 +1,22 @@
+@media (max-width: 680px) {
+    .book-single-card {
+        display: block !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .book-single-card img.MuiCardMedia-root {
+        max-width: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 460px) {
+    .book-list-card button.MuiButtonBase-root {
+        display: block !important;
+    }
+    .book-list-card img.MuiCardMedia-media {
+        height: initial;
+    }
+}

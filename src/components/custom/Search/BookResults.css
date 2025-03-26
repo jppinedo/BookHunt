@@ -16,3 +16,15 @@
 .book-card:hover .book-card-title {
   color: #00357b;
 }
+
+@media (max-width: 460px) {
+  .book-card {
+    display: block !important;
+    max-width: inherit !important;
+  }
+  .book-card img.MuiCardMedia-root {
+    width: inherit;
+    height: inherit;
+    margin-bottom: 1rem;
+  }
+}

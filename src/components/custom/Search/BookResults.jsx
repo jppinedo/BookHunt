@@ -6,7 +6,7 @@ import './BookResults.css';
 const BookResults = ({ books, onClickItem }) => {
   return (
     <Container>
-      <Grid2 container sx={{ pt: 3, maxWidth: '1600px' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+      <Grid2 container sx={{ pt: 3, maxWidth: '1600px', justifyContent: 'center' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
         {books.map((book) => (
           <Card key={`${book.id}-${book.etag}`} sx={{ maxWidth: 348, display: 'flex', padding: 1 }} className='book-card' tabIndex={0} onClick={() => onClickItem(book)}>
             <CardMedia
