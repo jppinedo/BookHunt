@@ -23,7 +23,7 @@ const SearchInput = ({
   return (
   <Box sx={{textAlign:'center', ...sx}}>
     <Paper
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', minWidth: 300, maxWidth: 600, width: '97%', marginLeft:'auto', marginRight: 'auto'}}
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', minWidth: 200, maxWidth: 600, width: '97%', marginLeft:'auto', marginRight: 'auto'}}
     >
       <InputBase
         sx={{ ml: 1, flex: 1 }}

@@ -45,7 +45,7 @@ const BookSinglePage = () => {
     );
   }
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" sx={{mt:6, mb: 15}}>
       <BookCard book={currentBook} type="view" isSingle={true} />
     </Container>
   )
