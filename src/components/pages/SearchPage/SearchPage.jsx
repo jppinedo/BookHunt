@@ -7,6 +7,7 @@ import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LoadingResults from '@custom/Search/LoadingResults';
+import logo from '@assets/images/book_hunt_logo.png';
 
 const SearchPage = () => {
   const [books, setBooks] = useState([]);
@@ -49,14 +50,23 @@ const SearchPage = () => {
 
   return (
     <div>
-      <h1>Find Your Textbook</h1>
+      <img src={logo} width="200px" style={{marginBottom: '2rem'}} />
+      {!books.length ? (
+        <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking for." />
+      ) : null}
       
       <SearchInput onSearch={setQueryParam} inputValue={urlQuery || ''}/>
-      <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
+      
       {!books.length && urlQuery ? (
         <LoadingResults sx={{mt: 3}} />
       ) : (
+        <>
+        {books.length ? (
+          <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
+        ) : null}
+        
         <BookResults books={books} onClickItem={handleItemClick} />
+        </>
       )}
       
     </div>
