@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import React from "react";
+import React, { useState, useContext } from 'react'
 import { useNavigate } from "react-router-dom";
 import {Button, TextField, Typography, Card} from "@mui/material";
 import logo from '@images/BookHuntLogoSmall.png'
 import { signInWithEmailAndPassword} from "firebase/auth";
+import { AppContext } from '@state/AppContext';
 import { auth } from "@/../firebase.js";
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const { onShowError } = useContext(AppContext);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -21,7 +22,7 @@ const LoginPage = () => {
             })
             .catch((error) => {
                 console.log(error);
-                alert("Invalid credentials.");
+                onShowError(error);
             })
     }
     const inputStyles = {
