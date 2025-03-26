@@ -1,0 +1,15 @@
+{
+    "rewrites": [
+      { "source": "/search", "destination": "/" },
+      { "source": "/login", "destination": "/" },
+      { "source": "/results", "destination": "/" },
+      { "source": "/book/:type/:id", "destination": "/" },
+      { "source": "/bookConfig/:type/:id", "destination": "/" },
+      { "source": "/sell", "destination": "/" },
+      { "source": "/new/:id", "destination": "/" },
+      { "source": "/registration", "destination": "/" },
+      { "source": "/profile", "destination": "/" },
+      { "source": "/saved", "destination": "/" },
+      { "source": "/(.*)", "destination": "/" }
+    ]
+  }
