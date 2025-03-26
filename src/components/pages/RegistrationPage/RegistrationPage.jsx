@@ -1,14 +1,16 @@
-import React, {useState} from "react";
+import React, {useState, useContext} from "react";
 import {Button, TextField, Card, Divider, Typography} from "@mui/material";
 import logo from '@images/BookHuntLogoSmall.png'
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword} from "firebase/auth";
 import { auth, app } from "@/../firebase.js";
+import { AppContext } from '@state/AppContext';
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import './RegistrationPage.css';
 
 const RegistrationPage = () => {
     const navigate = useNavigate();
+    const { onShowError } = useContext(AppContext);
 
     const db = getFirestore(app);
 
@@ -41,7 +43,7 @@ const RegistrationPage = () => {
                     navigate("/login");
                 })
                 .catch((error) => {
-                    console.log(error);
+                    onShowError(error);
                 })
         }
         else {
