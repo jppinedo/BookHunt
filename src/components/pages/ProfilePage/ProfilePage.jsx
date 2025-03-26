@@ -30,6 +30,7 @@ const ProfilePage = () => {
     const [oldPasswordError, setOldPasswordError] = useState(false);
     const [newPasswordError, setNewPasswordError] = useState(false);
 
+    // Check for firebase doc with ID of userID, then pull first and last name values
     useEffect(() => {
         async function getName() {
             if (!user) return;
@@ -55,6 +56,7 @@ const ProfilePage = () => {
         getName()
     }, [user])
 
+    // Set listed books array as matched books from Firebase database as different objects.
     useEffect(() => {
         if (!user) return;
 
@@ -84,6 +86,7 @@ const ProfilePage = () => {
         fetchListedBooks();
     }, [user]);
 
+    // Reauthenticate the user with old pass to confirm, then reset password to new selected password.
     async function changePassword(e) {
         e.preventDefault();
         setOldPasswordError(false);

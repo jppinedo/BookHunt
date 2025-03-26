@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react'
 import './App.css';
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, useNavigate} from 'react-router-dom';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
 import MenuNav from '@custom/Navigation/MenuNav';
@@ -16,6 +16,7 @@ import LoginPage from '@pages/LoginPage/LoginPage';
 import RegistrationPage from '@pages/RegistrationPage/RegistrationPage';
 import ProfilePage from '@pages/ProfilePage/ProfilePage';
 import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
+import RedirectHandler from "@state/RedirectHandler.jsx";
 import { Protected } from "@/Protected";
 
 function App() {
@@ -24,7 +25,6 @@ function App() {
 
   const { error, onCloseError, isError } = useContext(AppContext);
 
-
   useEffect(() => {
     setIsLoggedIn(!!user)
   }, [user]);
@@ -32,7 +32,8 @@ function App() {
   return (
     
     <Router>
-      <MenuNav />
+      {isLoggedIn && location.pathname !== "/login" && location.pathname !== "/registration" && <MenuNav />}
+      <RedirectHandler /> {/* Handles site load up for logged in or not logged in */}
 
       <Routes>
         <Route path="/search" element={<Protected><SearchPage /></Protected>} />
