@@ -44,7 +44,7 @@ const NewBookPage = () => {
 
   return (
     <Container maxWidth="md" sx={{mt:8, mb:15}}>
-      <BookCardSeller book={currentBook} type="form" isSingle={true}/>
+      <BookCardSeller book={currentBook} type="form" isSingle={true} isNew={true}/>
       <BookAddForm book={currentBook} onSaveBook={saveBook} />
     </Container>
   )

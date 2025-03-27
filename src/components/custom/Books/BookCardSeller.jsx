@@ -18,7 +18,7 @@ import {
 import {useNavigate} from "react-router-dom";
 import './BookCard.css';
 
-const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
+const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
 
   const isClickable = typeof onCardClick === 'function';
   const wrapperStyles = {display: 'flex', textAlign: 'left', maxWidth: type === 'grid' ? 560 : 'inherit', p: isSingle ? 0 : 1};
@@ -150,9 +150,11 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle }) => {
           Contact seller
         </Button>
       )}
-        <IconButton onClick={() => {deleteCard()}}>
-            <DeleteIcon />
-        </IconButton>
+        {!isNew &&
+            <IconButton onClick={() => {deleteCard()}}>
+                <DeleteIcon />
+            </IconButton>
+        }
     </CardActions>
   )
 
