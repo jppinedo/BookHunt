@@ -49,3 +49,34 @@
         height: initial;
     }
 }
+
+/* U8 — inside the shared .card-grid each card is a size container
+   (index.css), so these rules respond to the card's CELL width, not
+   the viewport. The standardized 3-column grid makes cells ~370px in
+   the wide shell — and much narrower inside the Profile card — where
+   the cover's 200px inline cap would squeeze the text column. First
+   the cover shrinks; below ~280px the card stacks cover-over-text,
+   the same pattern as the phone rule above. The !important beats the
+   cover's inline max-width style, as in the rules above. */
+@container (max-width: 380px) {
+    .book-list-card img,
+    .book-single-card img {
+        max-width: 110px !important;
+    }
+}
+
+@container (max-width: 280px) {
+    .book-list-card > div,
+    .book-single-card > div {
+        flex-direction: column;
+    }
+    .book-list-card img,
+    .book-single-card img {
+        width: 100%;
+        max-width: 100% !important;
+        max-height: 200px;
+        object-fit: contain;
+        padding: 0.75rem 0.75rem 0 !important;
+        box-sizing: border-box;
+    }
+}

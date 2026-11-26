@@ -181,7 +181,13 @@ const ProfilePage = () => {
     const BookListingView = (
         <div style={{maxHeight: "500px", overflowY: "auto", padding: '0.25rem 1.25rem 1.5rem', boxSizing: 'border-box'}}>
             {listedBooks.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                // U8: My Listings joins the shared .card-grid rule
+                // (index.css) — it was the last item list still on its
+                // own single-column flex stack. Inside this narrow
+                // card the cells are small, and BookCard.css's
+                // container queries shrink/stack the card interiors
+                // to fit.
+                <div className="card-grid">
                     {listedBooks.map((item, index) => (
                         <BookCardSeller
                             key={`${item.id}-${index}`}

@@ -35,13 +35,17 @@ import './BookResults.css';
  * w-full of their cell, the grid's default stretch makes each row's
  * cards equal height (the clickable body already carries h-full),
  * and rows fill from the left.
+ *
+ * U8: this list's private Tailwind grid classes are gone — it uses
+ * the shared .card-grid rule (index.css) like every other item list,
+ * so column counts can never drift apart again.
  */
 const BookResults = ({ books, onClickItem }) => {
   if (!books.length) return null;
   return (
     <div className="page-shell pb-32">
       <div className="pt-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="card-grid">
           {books.map((book) => (
             <Card
               key={`${book.id}-${book.etag}`}

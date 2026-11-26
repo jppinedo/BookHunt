@@ -134,17 +134,20 @@ const BookList = () => {
   // U3: the two sources are no longer one merged card stream. Campus
   // listings (Supabase/user rows — the marketplace's whole point) come
   // first under their own heading; eBay deals follow under theirs.
-  // Each heading carries its count, and a source with nothing to show
+  // The campus heading carries its count (U8: the eBay heading no
+  // longer does — its results load progressively), and a source with
+  // nothing to show
   // gets a one-line note instead of the old generic "No more results
   // found." card (which also used to be the whole screen when both
   // sources came back empty).
   const campusListings = results.filter((item) => item.sellerType !== 'eBay');
   const ebayListings = results.filter((item) => item.sellerType === 'eBay');
 
-  // U7: the sections use the shared .card-grid-wide (index.css) —
+  // U7: the sections use the shared .card-grid (index.css) —
   // full-width cells filled from the left, equal-height rows —
   // replacing the centered flex wrap whose shrink-wrapped cards made
-  // the list narrower than the breadcrumb bar above it.
+  // the list narrower than the breadcrumb bar above it. U8: the same
+  // rule now standardizes every item list at 1/2/3 columns.
   const renderCard = (item, index) => (
     <BookCard
       key={`${item.sellerType}-${item.id}-${index}`}
@@ -153,10 +156,14 @@ const BookList = () => {
       onCardClick={handleBookClick}
     />
   );
+  // U8: the count is optional — Campus passes it (its set is fully
+  // loaded, so the number is a true total); eBay doesn't (see below).
   const sectionHeading = (label, count) => (
     <h2 className="font-playfair text-[22px] font-semibold text-pio-text text-left mb-4">
       {label}
-      <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
+      {count !== undefined && (
+        <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
+      )}
     </h2>
   );
   const emptyNote = (text) => (
@@ -194,14 +201,20 @@ const BookList = () => {
       <section className="mb-9">
         {sectionHeading('Campus listings', campusListings.length)}
         {campusListings.length ? (
-          <div className="card-grid-wide">{campusListings.map(renderCard)}</div>
+          <div className="card-grid">{campusListings.map(renderCard)}</div>
         ) : (
           emptyNote('No campus listings for this book yet.')
         )}
       </section>
 
       <section>
-        {sectionHeading('eBay deals', ebayListings.length)}
+        {/* U8: no count here — eBay results stream in as the user
+            scrolls (InfiniteScroll below), so any number would just
+            be the batch loaded so far, not a total. Juan: "there
+            shouldn't be a count of ebay results since they load
+            dynamically." Campus keeps its count: that set arrives
+            complete from the database. */}
+        {sectionHeading('eBay deals')}
         {ebayListings.length ? (
           <InfiniteScroll
             dataLength={ebayListings.length}
@@ -211,7 +224,7 @@ const BookList = () => {
             scrollThreshold={1}
             style={{ paddingBottom: '15rem' }}
           >
-            <div className="card-grid-wide">{ebayListings.map(renderCard)}</div>
+            <div className="card-grid">{ebayListings.map(renderCard)}</div>
           </InfiniteScroll>
         ) : (
           <>

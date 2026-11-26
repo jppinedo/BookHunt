@@ -55,10 +55,10 @@ const BooksSavedPage = () => {
             />
 
             {savedBooks.length > 0 ? (
-                // U7: shared .card-grid-wide — a lone saved card now
-                // sits flush left at cell width instead of floating
+                // U7: shared .card-grid (U8 name) — a lone saved card
+                // now sits flush left at cell width instead of floating
                 // centered at its content width.
-                <div className="card-grid-wide" style={{ paddingBottom: '5rem' }}>
+                <div className="card-grid" style={{ paddingBottom: '5rem' }}>
                     {savedBooks.map((item, index) => (
                         <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                     ))}

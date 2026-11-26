@@ -76,19 +76,37 @@ body {
    box from the left edge, every card is width:100% of its cell, and
    the default stretch alignment makes every card in a row the height
    of that row's tallest card (the cards carry h-full to complete the
-   chain). One column until the shell is wide enough for two wide
-   cards side by side. */
-.card-grid-wide {
+   chain).
+   U8 — the same rule now also drives the search results list
+   (BookResults used to carry its own Tailwind grid classes), and the
+   columns are standardized everywhere: 1 under 640px, 2 from 640px,
+   3 from 1024px. Juan: the deals lists showed 2 columns where search
+   showed 3 — "we need to standardize the items list". Each card is a
+   size container so BookCard.css can adapt a card's inner layout to
+   its CELL width (narrower cover, then stacked) instead of the
+   viewport — a 3-up cell inside the narrow Profile card is much
+   narrower than a 3-up cell in the wide shell. */
+.card-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
   align-items: stretch;
 }
 
-@media (min-width: 1024px) {
-  .card-grid-wide {
+@media (min-width: 640px) {
+  .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card-grid > * {
+  container-type: inline-size;
 }
 
 /* U4 — toast entrance (ToastContext). Toasts rise slightly and fade in;
