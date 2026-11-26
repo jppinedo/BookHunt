@@ -11,6 +11,7 @@ import {MemoryRouter as Router, Routes, Route, useLocation, useNavigate} from 'r
 import logoSmall from '@assets/images/BookHuntLogoSmall.png';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
+import { SearchContext } from '@state/SearchContext';
 import MenuNav from '@custom/Navigation/MenuNav';
 import HubNav from '@custom/Navigation/HubNav';
 import ErrorModal from '@custom/Error/ErrorModal';
@@ -30,31 +31,36 @@ import { Toasts } from '@state/ToastContext';
 import { Protected } from "@/Protected";
 
 /**
- * PageBrand — the Home button in the header of every logged-in page.
- * U1 gave it a visible "Home" label beside the logo, a matching
- * aria-label, and hover/focus treatment so it reads as tappable (the
- * audit found the old bare logo + wordmark didn't read as a button or as
- * "Home" at all). U1.1: Juan's rule is that the logo is ALWAYS visible
- * and ALWAYS links home — the deals and listing-detail screens had no
- * header at all, so PageBrand now renders on every logged-in route. The
- * one exception is /search itself: that page's large centered hero logo
+ * PageBrand — the brand button in the header of every logged-in page.
+ * U1 gave it a visible label beside the logo, a matching aria-label,
+ * and hover/focus treatment so it reads as tappable (the audit found
+ * the old bare logo + wordmark didn't read as a button at all). U1.1:
+ * Juan's rule is that the logo is ALWAYS visible and ALWAYS links
+ * home — the deals and listing-detail screens had no header at all,
+ * so PageBrand now renders on every logged-in route. The one
+ * exception is /search itself: that page's large centered hero logo
  * is its brand lockup, and SearchPage makes it a Home button too, so
- * the rule holds there without stacking two logos. Clicking Home
- * returns to Book Search — which, since U1, shows the preserved search
- * session rather than a wiped page.
+ * the rule holds there without stacking two logos.
+ * U7 (Juan's review): the label reads "Book Hunt" — the wordmark, on
+ * every page — never "Home"; and the click is a true homecoming: it
+ * resets the search session (SearchContext.resetSearch) so it lands
+ * on the clean home view, empty bar and no results, NOT the U1
+ * preserved session. The wrapper also gains margin below so the
+ * header never crowds the content under it.
  */
 function PageBrand() {
   const navigate = useNavigate();
+  const { resetSearch } = useContext(SearchContext);
   return (
-    <div className="page-shell pt-3">
+    <div className="page-shell pt-3 mb-2">
       <button
         type="button"
-        onClick={() => navigate('/search')}
-        aria-label="Home — Book Search"
+        onClick={() => { resetSearch(); navigate('/search'); }}
+        aria-label="Book Hunt — home"
         className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer px-2.5 py-1.5 -ml-2.5 rounded-full transition-colors hover:bg-pio-coral-pale/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
       >
         <img src={logoSmall} alt="" style={{ width: '38px', height: '38px', display: 'block' }} />
-        <span className="text-pio-text text-lg font-bold font-jakarta">Home</span>
+        <span className="text-pio-text text-lg font-bold font-jakarta">Book Hunt</span>
       </button>
     </div>
   );
@@ -74,10 +80,10 @@ function AppShell() {
   }, [user]);
 
   const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration" && pathname !== "/reset-password";
-  // U1.1: the brand header (logo + "Home") shows on EVERY logged-in
-  // page — previously /results and /book/* had no header at all. The
-  // only exception is /search, whose hero logo is the brand there (and
-  // is itself a Home button; see SearchPage).
+  // U1.1: the brand header (logo + "Book Hunt") shows on EVERY
+  // logged-in page — previously /results and /book/* had no header at
+  // all. The only exception is /search, whose hero logo is the brand
+  // there (and is itself a Home button; see SearchPage).
   const showBrand = showNav && pathname !== "/search";
 
   return (

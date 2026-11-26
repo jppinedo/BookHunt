@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
+import { SearchContext } from '@state/SearchContext';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
 import { BookOpen as MenuBookIcon } from 'react-feather';
@@ -11,6 +12,14 @@ const SellBook = () => {
 
   const [books, setBooks] = useState([]);
   const navigate = useNavigate();
+  // U7: Home (and this page's search X) reset to the clean home view.
+  const { resetSearch } = useContext(SearchContext);
+
+  const goCleanHome = () => {
+    setBooks([]);
+    resetSearch();
+    navigate('/search');
+  };
 
   const handleSearch = async (query) => {
     const results = await searchGoogleBooks(query);
@@ -31,7 +40,7 @@ const SellBook = () => {
       <div className="page-shell pt-2">
         <BreadcrumbNav
           crumbs={[
-            { label: 'Home', to: '/search' },
+            { label: 'Home', to: '/search', onClick: resetSearch },
             { label: 'Sell a Book', current: true },
           ]}
           fallback="/search"
@@ -40,7 +49,7 @@ const SellBook = () => {
       {!books.length ? (
         <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking to sell." />
       ) : null}
-      <SearchInput onSearch={handleSearch} />
+      <SearchInput onSearch={handleSearch} onClear={goCleanHome} />
       {books.length ? (
         <InfoBox icon={MenuBookIcon} content="Click on the book you want to sell" />
       ) : null}

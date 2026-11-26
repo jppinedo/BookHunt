@@ -37,6 +37,20 @@ export const SearchProvider = ({ children }) => {
     }
   }, []);
 
+  // U7: Home means a CLEAN start (Juan's review of the full UX preview):
+  // the breadcrumb "Home" crumb, the brand logo, and the search field's
+  // X button all wipe the preserved session — empty query, no results,
+  // status back to idle, no remembered deals URL — so /search renders
+  // the fresh home view. This is deliberately separate from Back and
+  // the "Results" crumb, which keep the U1 behavior of returning to the
+  // preserved results.
+  const resetSearch = useCallback(() => {
+    setBooks([]);
+    setStatus('idle');
+    setSearchedQuery('');
+    setLastDealsUrl(null);
+  }, []);
+
   return (
     <SearchContext.Provider
       value={{
@@ -44,6 +58,7 @@ export const SearchProvider = ({ children }) => {
         status,
         searchedQuery,
         runSearch,
+        resetSearch,
         lastDealsUrl,
         setLastDealsUrl,
       }}

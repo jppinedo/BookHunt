@@ -91,10 +91,10 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
   return (
     <Card
       padded={false}
-      className={isSingle ? 'book-single-card' : 'book-list-card'}
+      className={`${isSingle ? 'book-single-card' : 'book-list-card'} w-full h-full`}
     >
       <div
-        className={`flex text-left ${type === 'grid' ? 'max-w-[560px]' : ''} ${isSingle ? '' : 'p-3'} ${isClickable ? 'cursor-pointer hover:bg-pio-teal-dark-opacity-14' : ''}`}
+        className={`flex text-left w-full h-full ${isSingle ? '' : 'p-3'} ${isClickable ? 'cursor-pointer hover:bg-pio-teal-dark-opacity-14' : ''}`}
         onClick={isClickable ? handleCardClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}

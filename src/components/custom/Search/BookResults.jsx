@@ -27,18 +27,26 @@ import './BookResults.css';
  * The D2 result-count line is gone from here — Juan asked for the
  * count inside the breadcrumb bar; SearchPage passes it to
  * BreadcrumbNav's `end` slot instead.
+ *
+ * U7: the cards no longer cap at 348px or center in their cells
+ * (justify-items-center) — that inset the card block from both edges
+ * of the shell the breadcrumb spans, so the bar looked wider than
+ * the list, and partial rows floated in the middle. Cards are now
+ * w-full of their cell, the grid's default stretch makes each row's
+ * cards equal height (the clickable body already carries h-full),
+ * and rows fill from the left.
  */
 const BookResults = ({ books, onClickItem }) => {
   if (!books.length) return null;
   return (
     <div className="page-shell pb-32">
       <div className="pt-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {books.map((book) => (
             <Card
               key={`${book.id}-${book.etag}`}
               padded={false}
-              className='book-card w-full max-w-[348px] cursor-pointer'
+              className='book-card w-full h-full cursor-pointer'
             >
               <div
                 className="flex gap-4 p-4 text-left h-full"

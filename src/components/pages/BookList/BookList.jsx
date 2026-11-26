@@ -45,7 +45,7 @@ const BookList = () => {
   // screen's own Back a fallback: the preserved Google results for the
   // book's title (normally Back just retraces history to them).
   const location = useLocation();
-  const { setLastDealsUrl } = useContext(SearchContext);
+  const { setLastDealsUrl, resetSearch } = useContext(SearchContext);
   useEffect(() => {
     setLastDealsUrl(`${location.pathname}${location.search}`);
   }, [location.pathname, location.search, setLastDealsUrl]);
@@ -120,11 +120,13 @@ const BookList = () => {
     );
   }
 
-  // U1.1: the breadcrumb trail for the deals screen. "Results" (and
-  // "Home") land on /search, which since U1 restores the preserved
-  // Google Books session — the results the user drilled in from.
+  // U1.1: the breadcrumb trail for the deals screen. "Results" lands
+  // on /search, which since U1 restores the preserved Google Books
+  // session — the results the user drilled in from. U7: "Home" is a
+  // different promise — it resets the session first, so it lands on
+  // the clean home view (empty bar, no results).
   const crumbs = [
-    { label: 'Home', to: '/search' },
+    { label: 'Home', to: '/search', onClick: resetSearch },
     { label: 'Results', to: '/search' },
     { label: title || 'Deals', current: true },
   ];
@@ -139,9 +141,10 @@ const BookList = () => {
   const campusListings = results.filter((item) => item.sellerType !== 'eBay');
   const ebayListings = results.filter((item) => item.sellerType === 'eBay');
 
-  const cardGridStyle = {
-    display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center',
-  };
+  // U7: the sections use the shared .card-grid-wide (index.css) —
+  // full-width cells filled from the left, equal-height rows —
+  // replacing the centered flex wrap whose shrink-wrapped cards made
+  // the list narrower than the breadcrumb bar above it.
   const renderCard = (item, index) => (
     <BookCard
       key={`${item.sellerType}-${item.id}-${index}`}
@@ -163,7 +166,14 @@ const BookList = () => {
   return (
 
     <div className="page-shell pt-4">
-      <SearchInput onSearch={handleSearch} inputValue={title} className="mb-1" />
+      {/* U7: the X in this search bar is a reset to the clean home
+          view (same as the Home crumb), not just a text clear. */}
+      <SearchInput
+        onSearch={handleSearch}
+        onClear={() => { resetSearch(); navigate('/search'); }}
+        inputValue={title}
+        className="mb-1"
+      />
       <BreadcrumbNav crumbs={crumbs} fallback={backFallback} className="mb-3" />
 
       {/* U3: a compact book header — the audit found this screen never
@@ -184,7 +194,7 @@ const BookList = () => {
       <section className="mb-9">
         {sectionHeading('Campus listings', campusListings.length)}
         {campusListings.length ? (
-          <div style={cardGridStyle}>{campusListings.map(renderCard)}</div>
+          <div className="card-grid-wide">{campusListings.map(renderCard)}</div>
         ) : (
           emptyNote('No campus listings for this book yet.')
         )}
@@ -201,7 +211,7 @@ const BookList = () => {
             scrollThreshold={1}
             style={{ paddingBottom: '15rem' }}
           >
-            <div style={cardGridStyle}>{ebayListings.map(renderCard)}</div>
+            <div className="card-grid-wide">{ebayListings.map(renderCard)}</div>
           </InfiniteScroll>
         ) : (
           <>

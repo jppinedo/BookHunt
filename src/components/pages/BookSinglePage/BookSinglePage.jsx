@@ -15,7 +15,7 @@ const BookSinglePage = () => {
   // fallback is the last deals URL the session visited (kept in
   // SearchContext), or the preserved search results. U1.1: the same
   // deals URL is where the book-title breadcrumb crumb points.
-  const { lastDealsUrl } = useContext(SearchContext);
+  const { lastDealsUrl, resetSearch } = useContext(SearchContext);
   const backFallback = lastDealsUrl || '/search';
   const [ currentBook, setCurrentBook ] = useState(null);
   const [ loading, setLoading ] = useState(true);
@@ -57,7 +57,7 @@ const BookSinglePage = () => {
       <div className="page-shell-narrow mt-6 mb-36">
         <BreadcrumbNav
           crumbs={[
-            { label: 'Home', to: '/search' },
+            { label: 'Home', to: '/search', onClick: resetSearch },
             { label: 'Results', to: '/search' },
             { label: 'Deal', current: true },
           ]}
@@ -69,13 +69,15 @@ const BookSinglePage = () => {
     );
   }
   // U1.1 trail: Home / Results / <book title> / Deal — the title crumb
-  // jumps straight back to this book's deals list.
+  // jumps straight back to this book's deals list. U7: the Home crumb
+  // resets the session (clean home view); Results and the title crumb
+  // keep landing on the preserved session/deals.
   const dealsUrl = lastDealsUrl || `/search?query=${encodeURIComponent(currentBook.title || '')}`;
   return (
     <div className="page-shell-narrow mt-6 mb-36">
       <BreadcrumbNav
         crumbs={[
-          { label: 'Home', to: '/search' },
+          { label: 'Home', to: '/search', onClick: resetSearch },
           { label: 'Results', to: '/search' },
           { label: currentBook.title || 'Book', to: dealsUrl },
           { label: 'Deal', current: true },

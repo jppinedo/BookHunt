@@ -33,6 +33,11 @@ import { ChevronLeft, ChevronRight } from 'react-feather';
  * results page puts its result count there ("20 results for …"), so the
  * count lives in the bar instead of floating as a separate line above
  * the grid. Other pages pass nothing and the bar stays clean.
+ * U7: the "Home" crumb is a link WITH an onClick — pages pass
+ * SearchContext.resetSearch there, so Home lands on the clean home
+ * view (empty bar, no results), while Back and the "Results" crumb
+ * keep the U1 preserved-session behavior. The component just renders
+ * what it's given; the distinction lives in the pages' crumb defs.
  * The Back button was also restyled: in U1.1 it was bare coral text at a
  * larger size than the crumbs, so it read as a stray link, not a
  * button. It is now a pill at the SAME text-sm size as the crumbs, with

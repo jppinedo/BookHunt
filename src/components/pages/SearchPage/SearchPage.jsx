@@ -41,7 +41,7 @@ const SearchPage = () => {
   // U1: search state (books / status / searchedQuery) is owned by
   // SearchContext at App level, not by this page — the page unmounts when
   // the user drills into a book, and the session must survive that.
-  const { books, status, searchedQuery, runSearch } = useContext(SearchContext);
+  const { books, status, searchedQuery, runSearch, resetSearch } = useContext(SearchContext);
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('query');
 
@@ -95,14 +95,19 @@ const SearchPage = () => {
     >
       {/* U1.1: this page has no PageBrand header — its hero logo IS the
           brand lockup, so the logo itself is the Home button (Juan's
-          rule: the logo is always visible and always links home). */}
+          rule: the logo is always visible and always links home).
+          U7: Home means the CLEAN home view — the click resets the
+          search session (and drops any ?query=) instead of landing on
+          the preserved results. The logo also gets real margin below
+          it (0.5rem → 1.5rem): it sat almost on top of the search
+          bar/headline under it. */}
       <button
         type="button"
-        onClick={() => navigate('/search')}
-        aria-label="Home — Book Search"
+        onClick={() => { resetSearch(); navigate('/search', { replace: true }); }}
+        aria-label="Book Hunt — home"
         className="block mx-auto bg-transparent border-0 p-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pio-coral"
       >
-        <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
+        <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '1rem auto 1.5rem'}} />
       </button>
       {/* D2 hero: in the idle home state the logo gets a headline and a
           one-line promise, so the centered hero reads as a composed
@@ -121,7 +126,13 @@ const SearchPage = () => {
         </div>
       ) : null}
 
-      <SearchInput onSearch={setQueryParam} inputValue={urlQuery || searchedQuery || ''}/>
+      {/* U7: the X resets to the clean home view (session wiped, bare
+          /search), same as the logo and the Home crumb. */}
+      <SearchInput
+        onSearch={setQueryParam}
+        onClear={() => { resetSearch(); navigate('/search', { replace: true }); }}
+        inputValue={urlQuery || searchedQuery || ''}
+      />
 
       {/* U1.2 order (Juan's screenshot review): search input → hint →
           breadcrumb bar → results grid. The hint sits directly below
@@ -142,7 +153,7 @@ const SearchPage = () => {
         <div className="page-shell">
           <BreadcrumbNav
             crumbs={[
-              { label: 'Home', to: '/search' },
+              { label: 'Home', to: '/search', onClick: resetSearch },
               { label: 'Results', current: true },
             ]}
             fallback="/search"

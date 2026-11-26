@@ -64,6 +64,33 @@ body {
   box-sizing: border-box;
 }
 
+/* U7 — ONE shared grid for the wide deal/listing cards (BookList's
+   campus + eBay sections, Saved Books, My Listings). The lists used to
+   be flex rows with justify-content: center and cards that
+   shrink-wrapped to their content (BookCard's inner content capped at
+   560px), so the visible list was a centered, narrower block floating
+   inside the same .page-shell the breadcrumb spans edge-to-edge —
+   Juan: "the breadcrumb bar is always wider than the items list" and
+   "list items are aligned to center; should be left". A real grid
+   fixes all three complaints at once: cells fill the shell's content
+   box from the left edge, every card is width:100% of its cell, and
+   the default stretch alignment makes every card in a row the height
+   of that row's tallest card (the cards carry h-full to complete the
+   chain). One column until the shell is wide enough for two wide
+   cards side by side. */
+.card-grid-wide {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .card-grid-wide {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* U4 — toast entrance (ToastContext). Toasts rise slightly and fade in;
    dismissal is instant (the toast unmounts), which reads fine at this
    size and keeps the implementation a single class. */

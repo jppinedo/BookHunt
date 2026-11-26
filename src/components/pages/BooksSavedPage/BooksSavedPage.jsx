@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@state/AuthContext.jsx";
+import { SearchContext } from "@state/SearchContext.jsx";
 import { getSavedBooks } from "@services/BookFirestore";
 import BookCard from "@custom/Books/BookCard.jsx";
 import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
@@ -10,6 +11,9 @@ import {useNavigate} from "react-router";
  *  Now the mock service layer (getSavedBooks) + Lienzo Title. */
 const BooksSavedPage = () => {
     const { user } = useContext(AuthContext);
+    // U7: the breadcrumb's Home crumb resets the search session —
+    // Home means the clean home view, not the preserved results.
+    const { resetSearch } = useContext(SearchContext);
     const [savedBooks, setSavedBooks] = useState([])
 
     const navigate = useNavigate();
@@ -43,7 +47,7 @@ const BooksSavedPage = () => {
             {/* U1.1: breadcrumb bar below the page title (Home / Saved Books). */}
             <BreadcrumbNav
                 crumbs={[
-                    { label: 'Home', to: '/search' },
+                    { label: 'Home', to: '/search', onClick: resetSearch },
                     { label: 'Saved Books', current: true },
                 ]}
                 fallback="/search"
@@ -51,7 +55,10 @@ const BooksSavedPage = () => {
             />
 
             {savedBooks.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', justifyContent: 'center'}}>
+                // U7: shared .card-grid-wide — a lone saved card now
+                // sits flush left at cell width instead of floating
+                // centered at its content width.
+                <div className="card-grid-wide" style={{ paddingBottom: '5rem' }}>
                     {savedBooks.map((item, index) => (
                         <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                     ))}

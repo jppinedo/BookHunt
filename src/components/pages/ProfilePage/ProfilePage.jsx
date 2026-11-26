@@ -5,6 +5,7 @@ import PasswordInput from '@custom/Shared/PasswordInput';
 import Modal from '@custom/Shared/Modal';
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
+import { SearchContext } from '@state/SearchContext';
 import { getUserProfile, getListedBooks } from "@services/BookFirestore";
 import BookCardSeller from "@custom/Books/BookCardSeller.jsx";
 import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
@@ -23,6 +24,8 @@ import './ProfilePage.css';
 const ProfilePage = () => {
     const { user, signOut } = useContext(AuthContext);
     const { onShowError, profileTab, setProfileTab } = useContext(AppContext);
+    // U7: the breadcrumb's Home crumb resets the search session.
+    const { resetSearch } = useContext(SearchContext);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -245,7 +248,17 @@ const ProfilePage = () => {
             </div>
             <div className="mt-6 flex flex-col items-center gap-3">
                 <Button label="Change Password" type="green" size="lg" onClick={(e) => { changePassword(e) }} />
-                <Button label="Delete Account" type="red" onClick={() => { showDelete(true) }} />
+                {/* U7: Delete Account is a small text link now, not a
+                    red pill button competing with Change Password —
+                    muted red text, underline on hover. It still opens
+                    the same U5.1 confirmation modal. */}
+                <button
+                    type="button"
+                    onClick={() => { showDelete(true) }}
+                    className="bg-transparent border-0 cursor-pointer p-0 font-jakarta text-[13px] font-medium text-pio-coral-dark/70 underline-offset-4 transition-colors hover:text-pio-coral-dark hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
+                >
+                    Delete Account
+                </button>
             </div>
             {/* U5.1: the delete confirmation is a modal (shared Modal
                 component) — same self-contained password field and the
@@ -289,11 +302,11 @@ const ProfilePage = () => {
             <div className="px-5">
                 <BreadcrumbNav
                     crumbs={activeTab === 'listings' ? [
-                        { label: 'Home', to: '/search' },
+                        { label: 'Home', to: '/search', onClick: resetSearch },
                         { label: 'Profile', onClick: goToProfileTab },
                         { label: 'My Listings', current: true },
                     ] : [
-                        { label: 'Home', to: '/search' },
+                        { label: 'Home', to: '/search', onClick: resetSearch },
                         { label: 'Profile', current: true },
                     ]}
                     fallback="/search"
