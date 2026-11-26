@@ -3,7 +3,7 @@
  * was built against (addBookToDB, searchBookInDB, getBookById) plus the
  * profile helpers the components use (getUserProfile, createUserProfile,
  * getSavedBooks, isBookSaved, toggleSavedBook, getListedBooks,
- * deleteListedBook).
+ * deleteListedBook, updateListing).
  *
  * Phase E1: two backends behind those signatures, chosen at runtime —
  *   - Supabase (when VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set):
@@ -227,6 +227,27 @@ const supabaseImpl = {
     await syncBooksListed(userId);
   },
 
+  // U4: edit an own listing's price/condition. Owner-scoped the same
+  // way deleteListedBook is (id AND seller_id), so a stale or foreign
+  // id updates nothing — .single() then errors, which the caller
+  // surfaces as an inline form error. Returns the updated book.
+  async updateListing(user, bookId, { price, condition } = {}) {
+    if (!user) throw new Error('updateListing requires a signed-in user');
+    const userId = user.uid || user.id;
+    const patch = {};
+    if (price !== undefined) patch.price = Number.parseFloat(price) || 0;
+    if (condition !== undefined) patch.condition = condition;
+    const { data, error } = await supabase
+      .from('listings')
+      .update(patch)
+      .eq('id', bookId)
+      .eq('seller_id', userId)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return rowToBook(data);
+  },
+
   async getSavedBooks(user) {
     if (!user) return [];
     const userId = user.uid || user.id;
@@ -360,6 +381,22 @@ const mockImpl = {
     mockDB.listings = mockDB.listings.filter((listing) => listing.id !== bookId);
   },
 
+  // U4: mock parity for updateListing — same owner scoping (the
+  // listing must be in the user's booksListed or carry their email).
+  async updateListing(user, bookId, { price, condition } = {}) {
+    if (!user) throw new Error('updateListing requires a signed-in user');
+    const listing = mockDB.listings.find((entry) => entry.id === bookId);
+    const profile = getMockProfile(user.uid || user.id);
+    const owns = listing && (
+      (profile?.booksListed || []).includes(bookId) ||
+      (listing.sellerEmail && user.email && listing.sellerEmail === user.email)
+    );
+    if (!listing || !owns) throw new Error('Listing not found');
+    if (price !== undefined) listing.price = (Number.parseFloat(price) || 0).toFixed(2);
+    if (condition !== undefined) listing.condition = condition;
+    return { ...listing };
+  },
+
   async getSavedBooks(user) {
     if (!user) return [];
     const profile = getMockProfile(user.uid || user.id);
@@ -397,6 +434,7 @@ export const searchBookInDB = impl.searchBookInDB;
 export const getBookById = impl.getBookById;
 export const getListedBooks = impl.getListedBooks;
 export const deleteListedBook = impl.deleteListedBook;
+export const updateListing = impl.updateListing;
 export const getSavedBooks = impl.getSavedBooks;
 export const toggleSavedBook = impl.toggleSavedBook;
 

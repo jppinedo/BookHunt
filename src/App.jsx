@@ -25,6 +25,7 @@ import RegistrationPage from '@pages/RegistrationPage/RegistrationPage';
 import ProfilePage from '@pages/ProfilePage/ProfilePage';
 import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
 import RedirectHandler from "@state/RedirectHandler.jsx";
+import { Toasts } from '@state/ToastContext';
 import { Protected } from "@/Protected";
 
 /**
@@ -99,6 +100,10 @@ function AppShell() {
       </Routes>
 
       {showNav && <HubNav />}
+      {/* U4: toast stack — rendered at shell level so a toast fired
+          just before a navigation (e.g. "Listing deleted") is still
+          visible on the destination screen. */}
+      <Toasts />
       <ErrorModal showError={isError} error={error} onClose={onCloseError}/>
     </>
   )

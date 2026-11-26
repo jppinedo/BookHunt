@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
+import { useToast } from '@state/ToastContext';
 import { deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
 import { Trash2 } from 'react-feather';
@@ -22,13 +23,19 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { onShowError } = useContext(AppContext);
+  const { showToast } = useToast();
 
   async function deleteCard() {
       if (!user || !book) return
 
       try {
           await deleteListedBook(user, book.id);
-          navigate("/profile");
+          // U4: confirm the delete with a toast (it renders at shell
+          // level, so it survives this navigation) and land on the
+          // Book Listings tab the listing was managed from — U2's
+          // deep-link state — instead of the bare Profile tab.
+          showToast('Listing deleted');
+          navigate("/profile", { state: { tab: 'listings' } });
       } catch (error) {
         onShowError(error);
       }
@@ -73,7 +80,11 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
                 )}
               </>
             )}
-            {(isSingle && book.description?.length) && (
+            {/* U4: in form mode (Sell flow) the description is NOT
+                dumped here — it pushed the price/condition form below
+                the fold. It lives in BookAddForm now, last and
+                optional, behind its toggle. */}
+            {(isSingle && type !== 'form' && book.description?.length) && (
               <p className="text-sm my-2">{book.description}</p>
             )}
             {type !== 'form' && (
@@ -90,11 +101,13 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
                   onClick={() => window.open(book.URL, '_blank', 'noopener,noreferrer')}
                 />
               )}
+              {/* U4: this card's view mode is the owner's own listing
+                  screen (/bookConfig) — "Contact seller" here mailed
+                  the seller themselves. It now says what it is; Edit
+                  and Delete are the actions (Edit lives on the page,
+                  below the card). */}
               {type === 'view' && book.sellerType === 'user' && (
-                <Button
-                  label="Contact seller"
-                  onClick={() => { window.location.href = `mailto:${book.sellerEmail}`; }}
-                />
+                <span className="text-sm font-semibold text-pio-coral">This is your listing</span>
               )}
               {!isNew && (
                 <button

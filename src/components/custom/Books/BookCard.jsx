@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { AuthContext } from "@state/AuthContext";
-import { isBookSaved, toggleSavedBook } from "@services/BookFirestore";
+import { AppContext } from '@state/AppContext';
+import { useToast } from '@state/ToastContext';
+import { isBookSaved, toggleSavedBook, deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
 import { Bookmark } from 'react-feather';
 import BookCover from './BookCover';
@@ -18,6 +21,18 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
 
   const isClickable = typeof onCardClick === 'function';
   const { user } = useContext(AuthContext);
+  const { onShowError } = useContext(AppContext);
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+
+  // U4: the viewer's own listing (matched by seller email — both data
+  // backends stamp sellerEmail on every user listing). Own listings get
+  // Edit/Delete instead of "Contact seller" (which mailed yourself).
+  const isOwnListing = Boolean(
+    book?.sellerType === 'user' &&
+    user?.email && book?.sellerEmail &&
+    book.sellerEmail.toLowerCase() === user.email.toLowerCase()
+  );
 
   const [cardSaved, setCardSaved] = useState(false);
 
@@ -38,9 +53,32 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
       if (!user || !book) return;
 
       try {
-          setCardSaved(await toggleSavedBook(user, book));
+          const saved = await toggleSavedBook(user, book);
+          setCardSaved(saved);
+          // U4: saving used to give no feedback at all (audit, Save
+          // finding). The saved toast carries a shortcut to the shelf.
+          if (saved) {
+              showToast('Saved to Books Saved', {
+                  actionLabel: 'View',
+                  onAction: () => navigate('/saved'),
+              });
+          } else {
+              showToast('Removed from saved books');
+          }
       } catch (error) {
           console.error("Error updating saved book!", error);
+      }
+  }
+
+  async function deleteOwnListing() {
+      if (!user || !book) return;
+
+      try {
+          await deleteListedBook(user, book.id);
+          showToast('Listing deleted');
+          navigate('/profile', { state: { tab: 'listings' } });
+      } catch (error) {
+          onShowError(error);
       }
   }
 
@@ -104,11 +142,25 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
                   onClick={() => window.open(book.URL, '_blank', 'noopener,noreferrer')}
                 />
               )}
-              {type === 'view' && book.sellerType === 'user' && (
+              {type === 'view' && book.sellerType === 'user' && !isOwnListing && (
                 <Button
                   label="Contact seller"
                   onClick={() => { window.location.href = `mailto:${book.sellerEmail}`; }}
                 />
+              )}
+              {type === 'view' && isOwnListing && (
+                <>
+                  <span className="text-sm font-semibold text-pio-coral">This is your listing</span>
+                  <Button
+                    label="Edit"
+                    onClick={() => navigate(`/bookConfig/user/${book.id}`)}
+                  />
+                  <Button
+                    label="Delete"
+                    type="red"
+                    onClick={() => { deleteOwnListing() }}
+                  />
+                </>
               )}
               <button
                 type="button"
