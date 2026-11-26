@@ -1,0 +1,139 @@
+/**
+ * Gradient text fills for Title.
+ * Solid color is the fallback; clip + transparent fill apply only when supported.
+ * Background-inspired: Amber Dawn, Studio Teal, Charcoal Depth (demo hexes).
+ * Pio accent: Coral Ember, Teal Mist, Deep Coral (token CSS variables).
+ */
+
+.lz-title-gradient-amber-dawn {
+  color: #8cc8ba;
+}
+
+.lz-title-gradient-studio-teal {
+  color: #3a7d76;
+}
+
+.lz-title-gradient-charcoal-depth {
+  color: #1f2421;
+}
+
+html[data-mode='dark'] .lz-title-gradient-charcoal-depth,
+html.dark .lz-title-gradient-charcoal-depth {
+  color: #c5cdc8;
+}
+
+/* Coral Ember — pio-coral → warm amber (fallback = darker stop) */
+.lz-title-gradient-coral-ember {
+  color: rgb(var(--lz-pio-coral));
+}
+
+/* Teal Mist — pio-teal-dark-hover → pio-teal-dark-muted */
+.lz-title-gradient-teal-mist {
+  color: rgb(var(--lz-pio-teal-dark-hover));
+}
+
+/* Deep Coral — pio-coral-dark → pio-coral-hover */
+.lz-title-gradient-deep-coral {
+  color: rgb(var(--lz-pio-coral-dark));
+}
+
+html[data-mode='dark'] .lz-title-gradient-deep-coral,
+html.dark .lz-title-gradient-deep-coral {
+  color: #c86868;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .lz-title-gradient-amber-dawn {
+    background-image: linear-gradient(
+      to right,
+      #8cc8ba,
+      #f5f5eb,
+      #f8b67a,
+      #f99280,
+      #e4ece0
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lz-title-gradient-studio-teal {
+    /* Lightest stop ≥ 3:1 on white while keeping atmospheric teal */
+    background-image: linear-gradient(to right, #628e88, #3a7d76, #2f6d68);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lz-title-gradient-charcoal-depth {
+    background-image: linear-gradient(to right, #1f2421, #30312f, #296863);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Lighter charcoal stops for dark surfaces (gray-900 / dark canvas) */
+  html[data-mode='dark'] .lz-title-gradient-charcoal-depth,
+  html.dark .lz-title-gradient-charcoal-depth {
+    background-image: linear-gradient(to right, #c5cdc8, #8a9a95, #4a9e96);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lz-title-gradient-coral-ember {
+    /* Amber end darkened (#c87840) so weakest stop ≥ 3:1 on white */
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--lz-pio-coral)),
+      #c87840
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lz-title-gradient-teal-mist {
+    /* Pale end uses muted teal instead of near-white wash (≥ 3:1 on white) */
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--lz-pio-teal-dark-hover)),
+      rgb(var(--lz-pio-teal-dark-muted))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lz-title-gradient-deep-coral {
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--lz-pio-coral-dark)),
+      rgb(var(--lz-pio-coral-hover))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Deep Coral on dark surfaces: lighten the dark stop (≥ 3:1 on gray-900) */
+  html[data-mode='dark'] .lz-title-gradient-deep-coral,
+  html.dark .lz-title-gradient-deep-coral {
+    background-image: linear-gradient(
+      to right,
+      #c86868,
+      rgb(var(--lz-pio-coral-hover))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}

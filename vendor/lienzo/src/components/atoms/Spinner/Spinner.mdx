@@ -1,0 +1,64 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Spinner.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Spinner from '@atoms/Spinner/Spinner';
+
+<Spinner colorClass="border-pio-coral" size="60px" thickness="16px" />`;
+
+<ComponentDocsPage
+  title="Spinner"
+  badge="0.1.0"
+  description="Circular border spinner for loading states. Color, size, and border thickness are configurable via CSS class and style props."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Inline loading indicators while content fetches.',
+      'Centered loading state over a panel or page region.',
+      'Brand-colored wait affordances using pio border utilities.',
+      'Related: use CircleSpinner for the orbiting-dot loading treatment.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'SpinnerProps',
+    lead: 'Runtime props for Spinner.',
+    rows: [
+      {
+        name: 'colorClass',
+        type: 'string',
+        defaultValue: "'border-pio-coral'",
+        description: 'Border color utility class applied to the spinner.',
+      },
+      {
+        name: 'size',
+        type: 'string',
+        defaultValue: "'60px'",
+        description: 'Width and height of the spinner.',
+      },
+      {
+        name: 'thickness',
+        type: 'string',
+        defaultValue: "'16px'",
+        description: 'Border width of the spinner ring.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Indeterminate loading with a classic rotating ring.',
+      'You want to set size and thickness with CSS length strings.',
+    ],
+    whenToAvoid: [
+      'The orbiting-dot spinner look—use CircleSpinner.',
+      'Progress that has a known percentage—prefer a determinate progress pattern.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Spinner.example.tsx',
+    language: 'tsx',
+  }}
+/>

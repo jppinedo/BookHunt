@@ -1,0 +1,11 @@
+export declare const phoneOuter: string;
+export declare const phoneScreen: string;
+export declare const phoneStatusBar: string;
+export declare const phoneTime = "font-bold text-[12px] tracking-tight";
+export declare const phoneIsland: string;
+export declare const phoneIslandLens: string;
+export declare const phoneIslandLensInner = "w-1 h-1 rounded-full bg-[#1A2E44]";
+export declare const phoneIslandDot = "w-1.5 h-1.5 rounded-full bg-pio-coral animate-pulse";
+export declare const phoneStatusIcons = "flex items-center gap-1.5 text-[12px] text-pio-text dark:text-blue-200";
+export declare const phoneContent = "flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto";
+export declare const phoneHomeIndicator = "w-32 h-1 bg-black/40 dark:bg-white/40 rounded-full mx-auto mt-0.5 shrink-0";

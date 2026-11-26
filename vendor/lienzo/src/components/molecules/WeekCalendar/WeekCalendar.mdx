@@ -1,0 +1,320 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './WeekCalendar.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import WeekCalendar from '@molecules/WeekCalendar/WeekCalendar';
+
+const weekStart = new Date(2025, 9, 13);
+const today = new Date(2025, 9, 15, 10, 30);
+
+<WeekCalendar
+  weekStart={weekStart}
+  today={today}
+  showHours={false}
+  layout="auto"
+  events={[
+    {
+      id: '1',
+      date: weekStart,
+      title: 'Morning brief',
+      subtitle: 'Ops',
+      tone: 'teal',
+    },
+  ]}
+/>`;
+
+export const choosingLayout = (
+  <div className="space-y-3 text-sm font-jakarta text-pio-text dark:text-blue-200">
+    <h3 className="font-bold text-base">Choosing a layout</h3>
+    <p>
+      <code className="font-jetbrains text-xs">layout=&quot;auto&quot;</code> (default)
+      measures the calendar’s own container. Below{' '}
+      <code className="font-jetbrains text-xs">autoBreakpoint</code> (640px) it uses{' '}
+      <code className="font-jetbrains text-xs">mobileLayout</code>
+      — day when hours are on, agenda when hours are off, unless you override it.
+      Wider containers keep the week grid.
+    </p>
+    <p>
+      Pass <code className="font-jetbrains text-xs">layout=&quot;week&quot; | &quot;day&quot; | &quot;agenda&quot;</code>{' '}
+      to force a view regardless of width. Use{' '}
+      <code className="font-jetbrains text-xs">layout=&quot;week&quot;</code> on a narrow
+      shell if you need the previous horizontal-scroll week behavior.
+    </p>
+    <p>
+      <code className="font-jetbrains text-xs">initialLayout</code> is the first paint
+      before measurement (SSR-safe). It defaults to the resolved mobile view so
+      narrow clients do not flash the week grid.
+    </p>
+  </div>
+);
+
+<ComponentDocsPage
+  title="WeekCalendar"
+  badge="0.1.0"
+  breadcrumb={['Molecules', 'WeekCalendar']}
+  description="Week, day, and agenda layouts with event cards. Timed hour grid or stacked lists; auto-switches by container width. Generic content model—titles, subtitles, bodies, and optional meta accept strings or JSX."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Weekly schedules with timed blocks and an hour gutter.',
+      'Compact day view with a selectable day strip on narrow screens.',
+      'Agenda list with sticky day headers and optional meta labels.',
+      'Rich card content with facepiles, times, and Lienzo atoms.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'day-view',
+      label: 'Day view',
+      canvas: <Canvas of={Stories.DayView} layout="fullscreen" />,
+      badge: 'Pattern: Mobile day',
+      description:
+        'Day strip, full-width hour grid, current-time line, and swipe between visible days.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "layout='day' · selectedDate · showSwipeHint",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'agenda-view',
+      label: 'Agenda view',
+      canvas: <Canvas of={Stories.AgendaView} layout="fullscreen" />,
+      badge: 'Pattern: Mobile agenda',
+      description:
+        'Stacked days with time under the title, today wash with an integrated header, and empty-day lines.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "layout='agenda' · meta · emptyDayLabel",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'without-hours',
+      label: 'Without hours',
+      canvas: <Canvas of={Stories.WithoutHours} layout="fullscreen" />,
+      badge: 'Pattern: Day lists',
+      description:
+        'Three-day week with stacked cards; start/end times are ignored for layout.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: 'showHours={false} · visibleDays',
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'rich-content',
+      label: 'Rich content',
+      canvas: <Canvas of={Stories.RichContent} layout="fullscreen" />,
+      badge: 'Pattern: Facepile',
+      description:
+        'Three-day week with clock time rows and overlapping avatar groups in the card body.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: 'body as ReactNode',
+          valueTone: 'prop',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'WeekCalendarProps',
+    lead: 'Runtime props for WeekCalendar. Event shape: WeekCalendarEvent. Layout type: CalendarLayout.',
+    children: choosingLayout,
+    rows: [
+      {
+        name: 'weekStart',
+        type: 'Date',
+        description:
+          'Any date in the week to display. Normalized to the week start using weekStartsOn.',
+      },
+      {
+        name: 'onWeekStartChange',
+        type: '(weekStart: Date) => void',
+        description:
+          'Called when day-view previous/next week controls move the week.',
+      },
+      {
+        name: 'visibleDays',
+        type: 'Weekday[]',
+        defaultValue: '[0, 1, 2, 3, 4, 5, 6]',
+        description:
+          'Weekdays to show (0 = Sunday … 6 = Saturday). Order follows weekStartsOn.',
+      },
+      {
+        name: 'weekStartsOn',
+        type: '0 | 1',
+        defaultValue: '1',
+        description: '0 = Sunday, 1 = Monday.',
+      },
+      {
+        name: 'events',
+        type: 'WeekCalendarEvent[]',
+        description:
+          'Events to place. Hidden-day events are omitted (dev warning).',
+      },
+      {
+        name: 'showHours',
+        type: 'boolean',
+        defaultValue: 'true',
+        description:
+          'When true, timed events use an hour grid; when false, cards stack.',
+      },
+      {
+        name: 'hourRange',
+        type: '[number, number]',
+        defaultValue: '[6, 22]',
+        description: 'Inclusive start hour and exclusive end hour when showHours is true.',
+      },
+      {
+        name: 'today',
+        type: 'Date',
+        defaultValue: 'new Date()',
+        description:
+          'Overrides “today” for accent styling and the current-time indicator.',
+      },
+      {
+        name: 'layout',
+        type: "CalendarLayout | 'auto'",
+        defaultValue: "'auto'",
+        description:
+          'Forced view, or auto from container width. Narrow containers use mobileLayout.',
+      },
+      {
+        name: 'mobileLayout',
+        type: "'day' | 'agenda'",
+        defaultValue: "showHours ? 'day' : 'agenda'",
+        description: 'View used when layout is auto and the container is narrow.',
+      },
+      {
+        name: 'autoBreakpoint',
+        type: 'number',
+        defaultValue: '640',
+        description: 'Container width in px below which auto mode uses mobileLayout.',
+      },
+      {
+        name: 'initialLayout',
+        type: 'CalendarLayout',
+        defaultValue: 'mobileLayout',
+        description: 'First render before measuring (SSR-safe).',
+      },
+      {
+        name: 'onLayoutChange',
+        type: '(layout: CalendarLayout) => void',
+        description: 'Fires when the resolved layout changes.',
+      },
+      {
+        name: 'selectedDate / defaultSelectedDate',
+        type: 'Date',
+        description:
+          'Controlled or uncontrolled selected day for day view (kept across layout switches).',
+      },
+      {
+        name: 'onSelectedDateChange',
+        type: '(date: Date) => void',
+        description: 'Selected-day change handler.',
+      },
+      {
+        name: 'showSwipeHint',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Day-view hint pill for horizontal swipe.',
+      },
+      {
+        name: 'hideEmptyDays',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Agenda: omit days with no events.',
+      },
+      {
+        name: 'emptyDayLabel',
+        type: 'React.ReactNode',
+        defaultValue: "'No events'",
+        description: 'Agenda: label for empty days.',
+      },
+      {
+        name: 'renderEvent',
+        type: '(event: WeekCalendarEvent) => React.ReactNode',
+        description: 'Optional full override for event card rendering.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class on the root surface.',
+      },
+      {
+        name: 'WeekCalendarEvent.id',
+        type: 'string',
+        description: 'Stable event id.',
+      },
+      {
+        name: 'WeekCalendarEvent.date',
+        type: 'Date | string',
+        description: 'Day the event belongs to.',
+      },
+      {
+        name: 'WeekCalendarEvent.start / end',
+        type: "string ('HH:mm')",
+        description:
+          'Optional times for hour-grid placement; start also shows under the title in agenda (always with minutes, e.g. 10:00 AM).',
+      },
+      {
+        name: 'WeekCalendarEvent.title',
+        type: 'React.ReactNode',
+        description: 'Required card title (string or JSX).',
+      },
+      {
+        name: 'WeekCalendarEvent.subtitle / body',
+        type: 'React.ReactNode',
+        description: 'Optional secondary and body content.',
+      },
+      {
+        name: 'WeekCalendarEvent.meta',
+        type: 'React.ReactNode',
+        description: 'Optional short label after the agenda time line (small caps).',
+      },
+      {
+        name: 'WeekCalendarEvent.tone',
+        type: "'coral' | 'teal' | 'amber' | 'neutral' | 'muted'",
+        defaultValue: "'neutral'",
+        description: 'Card color mapped to Lienzo palette tokens.',
+      },
+      {
+        name: 'WeekCalendarEvent.status',
+        type: 'React.ReactNode',
+        description: 'Optional bottom band; shown on the muted tone.',
+      },
+      {
+        name: 'WeekCalendarEvent.onClick',
+        type: '() => void',
+        description: 'When set, the card renders as a focusable button.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Presenting a week of items in day columns, a single-day strip, or an agenda list.',
+      'showHours for schedules; showHours={false} for simple per-day lists / agenda.',
+      'layout="auto" for responsive shells; force week/day/agenda when the parent decides.',
+      'visibleDays to hide weekends or show a custom subset.',
+    ],
+    whenToAvoid: [
+      'Picking a single date—use Calendar.',
+      'Month grids or multi-week planners—not covered by this component.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'WeekCalendar.example.tsx',
+    language: 'tsx',
+  }}
+/>

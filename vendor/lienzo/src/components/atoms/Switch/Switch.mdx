@@ -1,0 +1,166 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Switch.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Switch from '@atoms/Switch/Switch';
+import { Moon, Sun } from 'react-feather';
+
+<Switch size="md" type="green" isActive={false} onChange={(active) => console.log(active)} />
+
+<Switch
+  size="md"
+  isActive={false}
+  onChange={(active) => console.log(active)}
+  offLabel="Light"
+  onLabel="Dark"
+  offIcon={<Sun strokeWidth={2} className="text-pio-amber" />}
+  onIcon={<Moon strokeWidth={2} />}
+/>`;
+
+<ComponentDocsPage
+  title="Switch"
+  badge="0.1.0"
+  description="Toggle switch for binary on/off state with Pio accent types (default gray, green, red, yellow). Default layout is a circular thumb on a track. Pass off/on labels and/or icons for a segmented pill with a sliding white chip."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Enable or disable a single setting immediately.',
+      'Feature flags and preferences with a clear on/off affordance.',
+      'Inline toggles beside a short setting label.',
+      'Labeled theme or mode toggles (Light/Dark) via offLabel, onLabel, offIcon, and onIcon.',
+      'Related: use Checkbox when multiple independent options can be selected; use Tabs segmented when there are more than two named options.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'types',
+      label: 'Types',
+      canvas: <Canvas of={Stories.Types} layout="fullscreen" />,
+      badge: 'Pattern: Accent types',
+      description:
+        'On-state track uses the selected type. default is gray; green, red, and yellow map to Pio teal-dark, coral, and amber. Off stays pio-grid. In segmented mode, type tints the recessed track and active label/icon color.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='default' | 'green' | 'red' | 'yellow' · isActive",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Semantic accents on settings and feature toggles',
+        },
+      ],
+    },
+    {
+      id: 'sizes',
+      label: 'Sizes',
+      canvas: <Canvas of={Stories.Sizes} layout="fullscreen" />,
+      badge: 'Pattern: Size scale',
+      description:
+        'Small, medium, and large tracks with a 2px-inset thumb at every size.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "size='sm' | 'md' | 'lg'",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Matching switch scale to the surrounding settings row',
+        },
+      ],
+    },
+    {
+      id: 'segmented',
+      label: 'Segmented',
+      canvas: <Canvas of={Stories.Segmented} layout="fullscreen" />,
+      badge: 'Pattern: Labeled options',
+      description:
+        'Passing any of offLabel, onLabel, offIcon, or onIcon renders a two-option segmented pill. The white chip slides to the active side; click either option to select it. type uses a pale track wash and colors the active label (and icons when type is not default). Optional chrome (for example an Interactive Showcase pill) is composed outside Switch.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "offLabel · onLabel · offIcon · onIcon · type · size · isActive",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Light/Dark and other binary modes that need visible labels',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'SwitchProps',
+    lead: 'Runtime props for Switch.',
+    rows: [
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg'",
+        defaultValue: "'md'",
+        description: 'Visual size of the track and thumb, or of the segmented options.',
+      },
+      {
+        name: 'type',
+        type: "'default' | 'red' | 'green' | 'yellow'",
+        defaultValue: "'default'",
+        description:
+          'Accent for the thumb on-state, and for segmented track wash plus active label/icon color. Chromatic types force active icons to follow the type color.',
+      },
+      {
+        name: 'isActive',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Controlled on/off state. In segmented mode, false selects the off (left) option.',
+      },
+      {
+        name: 'onChange',
+        type: '(active: boolean) => void',
+        description: 'Called when the user toggles the switch.',
+      },
+      {
+        name: 'offLabel',
+        type: 'string',
+        description: 'Label for the off (left) option. Enables segmented layout when any label or icon is set.',
+      },
+      {
+        name: 'onLabel',
+        type: 'string',
+        description: 'Label for the on (right) option.',
+      },
+      {
+        name: 'offIcon',
+        type: 'ReactNode',
+        description: 'Icon for the off (left) option. Active-side icon colors from the icon are preserved; inactive side is muted.',
+      },
+      {
+        name: 'onIcon',
+        type: 'ReactNode',
+        description: 'Icon for the on (right) option.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'A single binary preference that takes effect immediately.',
+      'Settings UIs where a sliding toggle matches user expectation.',
+      'Binary modes that need on-control labels or icons (for example Light / Dark).',
+    ],
+    whenToAvoid: [
+      'Multi-select lists—use Checkbox.',
+      'Submitting a choice among many labeled options—use Select or Tabs.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Switch.example.tsx',
+    language: 'tsx',
+  }}
+/>

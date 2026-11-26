@@ -1,0 +1,82 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Card.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Card from '@atoms/Card/Card';
+
+<Card surface="white" radius="3xl" shadow="soft">
+  <p>Card content</p>
+</Card>`;
+
+<ComponentDocsPage
+  title="Card"
+  badge="0.1.0"
+  description="Elevated surface with white, subtle, or transparent fill, `rounded-2xl` or `rounded-3xl`, `pio-grid` border, and soft/card shadows. Distinct from Box, which is the product container with glass and header/footer slots."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Docs section panels and content surfaces.',
+      'Grouped content that needs elevation without Box header/footer slots.',
+      'Subtle or transparent fills over patterned backgrounds.',
+      'Related: use Box when you need glass, header, or footer slots.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'CardProps',
+    lead: 'Runtime props for Card.',
+    rows: [
+      {
+        name: 'children',
+        type: 'React.ReactNode',
+        description: 'Card body content.',
+      },
+      {
+        name: 'padded',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Applies default inner padding.',
+      },
+      {
+        name: 'radius',
+        type: "'2xl' | '3xl'",
+        defaultValue: "'3xl'",
+        description: 'Corner radius.',
+      },
+      {
+        name: 'surface',
+        type: "'white' | 'subtle' | 'transparent'",
+        defaultValue: "'white'",
+        description: 'Background fill.',
+      },
+      {
+        name: 'shadow',
+        type: "'soft' | 'card' | 'none'",
+        defaultValue: "'soft'",
+        description: 'Elevation shadow.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Elevated content surfaces with border and optional shadow.',
+      'Docs and marketing layouts that need a simple padded panel.',
+    ],
+    whenToAvoid: [
+      'Containers that need glass style or header/footer slots—use Box.',
+      'Interactive tool chrome—prefer Toolbar or Button groups.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Card.example.tsx',
+    language: 'tsx',
+  }}
+/>

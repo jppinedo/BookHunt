@@ -1,21 +1,26 @@
 import React, {useContext, useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import {Button, Container, IconButton, TextField, Divider, Tab, Tabs} from "@mui/material";
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Button, Input, Tabs, Title } from "@jppinedo/lienzo";
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
-import { getFirestore, doc, getDoc, deleteDoc } from "firebase/firestore";
-import { app } from "@/../firebase.js";
+import { getUserProfile, getListedBooks } from "@services/BookFirestore";
 import BookCardSeller from "@custom/Books/BookCardSeller.jsx";
 import './ProfilePage.css';
 
+/**
+ * ProfilePage — was MUI Tabs/Tab/TextField/Button/IconButton + Firebase
+ * Auth (reauthenticate/updatePassword/deleteUser) + Firestore userInfo doc.
+ * Now: Lienzo Tabs molecule + Button + Title + Input (D1: passwords use
+ * Input htmlType="password" — the old PasswordField workaround is gone),
+ * and the mock service layer
+ * (getUserProfile / getListedBooks). Password change and account deletion
+ * are MOCK no-ops in Phase 1 (no real auth backend to call); they validate
+ * input and report success exactly where Supabase Auth calls will go.
+ */
 const ProfilePage = () => {
-    const { user } = useContext(AuthContext);
+    const { user, signOut } = useContext(AuthContext);
     const { onShowError } = useContext(AppContext);
     const navigate = useNavigate();
-    const db = getFirestore(app)
 
     const [fullName, setFullName] = useState('');
     const [oldPassword, setOldPassword] = useState('');
@@ -23,24 +28,18 @@ const ProfilePage = () => {
     const [listedBooks, setListedBooks] = useState([])
 
     const [deleteVisible, setDeleteVisible] = useState(false);
-    const [sideNavVisible, setSideNavVisible] = useState(false);
-    const [tabIndex, setTabIndex] = useState(0);
-    const [bookListingVisible, setBookListingVisible] = useState(false);
 
     const [oldPasswordError, setOldPasswordError] = useState(false);
     const [newPasswordError, setNewPasswordError] = useState(false);
 
-    // Check for firebase doc with ID of userID, then pull first and last name values
+    // Pull first/last name from the (mock) profiles table
     useEffect(() => {
         async function getName() {
             if (!user) return;
 
             try {
-                const docRef = doc(db, "userInfo", user.uid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
+                const data = await getUserProfile(user.uid);
+                if (data) {
                     setFullName(`${data.firstName} ${data.lastName}`);
                 }
                 else {
@@ -56,27 +55,13 @@ const ProfilePage = () => {
         getName()
     }, [user])
 
-    // Set listed books array as matched books from Firebase database as different objects.
+    // Set listed books array from the (mock) listings table
     useEffect(() => {
         if (!user) return;
 
         const fetchListedBooks = async () => {
             try {
-                const docRef = doc(db, "userInfo", user.uid);
-                const docSnap = await getDoc(docRef)
-
-                if (docSnap.exists()) {
-                    const booksListed = docSnap.data().booksListed || [];
-
-                    const booksFetched = booksListed.map(async (bookID) => {
-                        const bookDocRef = doc(db, "books", bookID);
-                        const bookDocSnap = await getDoc(bookDocRef);
-                        return bookDocSnap.exists() ? { id: bookDocSnap.id, ...bookDocSnap.data() } : null;
-                    });
-
-                    const booksData = (await Promise.all(booksFetched)).filter(book => book !== null);
-                    setListedBooks(booksData);
-                }
+                setListedBooks(await getListedBooks(user));
             }
             catch (error) {
                 onShowError(error);
@@ -86,236 +71,140 @@ const ProfilePage = () => {
         fetchListedBooks();
     }, [user]);
 
-    // Reauthenticate the user with old pass to confirm, then reset password to new selected password.
+    // Mock: a real Supabase version reauthenticates and calls
+    // supabase.auth.updateUser({ password }) here.
     async function changePassword(e) {
         e.preventDefault();
         setOldPasswordError(false);
 
-        try {
-            const credential = EmailAuthProvider.credential(user.email, oldPassword);
-            await reauthenticateWithCredential(user, credential)
-            await updatePassword(user, newPassword)
-                .then(() => {
-                    alert("Password successfully updated!");
-                    setOldPassword('');
-                    setNewPassword('');
-                })
-                .catch((error) => {
-                    onShowError(error);
-                })
+        if (!oldPassword) {
+            setOldPasswordError(true);
+            return;
         }
-        catch (error) {
-            console.log(error);
+        if (newPassword.length < 6) {
+            setNewPasswordError(true);
+            return;
         }
+        alert("Password successfully updated! (mock auth — no real password was changed)");
+        setOldPassword('');
+        setNewPassword('');
     }
 
+    // Mock: a real Supabase version deletes the profile row + auth user here.
     async function deleteAccount(e) {
         e.preventDefault();
-        const credential = EmailAuthProvider.credential(user.email, oldPassword);
-        await reauthenticateWithCredential(user, credential)
-        await deleteDoc(doc(db, "userInfo", user.uid));
-        await deleteUser(user)
-            .then(() => {
-                alert("Account successfully deleted.");
-                navigate("/login");
-            })
-            .catch((error) => {
-                onShowError(error);
-            })
+        if (!oldPassword) {
+            setOldPasswordError(true);
+            return;
+        }
+        try {
+            await signOut();
+            alert("Account successfully deleted. (mock auth — signed out only)");
+            navigate("/login");
+        }
+        catch (error) {
+            onShowError(error);
+        }
     }
 
     function showDelete(option) {
-        if (option === true) {
-            setDeleteVisible(true);
-        }
-        else {
-            setDeleteVisible(false);
-        }
+        setDeleteVisible(option === true);
     }
 
     const handlePasswordInput = e => {
-        setNewPassword(e.target.value);
-        if (newPassword.length >= 6) {
-            setNewPasswordError(false);
-        }
-        else {
-            setNewPasswordError(true);
-        }
+        const value = e.target.value;
+        setNewPassword(value);
+        setNewPasswordError(value.length < 6);
     }
 
     const handleBookClick = (item) => {
         navigate(`/bookConfig/${item.sellerType}/${item.id}`);
     }
 
-    const changeTab = (item) => {
-        console.log(item)
-        switch(item.id) {
-            case 'profile-tab':
-                setTabIndex(0);
-                break;
-            case 'listings-tab':
-                setTabIndex(1);
-        }
-    }
-
-    const BookListingView = () => (
-        <>
-            <Container sx={{maxHeight: "500px", overflowY: "auto", paddingTop: '2rem', paddingBottom: '2rem'}}>
-                {listedBooks.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                        {listedBooks.map((item, index) => (
-                            <BookCardSeller 
-                                key={`${item.id}-${index}`} 
-                                book={item} 
-                                type="grid" 
-                                onCardClick={handleBookClick} 
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <p>No listed books found.</p>
-                )}
-            </Container>
-        </>
+    const BookListingView = (
+        <div style={{maxHeight: "500px", overflowY: "auto", padding: '0.25rem 1.25rem 1.5rem', boxSizing: 'border-box'}}>
+            {listedBooks.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {listedBooks.map((item, index) => (
+                        <BookCardSeller
+                            key={`${item.id}-${index}`}
+                            book={item}
+                            type="grid"
+                            onCardClick={handleBookClick}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <p>No listed books found.</p>
+            )}
+        </div>
     )
 
-    const ProfileSettings = () => (
-        <>
-            <div className={"info-area"} style={{padding: '2rem'}}>
-                <div className={"name-section"}>
-                    <h4 style={{marginRight: "auto"}}>Name</h4>
-                    <TextField
-                        variant={"outlined"}
-                        value={fullName}
-                        disabled={true}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                height: "30px"
-                            }
-                        }}
-                    />
-                </div>
-                <div className={"email-section"}>
-                    <h4 style={{marginRight: "auto"}}>Email</h4>
-                    <TextField
-                        variant={"outlined"}
-                        value={user.email}
-                        disabled={true}
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                height: "30px"
-                            }
-                        }}
-                    />
-                </div>
-                <div className={"old-pass-section"}>
-                    <h4 style={{marginRight: "auto"}}>Old Password</h4>
-                    <TextField
-                        variant={"outlined"}
-                        onChange={(e) => {
-                            setOldPassword(e.target.value)
-                        }}
-                        error={oldPasswordError}
-                        helperText={oldPasswordError ? "Passwords do not match!" : ""}
-                        sx={{
-                            "& .MuiFormHelperText-root": {
-                                width: "200px"
-                            },
-                            "& .MuiOutlinedInput-root": {
-                                height: "30px",
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                }
-                            },
-                            "& .MuiInputBase-input": {
-                                padding: "0 14px"
-                            }
+    // D1: every field on this form is the same Lienzo Input at the same
+    // fixed 48px height. The read-only fields used to be hand-rolled
+    // 30px native inputs and the passwords a separate PasswordField
+    // primitive (built when Lienzo Input hardcoded type="text") — three
+    // implementations, three heights. Input now takes htmlType, so the
+    // workaround is deleted and all four fields line up.
+    const readOnlyField = (label, value) => (
+        <div className="mb-3 text-left">
+            <Input label={label} value={value} readOnly />
+        </div>
+    );
 
-                        }}
-                    />
-                </div>
-                <div className={"new-pass-section"}>
-                    <h4 style={{marginRight: "auto"}}>New Password</h4>
-                    <TextField
-                        variant={"outlined"}
-                        onChange={(e) => {
-                            handlePasswordInput(e)
-                        }}
-                        error={newPasswordError}
-                        helperText={newPasswordError ? "Password must be at least 6 characters." : ""}
-                        sx={{
-                            "& .MuiFormHelperText-root": {
-                                width: "190px"
-                            },
-                            "& .MuiOutlinedInput-root": {
-                                height: "30px",
-                                "&:hover fieldset": {
-                                    borderColor: "orange", // Ensures hover effect applies
-                                },
-                                "&.Mui-focused fieldset": {
-                                    borderColor: "orange",
-                                },
-                            },
-                            "& .MuiInputBase-input": {
-                                padding: "0 14px"
-                            }
-                        }}
-                    />
-                </div>
-                <Button variant="contained" onClick={(e) => {
-                    changePassword(e)
-                }} sx={{mt: 4, width: "300px"}}>
-                    Change Password
-                </Button>
-                <Button variant="contained" onClick={() => {
-                    showDelete(true)
-                }} sx={{mt: 5, width: "300px", backgroundColor: "red"}}>
-                    Delete Account
-                </Button>
-                <div>
-                    {deleteVisible ?
-                        <>
-                            <h3 style={{marginTop: 10}}>This is permanent. Do you want to proceed? Please type old
-                                password in text box.</h3>
-                            <Button 
-                                variant="contained" 
-                                onClick={(e) => deleteAccount(e)} 
-                                className="delete-account-btn"
-                                sx={{marginRight: "10px", width: "100px", backgroundColor: "red"}}
-                            >
-                                Yes
-                            </Button>
-                            <Button 
-                                variant="contained" 
-                                onClick={() =>  showDelete(false)} 
-                                className="delete-account-btn"
-                                sx={{marginLeft: "10px", width: "100px", backgroundColor: "red"}}
-                            >
-                                No
-                            </Button>
-                        </> : null}
-                </div>
+    const ProfileSettings = (
+        <div className={"info-area"} style={{padding: '2rem'}}>
+            {readOnlyField("Name", fullName)}
+            {readOnlyField("Email", user?.email || '')}
+            <div className="mt-3 text-left">
+                <Input
+                    label="Old Password"
+                    htmlType="password"
+                    autoComplete="current-password"
+                    value={oldPassword}
+                    onChange={(e) => { setOldPassword(e.target.value) }}
+                    hint={oldPasswordError ? "Please type your old password." : undefined}
+                />
             </div>
-        </>
+            <div className="mt-3 text-left">
+                <Input
+                    label="New Password"
+                    htmlType="password"
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={handlePasswordInput}
+                    hint={newPasswordError ? "Password must be at least 6 characters." : undefined}
+                />
+            </div>
+            <div className="mt-6 flex flex-col items-center gap-3">
+                <Button label="Change Password" onClick={(e) => { changePassword(e) }} />
+                <Button label="Delete Account" type="red" onClick={() => { showDelete(true) }} />
+            </div>
+            <div>
+                {deleteVisible ?
+                    <>
+                        <h3 style={{marginTop: 10}}>This is permanent. Do you want to proceed? Please type old
+                            password in text box.</h3>
+                        <div className="flex justify-center gap-3">
+                            <Button label="Yes" type="red" onClick={(e) => deleteAccount(e)} />
+                            <Button label="No" type="red" onClick={() => showDelete(false)} />
+                        </div>
+                    </> : null}
+            </div>
+        </div>
     )
+
+    if (!user) return null;
 
     return (
-        <div className={"profile-background"} style={{marginTop: '3rem', marginBottom: '6rem'}}>
-            <Tabs 
-                value={tabIndex} 
-                onChange={(e) => changeTab(e.target)} 
-                aria-label="Profile tabs"
-                sx={{borderBottom: '2px solid #eee'}}
-                variant="fullWidth"
-            >
-                <Tab label="Profile" id="profile-tab" aria-controls="tabpanel" />
-                <Tab label="Book Listings" id="listings-tab" aria-controls="tabpanel" />
-            </Tabs>
-            {tabIndex === 0 ? <ProfileSettings/> : null}
-            {tabIndex === 1 ? <BookListingView /> : null}
+        <div className={"profile-background"} style={{marginTop: '1rem', marginBottom: '6rem'}}>
+            <Title size="lg" thikness="bold" fontFamily="playfair" className="pt-4">Profile</Title>
+            <Tabs
+                tabs={[
+                    { id: 'profile-tab', label: 'Profile', content: ProfileSettings },
+                    { id: 'listings-tab', label: 'Book Listings', content: BookListingView },
+                ]}
+            />
         </div>
     );
 };

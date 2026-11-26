@@ -1,0 +1,152 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Background.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Background from '@atoms/Background/Background';
+
+<Background
+  type="gradient"
+  colors={['#FAF8F5', '#EAA838', '#FF6B57']}
+  isHexColors
+  rounded
+>
+  {/* overlay content */}
+</Background>`;
+
+<ComponentDocsPage
+  title="Background"
+  badge="0.1.0"
+  description="Full-bleed background wrapper with type-specific recipes. `gradient` is a turbulent SVG gradient; `dotted` is a solid fill with an evenly spaced dot grid and optional edge vignette. Each type is implemented separately so more recipes can be added without mixing logic."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Hero or panel backgrounds behind product content.',
+      'Story and Docs demos that need a rich gradient plane.',
+      'Warm dotted fields under glass panels or light overlays.',
+      'Layer titles, buttons, or other atoms as children over the surface.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'studio-teal',
+      label: 'Gradient — Studio Teal',
+      canvas: <Canvas of={Stories.ExampleBackgroundTwo} layout="fullscreen" />,
+      badge: 'Pattern: Gradient type',
+      description:
+        'Earthy 45° stops: pio-bg-light → teal-light → teal-dark. White type and a coral button against the deepening teal field.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='gradient' · studio teal · rounded",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'charcoal-depth',
+      label: 'Gradient — Charcoal Depth',
+      canvas: <Canvas of={Stories.ExampleBackgroundThree} layout="fullscreen" />,
+      badge: 'Pattern: Gradient type',
+      description:
+        'Moody 45° stops: charcoal → inverse-surface → secondary teal. Off-white titles; coral marks the high-intent action.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='gradient' · charcoal depth · rounded",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'dotted',
+      label: 'Dotted',
+      canvas: <Canvas of={Stories.Dotted} layout="fullscreen" />,
+      badge: 'Pattern: Dotted type',
+      description:
+        'pio-bg-light fill with pio-grid dots and a vignette that defaults to the fill color.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='dotted' · colors={[fill, dots]} · vignette",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Light glass overlays, soft product canvases',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'BackgroundProps',
+    lead: 'Runtime props for Background.',
+    rows: [
+      {
+        name: 'type',
+        type: "'gradient' | 'dotted'",
+        defaultValue: "'gradient'",
+        description:
+          'Background recipe. Each type has its own renderer; props like `vignette` apply to `dotted` only.',
+      },
+      {
+        name: 'colors',
+        type: 'string[]',
+        description:
+          'For `gradient`: stop colors. For `dotted`: `[fill, dots]`. Token names when `isHexColors` is false (e.g. `pio-bg-light`).',
+      },
+      {
+        name: 'isHexColors',
+        type: 'boolean',
+        description:
+          'When true, `colors` / `vignetteColor` are raw CSS colors; otherwise design-token names mapped to `--lz-*` channels.',
+      },
+      {
+        name: 'vignette',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: '`dotted` only. Fades the dots toward the edges.',
+      },
+      {
+        name: 'vignetteColor',
+        type: 'string',
+        description:
+          '`dotted` only. Edge fade color; defaults to `colors[0]` (fill) when omitted.',
+      },
+      {
+        name: 'darkColors',
+        type: 'string[]',
+        description:
+          '`dotted` only. Optional `[fill, dots]` applied when an ancestor has `data-mode="dark"` or the `dark` class.',
+      },
+      {
+        name: 'darkVignetteColor',
+        type: 'string',
+        description:
+          '`dotted` only. Dark-mode vignette color; defaults to `darkColors[0]` when omitted.',
+      },
+      {
+        name: 'children',
+        type: 'React.ReactNode',
+        description: 'Optional content layered above the background.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough on the wrapper.',
+      },
+      {
+        name: 'rounded',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Applies `rounded-3xl` and clips overflow.',
+      },
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Background.example.tsx',
+    language: 'tsx',
+  }}
+/>

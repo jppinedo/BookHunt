@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
-import { app } from "@/../firebase.js";
 import { AuthContext } from "@state/AuthContext.jsx";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getSavedBooks } from "@services/BookFirestore";
 import BookCard from "@custom/Books/BookCard.jsx";
-import {Box, Container} from "@mui/material";
+import { Title } from "@jppinedo/lienzo";
 import {useNavigate} from "react-router";
 
+/** BooksSavedPage — was Firebase Firestore userInfo doc + MUI Container/Box.
+ *  Now the mock service layer (getSavedBooks) + Lienzo Title. */
 const BooksSavedPage = () => {
     const { user } = useContext(AuthContext);
-    const db = getFirestore(app);
     const [savedBooks, setSavedBooks] = useState([])
 
     const navigate = useNavigate();
@@ -19,13 +19,7 @@ const BooksSavedPage = () => {
 
         const fetchSavedBooks = async () => {
             try {
-                const docRef = doc(db, "userInfo", user.uid);
-                const docSnap = await getDoc(docRef)
-
-                if (docSnap.exists()) {
-                    const booksSaved = docSnap.data().booksSaved || [];
-                    setSavedBooks(booksSaved);
-                }
+                setSavedBooks(await getSavedBooks(user));
             }
             catch (error) {
                 console.error("Error fetching saved books!", error);
@@ -40,19 +34,21 @@ const BooksSavedPage = () => {
     }
 
     return (
-        <Container sx={{padding: 0}}>
-            <h2>Saved Books</h2>
+        <div className="w-full max-w-[1200px] mx-auto px-4 box-border">
+            <div className="page-heading">
+                <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6">Saved Books</Title>
+            </div>
 
             {savedBooks.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', maxWidth: '1140px'}}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', maxWidth: '1140px', margin: '0 auto', justifyContent: 'center'}}>
                     {savedBooks.map((item, index) => (
                         <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                     ))}
                 </div>
             ) : (
-                <p>No saved books found.</p>
+                <p className="on-bg-text">No saved books found.</p>
             )}
-        </Container>
+        </div>
     )
 }
 

@@ -1,0 +1,69 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './CodeBlock.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import CodeBlock from '@molecules/CodeBlock/CodeBlock';
+
+<CodeBlock
+  code="const greet = () => 'hello';"
+  filename="greet.ts"
+  language="tsx"
+  codeMode="dark"
+/>`;
+
+<ComponentDocsPage
+  title="CodeBlock"
+  badge="0.1.0"
+  description="Code panel with a light filename bar, copy control, and a syntax pane that defaults to dark. `codeMode` (`dark` | `light`) styles only the code surface and is independent of the Storybook theme toolbar."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Docs and reference pages that show copyable snippets.',
+      'Examples with an optional filename in the top bar.',
+      'Syntax-highlighted samples when a Prism `language` is provided.',
+      'Unhighlighted plain code when `language` is omitted.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'CodeBlockProps',
+    lead: 'Runtime props for CodeBlock. `codeMode` affects only the syntax pane, not the app theme.',
+    rows: [
+      {
+        name: 'code',
+        type: 'string',
+        description: 'Source text shown in the pane.',
+      },
+      {
+        name: 'filename',
+        type: 'string',
+        description: 'Optional filename shown in the top bar.',
+      },
+      {
+        name: 'language',
+        type: 'Language',
+        description:
+          'Prism language for highlighting. When omitted, code renders as plain text.',
+      },
+      {
+        name: 'codeMode',
+        type: "'dark' | 'light'",
+        defaultValue: "'dark'",
+        description:
+          'Syntax pane theme only; independent of the Storybook/app theme.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough on the Card wrapper.',
+      },
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'CodeBlock.example.tsx',
+    language: 'tsx',
+  }}
+/>

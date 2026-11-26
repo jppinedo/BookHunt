@@ -1,0 +1,81 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Menu.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Menu from '@molecules/Menu/Menu';
+
+<Menu
+  label="Actions"
+  pointer="bottom"
+  separator
+  items={[
+    { label: { text: 'Edit' }, onClick: () => {} },
+    { label: { text: 'Delete', type: 'red' }, onClick: () => {} },
+  ]}
+/>`;
+
+<ComponentDocsPage
+  title="Menu"
+  badge="0.1.0"
+  description="Menu component (dropdown/list). Supports a pointer position, optional separator, and a header label. Often used from Toolbar items."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Dropdown action lists attached to toolbar or trigger UI.',
+      'Menus with a header label above the items.',
+      'Pointer facing top or bottom depending on placement.',
+      'Related: compose with Toolbar when items need nested menus.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'MenuProps',
+    lead: 'Runtime props for Menu.',
+    rows: [
+      {
+        name: 'label',
+        type: 'string',
+        description: 'Optional header text above the item list.',
+      },
+      {
+        name: 'items',
+        type: 'MenuItem[]',
+        description:
+          'Menu entries: each has a Label props object and an `onClick` handler.',
+      },
+      {
+        name: 'pointer',
+        type: "'bottom' | 'top'",
+        description: 'Pointer direction for the menu chrome.',
+      },
+      {
+        name: 'separator',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Adds separators between items.',
+      },
+      {
+        name: 'onClickOutside',
+        type: '() => void',
+        description: 'Called when a mousedown occurs outside the menu.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'A list of actions in a floating or anchored menu.',
+      'Nested menus opened from Toolbar items.',
+    ],
+    whenToAvoid: [
+      'Primary navigation across views—use Tabs.',
+      'A single action—use Button.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Menu.example.tsx',
+    language: 'tsx',
+  }}
+/>

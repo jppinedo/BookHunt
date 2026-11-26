@@ -1,0 +1,59 @@
+/**
+ * Dotted Background type — fill, repeating dots, optional edge vignette.
+ * Colors are injected via CSS variables from DottedBackground.tsx.
+ */
+.bg-dotted {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-dotted-fill);
+}
+
+/* Themeable dotted: light channels are the default; dark swaps under theme root */
+.bg-dotted--themeable {
+  --bg-dotted-fill: var(--bg-dotted-fill-light);
+  --bg-dotted-dot: var(--bg-dotted-dot-light);
+  --bg-dotted-vignette: var(--bg-dotted-vignette-light);
+}
+
+html[data-mode='dark'] .bg-dotted--themeable,
+.dark .bg-dotted--themeable {
+  --bg-dotted-fill: var(--bg-dotted-fill-dark);
+  --bg-dotted-dot: var(--bg-dotted-dot-dark);
+  --bg-dotted-vignette: var(--bg-dotted-vignette-dark);
+}
+
+.bg-dotted__pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    var(--bg-dotted-dot) 1px,
+    transparent 1.5px
+  );
+  background-size: 10px 10px;
+  background-position: 0 0;
+}
+
+.bg-dotted__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 82% 78% at 50% 50%,
+    transparent 30%,
+    var(--bg-dotted-vignette) 80%
+  );
+}
+
+.bg-dotted__content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+}

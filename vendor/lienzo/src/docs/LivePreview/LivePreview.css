@@ -1,0 +1,360 @@
+/**
+ * Live Preview — best-effort restyles of Storybook Docs blocks.
+ *
+ * Brittle selectors (Storybook 8; may change between majors):
+ *   .sbdocs-preview, .docs-story, .docblock-argstable,
+ *   .docblock-argstable-head, .docblock-argstable-body,
+ *   .docblock-code-toggle, .innerZoomElementWrapper
+ * Plus control widgets inside the args table (Emotion-styled inputs,
+ * selects, and boolean True/False labels — no stable class names).
+ *
+ * Canvas uses layout="fullscreen" so Storybook does not add its own
+ * padded ChildrenContainer. The white `live-preview__canvas` column is
+ * the only surface that should pad (single p-6/sm:p-8 inset).
+ *
+ * Widget restyle: warmer pio borders/radii/accents; flatten Storybook
+ * drop shadows. Booleans stay True/False (not design-system Switch).
+ *
+ * Fallback: layout is a CSS grid that collapses to a vertical stack
+ * (controls above canvas). If these class names disappear, Controls and
+ * Canvas remain usable inside the card without the panel chrome polish.
+ */
+
+.live-preview .sbdocs-preview {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  background: transparent !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+.live-preview .sbdocs-preview > div {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  width: 100%;
+}
+
+/* Beat `html[data-mode] .docs-story` canvas fill from story-global.css */
+html[data-mode='light'] .live-preview .docs-story,
+html[data-mode='dark'] .live-preview .docs-story,
+.live-preview .docs-story {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  width: 100%;
+}
+
+.live-preview .docs-story > div {
+  padding: 0 !important;
+  /* Storybook ChildrenContainer defaults to overflow:auto — causes
+     needless scrollbars when the canvas height is stretched (e.g. Live Preview). */
+  overflow: visible !important;
+}
+
+.live-preview .innerZoomElementWrapper > * {
+  border: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.live-preview .docblock-code-toggle {
+  display: none;
+}
+
+/* Args table → customization panel feel.
+ * Horizontal inset comes only from the panel (`p-6 sm:p-7`); zero Storybook’s
+ * own table/cell padding so the eyebrow and rows share the same left edge. */
+.live-preview .docblock-argstable {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+.live-preview .docblock-argstable-head {
+  /* Hide column headers (Name / Description / Default / Control);
+     our “Control Panel” eyebrow replaces that chrome. */
+  display: none;
+}
+
+.live-preview .docblock-argstable-body {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.live-preview .docblock-argstable-body tr {
+  border-bottom: 1px solid rgb(var(--lz-pio-border-subtle));
+}
+
+.live-preview .docblock-argstable-body tr:last-child {
+  border-bottom: none;
+}
+
+.live-preview .docblock-argstable-body td {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  vertical-align: middle;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Name cell → sentence-case control label */
+.live-preview .docblock-argstable-body td:first-child {
+  width: 38%;
+  padding-right: 0.75rem !important;
+  overflow-wrap: break-word;
+}
+
+.live-preview .docblock-argstable-body td:first-child span,
+.live-preview .docblock-argstable-body td:first-child code {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: rgb(var(--lz-pio-text));
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Description + Default columns: collapse when present */
+.live-preview .docblock-argstable-body td:nth-child(2),
+.live-preview .docblock-argstable-body td:nth-child(3) {
+  display: none;
+}
+
+.live-preview .docblock-argstable-body td:last-child {
+  width: 62%;
+  /* Allow the control cell to shrink inside the fixed table layout */
+  overflow: hidden;
+}
+
+/* Keep Storybook control widgets inside the panel width */
+.live-preview .docblock-argstable-body td:last-child > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* -------------------------------------------------------------------------
+ * Control widgets (Docs chrome on Storybook Controls)
+ * Emotion inline styles need !important; selectors are structural only.
+ * ---------------------------------------------------------------------- */
+
+.live-preview .docblock-argstable-body input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+.live-preview .docblock-argstable-body select,
+.live-preview .docblock-argstable-body textarea {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  color: rgb(var(--lz-pio-text)) !important;
+  background-color: #fff !important;
+  border: 1px solid rgb(var(--lz-pio-grid)) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0.5rem 0.75rem !important;
+  min-height: 2rem;
+}
+
+/* Room for the native chevron; truncate before the arrow */
+.live-preview .docblock-argstable-body select {
+  padding-right: 2rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.live-preview .docblock-argstable-body input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):focus,
+.live-preview .docblock-argstable-body select:focus,
+.live-preview .docblock-argstable-body textarea:focus {
+  border-color: rgb(var(--lz-pio-teal-dark-hover)) !important;
+  box-shadow: 0 0 0 2px rgb(var(--lz-pio-teal-dark) / 0.2) !important;
+}
+
+.live-preview .docblock-argstable-body input[type='checkbox'],
+.live-preview .docblock-argstable-body input[type='radio'],
+.live-preview .docblock-argstable-body input[type='color'] {
+  width: auto;
+  max-width: none;
+}
+
+/* Number steppers / nested chrome inside Storybook wrappers */
+.live-preview .docblock-argstable-body td:last-child button {
+  box-shadow: none !important;
+  border-color: rgb(var(--lz-pio-grid)) !important;
+  background-color: rgb(var(--lz-pio-bg-soft)) !important;
+  color: rgb(var(--lz-pio-text-muted)) !important;
+}
+
+.live-preview .docblock-argstable-body td:last-child > div,
+.live-preview .docblock-argstable-body td:last-child > span {
+  box-shadow: none !important;
+}
+
+/* Boolean True/False — flatten shadows; warm segmented track */
+.live-preview .docblock-argstable-body label:has(input[role='switch']),
+.live-preview .docblock-argstable-body label:has(input[type='checkbox'][role='switch']) {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0.125rem !important;
+  background: rgb(var(--lz-pio-border-subtle)) !important;
+  border: 1px solid rgb(var(--lz-pio-grid)) !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.live-preview .docblock-argstable-body label:has(input[role='switch']):focus-within {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgb(var(--lz-pio-teal-dark) / 0.2) !important;
+}
+
+.live-preview .docblock-argstable-body label:has(input[role='switch']) span {
+  text-align: center !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  padding: 0.4rem 0.75rem !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  color: rgb(var(--lz-pio-text-muted)) !important;
+  box-shadow: none !important;
+  transition: background-color 100ms ease-out, color 100ms ease-out;
+}
+
+/* Selected side (checked → True; unchecked → False) */
+.live-preview .docblock-argstable-body label:has(input[role='switch']:checked) span:last-of-type,
+.live-preview .docblock-argstable-body label:has(input[role='switch']:not(:checked)) span:first-of-type {
+  background: #fff !important;
+  color: rgb(var(--lz-pio-text)) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  border: 1px solid rgb(var(--lz-pio-grid)) !important;
+}
+
+/* Range (when argTypes use control: 'range') */
+.live-preview .docblock-argstable-body input[type='range'] {
+  width: 100%;
+  height: 6px !important;
+  padding: 0 !important;
+  min-height: 0;
+  border: none !important;
+  border-radius: 9999px !important;
+  background: rgb(var(--lz-pio-grid)) !important;
+  box-shadow: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.live-preview .docblock-argstable-body input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(var(--lz-pio-coral));
+  border: 1px solid rgb(var(--lz-pio-grid));
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.live-preview .docblock-argstable-body input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(var(--lz-pio-coral));
+  border: 1px solid rgb(var(--lz-pio-grid));
+  box-shadow: none;
+  cursor: pointer;
+}
+
+/* Inline radio / option groups */
+.live-preview .docblock-argstable-body td:last-child label:has(input[type='radio']) {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: rgb(var(--lz-pio-text));
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body td:last-child label:has(input[type='radio']) {
+  color: rgb(var(--lz-blue-200));
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body tr {
+  border-bottom-color: rgb(var(--lz-gray-700));
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body td:first-child span,
+html[data-mode='dark'] .live-preview .docblock-argstable-body td:first-child code {
+  color: rgb(var(--lz-blue-200));
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+html[data-mode='dark'] .live-preview .docblock-argstable-body select,
+html[data-mode='dark'] .live-preview .docblock-argstable-body textarea {
+  color: rgb(var(--lz-blue-200)) !important;
+  background-color: rgb(var(--lz-gray-800)) !important;
+  border-color: rgb(var(--lz-gray-700)) !important;
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):focus,
+html[data-mode='dark'] .live-preview .docblock-argstable-body select:focus,
+html[data-mode='dark'] .live-preview .docblock-argstable-body textarea:focus {
+  border-color: rgb(var(--lz-pio-teal-dark-muted)) !important;
+  box-shadow: 0 0 0 2px rgb(var(--lz-pio-teal-dark) / 0.2) !important;
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body label:has(input[role='switch']) {
+  background: rgb(var(--lz-gray-800)) !important;
+  border-color: rgb(var(--lz-gray-700)) !important;
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body label:has(input[role='switch']) span {
+  color: rgb(var(--lz-blue-200) / 0.7) !important;
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body label:has(input[role='switch']:checked) span:last-of-type,
+html[data-mode='dark'] .live-preview .docblock-argstable-body label:has(input[role='switch']:not(:checked)) span:first-of-type {
+  background: rgb(var(--lz-gray-700)) !important;
+  color: rgb(var(--lz-blue-200)) !important;
+  border-color: rgb(var(--lz-gray-600)) !important;
+}
+
+html[data-mode='dark'] .live-preview .docblock-argstable-body input[type='range'] {
+  background: rgb(var(--lz-gray-700)) !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Toolbar in Docs Live Preview only — tighter chrome so items fit ~1280 px
+ * without changing Toolbar's default sizing in Canvas stories / apps.
+ * ---------------------------------------------------------------------- */
+.live-preview .toolbar .toolbar__item-inner {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.125rem;
+  padding-right: 0.125rem;
+}
+
+.live-preview .toolbar .toolbar__item-inner > button {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}

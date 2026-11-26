@@ -1,0 +1,83 @@
+/**
+ * Calendar: overrides for cases Tailwind cannot express.
+ *
+ * DayPicker's default style.css already applies:
+ *   - range_start td: linear-gradient(transparent 50%, <bar-color> 50%)
+ *   - range_middle td: solid <bar-color>
+ *   - range_end td:   linear-gradient(<bar-color> 50%, transparent 50%)
+ *
+ * Overriding --rdp-range_middle-background-color makes all three use pio-teal-dark,
+ * which (combined with no gap between cells) creates the continuous bar.
+ */
+
+/* Range bar color (pio-teal-dark) via CSS variable and day sizing */
+.rdp-root {
+  --rdp-range_middle-background-color: rgb(var(--lz-pio-teal-dark));
+  --rdp-range_middle-color: rgb(var(--lz-white));
+  /* Make the day buttons the same size as the day cells so
+     the start/end circles align perfectly with the range bar. */
+  --rdp-day_button-height: var(--rdp-day-height);
+  --rdp-day_button-width: var(--rdp-day-width);
+}
+
+/* Dark mode: darker teal range bar */
+html[data-mode='dark'] .rdp-root,
+html.dark .rdp-root {
+  --rdp-range_middle-background-color: rgb(var(--lz-pio-teal-black));
+}
+
+/* Single selection: pio-teal-black sphere, no border */
+.rdp-selected .rdp-day_button {
+  background-color: rgb(var(--lz-pio-teal-black));
+  color: rgb(var(--lz-white));
+  font-weight: normal;
+  border: none;
+  border-radius: 9999px;
+}
+
+/* Range middle: transparent button over the range bar, no circle */
+.rdp-range_middle .rdp-day_button {
+  background-color: transparent;
+  color: rgb(var(--lz-white));
+  border: none;
+  border-radius: 0;
+  font-weight: normal;
+}
+
+/* Prevent focus outline "flash" on click (Tailwind outline-offset behavior). */
+.rdp-root .rdp-day_button:focus,
+.rdp-root .rdp-day_button:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
+/* Range end: lighter teal-dark sphere, pio-teal-black text */
+.rdp-range_end .rdp-day_button {
+  background-color: rgb(var(--lz-pio-teal-dark-hover));
+  color: rgb(var(--lz-pio-teal-black));
+  border: none;
+  border-radius: 9999px;
+  font-weight: normal;
+}
+
+/* Dark mode range end */
+html[data-mode='dark'] .rdp-range_end .rdp-day_button,
+html.dark .rdp-range_end .rdp-day_button {
+  background-color: rgb(var(--lz-pio-teal-dark));
+  color: rgb(var(--lz-white));
+}
+
+/* Today (when not in a range): pio-teal-black sphere, no border */
+.rdp-today .rdp-day_button {
+  background-color: rgb(var(--lz-pio-teal-black));
+  color: rgb(var(--lz-white));
+  border-radius: 9999px;
+  border: none;
+}
+
+/* Single-day range (range_start == range_end): pio-teal-black sphere */
+.rdp-day.rdp-range_start.rdp-range_end .rdp-day_button {
+  border-radius: 9999px;
+  background-color: rgb(var(--lz-pio-teal-black));
+  color: rgb(var(--lz-white));
+}

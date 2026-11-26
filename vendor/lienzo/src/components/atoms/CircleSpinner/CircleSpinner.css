@@ -1,0 +1,23 @@
+.circle-spinner {
+  position: relative;
+  border-top-width: medium;
+  border-right-width: medium;
+  border-bottom-width: medium;
+  border-left-width: medium;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.inner-circle {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  border-radius: 50%;
+  
+  /* transform: translate(-50%, -50%); */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

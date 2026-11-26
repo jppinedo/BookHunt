@@ -1,6 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react'
 import './App.css';
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+// MemoryRouter (not BrowserRouter): this preview runs inside a sandboxed
+// iframe whose real URL is the host's gateway path, and the sandbox can
+// block the History API outright (opaque origin). BrowserRouter therefore
+// booted on an unmatched path (blank page) and every navigate() threw.
+// MemoryRouter keeps all routing in memory: the app always starts at "/",
+// RedirectHandler sends the demo user to /search, and no button ever
+// touches the real address bar.
+import {MemoryRouter as Router, Routes, Route, useLocation, useNavigate} from 'react-router-dom';
+import logoSmall from '@assets/images/BookHuntLogoSmall.png';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
 import MenuNav from '@custom/Navigation/MenuNav';
@@ -19,20 +27,56 @@ import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
 import RedirectHandler from "@state/RedirectHandler.jsx";
 import { Protected } from "@/Protected";
 
-function App() {
+/**
+ * PageBrand — small logo at the top-left for internal pages that are NOT
+ * part of the book search flow (Saved Books, Profile, listing management).
+ * The search-flow pages keep the large centered logo instead. Clicking it
+ * returns to Book Search.
+ */
+function PageBrand() {
+  const navigate = useNavigate();
+  return (
+    <div className="w-full max-w-[1200px] mx-auto px-4 pt-3 box-border">
+      <button
+        type="button"
+        onClick={() => navigate('/search')}
+        aria-label="Book Hunt — back to Book Search"
+        className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-1"
+      >
+        <img src={logoSmall} alt="" style={{ width: '38px', height: '38px', display: 'block' }} />
+        <span className="text-pio-text text-lg font-bold font-jakarta">Book Hunt</span>
+      </button>
+    </div>
+  );
+}
+
+function AppShell() {
   const { user } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const { error, onCloseError, isError } = useContext(AppContext);
+  // Router location, not the global `location`: with MemoryRouter the real
+  // address bar never changes, so the global pathname is meaningless here.
+  const { pathname } = useLocation();
 
   useEffect(() => {
     setIsLoggedIn(!!user)
   }, [user]);
 
+  const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration";
+  // Small top-left logo on internal pages outside the search flow. The
+  // search flow (/search, /results, /book/*, /sell) keeps its own header.
+  const showBrand = showNav && (
+    pathname === "/saved" ||
+    pathname === "/profile" ||
+    pathname.startsWith("/new") ||
+    pathname.startsWith("/bookConfig")
+  );
+
   return (
-    
-    <Router>
-      {isLoggedIn && location.pathname !== "/login" && location.pathname !== "/registration" && <MenuNav />}
+    <>
+      {showNav && <MenuNav />}
+      {showBrand && <PageBrand />}
       <RedirectHandler /> {/* Handles site load up for logged in or not logged in */}
 
       <Routes>
@@ -46,11 +90,19 @@ function App() {
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
-        <Route path="*" element={<h1>404 - Page Not Found</h1>} /> {/* Catch-all route */}
+        <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
       </Routes>
 
-      {isLoggedIn && location.pathname !== "/login" && location.pathname !== "/registration" && <HubNav />}
+      {showNav && <HubNav />}
       <ErrorModal showError={isError} error={error} onClose={onCloseError}/>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <Router initialEntries={["/"]}>
+      <AppShell />
     </Router>
   )
 }

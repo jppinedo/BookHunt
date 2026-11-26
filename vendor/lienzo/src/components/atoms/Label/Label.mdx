@@ -1,0 +1,72 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Label.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Label from '@atoms/Label/Label';
+
+<Label text="Inbox" type="default" items={3} />`;
+
+<ComponentDocsPage
+  title="Label"
+  badge="0.1.0"
+  description="Text label with optional icon, type color (default, red, yellow, green), and an optional numeric items badge."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Menu and list row titles with an optional count.',
+      'Status-colored labels next to icons in toolbars or menus.',
+      'Compact text + icon pairs in navigation or filter chips.',
+      'Related: use Badge for Docs chrome pills without icons or counts.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'LabelProps',
+    lead: 'Runtime props for Label.',
+    rows: [
+      {
+        name: 'text',
+        type: 'string',
+        description: 'Primary label text.',
+      },
+      {
+        name: 'type',
+        type: "'default' | 'red' | 'yellow' | 'green'",
+        defaultValue: "'default'",
+        description: 'Color treatment for text, icon, and items badge.',
+      },
+      {
+        name: 'items',
+        type: 'number',
+        description: 'Optional count shown in a small badge after the text.',
+      },
+      {
+        name: 'icon',
+        type: 'React.ReactElement',
+        description: 'Optional leading icon element.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Labeled rows that may include an icon and/or item count.',
+      'Menu items and list headers that need type-colored text.',
+    ],
+    whenToAvoid: [
+      'Version or pattern chrome chips—use Badge.',
+      'Page or section headings—use Title.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Label.example.tsx',
+    language: 'tsx',
+  }}
+/>

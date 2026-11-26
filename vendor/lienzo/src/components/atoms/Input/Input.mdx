@@ -1,0 +1,103 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Input.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Input from '@atoms/Input/Input';
+
+<Input
+  label="Email"
+  placeholder="you@example.com"
+  type="default"
+  fill="solid"
+  rounded="lg"
+  hint="We never share your email."
+/>`;
+
+<ComponentDocsPage
+  title="Input"
+  badge="0.1.0"
+  description="Text input with type (`default`, `red`, `green`), fill (`solid`, `outline`, `ghost`), rounding, optional label, hint, and icon."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Form fields with label and helper hint.',
+      'Search or filter fields with a leading or trailing icon.',
+      'Validation-colored inputs via `type` (default, red, green).',
+      'Uncontrolled (`initialValue`) or controlled (`value` + `onChange`) text entry.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'InputProps',
+    lead: 'Runtime props for Input.',
+    rows: [
+      {
+        name: 'type',
+        type: "'default' | 'red' | 'green'",
+        defaultValue: "'default'",
+        description: 'Color treatment for the field.',
+      },
+      {
+        name: 'fill',
+        type: "'solid' | 'outline' | 'ghost'",
+        defaultValue: "'solid'",
+        description: 'Fill style of the field container.',
+      },
+      {
+        name: 'rounded',
+        type: 'RoundedSizes',
+        defaultValue: "'lg'",
+        description: 'Corner radius token.',
+      },
+      {
+        name: 'label',
+        type: 'string',
+        description: 'Optional visible label wrapping the field.',
+      },
+      {
+        name: 'placeholder',
+        type: 'string',
+        defaultValue: "'Enter your text'",
+        description: 'Placeholder text.',
+      },
+      {
+        name: 'icon',
+        type: 'React.ReactElement',
+        description: 'Optional icon inside the field.',
+      },
+      {
+        name: 'iconPosition',
+        type: "'left' | 'right'",
+        defaultValue: "'left'",
+        description: 'Icon placement inside the field.',
+      },
+      {
+        name: 'hint',
+        type: 'string',
+        description: 'Helper text below the field.',
+      },
+      {
+        name: 'initialValue',
+        type: 'string',
+        description: 'Initial value for uncontrolled usage.',
+      },
+      {
+        name: 'value',
+        type: 'string',
+        description: 'Controlled value.',
+      },
+      {
+        name: 'onChange',
+        type: '(event: React.ChangeEvent<HTMLInputElement>) => void',
+        description: 'Change handler.',
+      },
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Input.example.tsx',
+    language: 'tsx',
+  }}
+/>

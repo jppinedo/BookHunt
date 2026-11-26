@@ -1,94 +1,77 @@
 import React, { useState, useContext } from 'react'
 import { useNavigate } from "react-router-dom";
-import {Button, TextField, Typography, Card} from "@mui/material";
-import logo from '@images/BookHuntLogoSmall.png'
-import { signInWithEmailAndPassword} from "firebase/auth";
+import { Button, Card, Input, Title } from "@jppinedo/lienzo";
+import AuthBrand from '@custom/Shared/AuthBrand';
 import { AppContext } from '@state/AppContext';
-import { auth } from "@/../firebase.js";
+import { AuthContext } from '@state/AuthContext';
 
+/**
+ * LoginPage — was MUI Button/TextField/Typography/Card + Firebase
+ * signInWithEmailAndPassword. Now Lienzo Card/Title/Input/Button and the
+ * mock AuthContext signIn (any credentials sign in as the demo user).
+ * D1: the password field is Lienzo Input with htmlType="password" — the
+ * PasswordField workaround (from when Input hardcoded type="text") is
+ * deleted, so both fields share the fixed 48px Input height.
+ */
 const LoginPage = () => {
     const navigate = useNavigate();
     const { onShowError } = useContext(AppContext);
+    const { signIn } = useContext(AuthContext);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     async function handleLogin(e){
         e.preventDefault();
-        signInWithEmailAndPassword(auth, email, password)
-            .then((user) => {
-                console.log(user);
-                navigate("/search");
-            })
-            .catch((error) => {
-                console.log(error);
-                onShowError(error);
-            })
-    }
-    const inputStyles = {
-        width: '100%',
-        maxWidth: '340px',
-        mt:1,
-        "& .MuiOutlinedInput-root": {
-            "& fieldset": {
-                borderColor: "black",
-                borderWidth: "2px",
-            },
-            "&:hover fieldset": {
-                borderColor: "orange", // Ensures hover effect applies
-            },
-            "&.Mui-focused fieldset": {
-                borderColor: "orange",
-            },
-        },
-        "& .MuiInputLabel-root": {
-            color: "black",
-            "&.Mui-focused": {
-                color: "orange",
-            },
-        },
+        try {
+            await signIn(email, password);
+            navigate("/search");
+        } catch (error) {
+            console.log(error);
+            onShowError(error);
+        }
     }
 
     return (
         <>
-            <div className={"site-title"}>
-                <h1 className={"appName"}>Book Hunt <img src={logo} alt="BookHuntLogo" width={45} height={45}/></h1>
-            </div>
-            <Card sx={{ maxWidth: '24em', borderRadius: '1rem', padding: '2rem 0.5rem 0', margin: '0 auto'}}>
-                <form id={"log-in"} method={"post"}>
-                    <Typography variant='h4'>Welcome</Typography>
-                    <Typography variant='body'>Sing in with your email and password:</Typography>
-                    <TextField
-                        id={"logName"}
-                        label={"Email"}
-                        variant={"outlined"}
-                        margin={"normal"}
-                        onChange={(e) => {setEmail(e.target.value)}}
-                        sx={{...inputStyles, ...{mt: 5}}}
-                    />
-                    <TextField
-                        id={"logPass"}
-                        label={"Password"}
-                        variant={"outlined"}
-                        type={"password"}
-                        margin={"normal"}
-                        onChange={(e) => {setPassword(e.target.value)}}
-                        sx={inputStyles}
-                    />
-                    <Button 
-                        id={"crButton"} 
-                        variant="contained" 
-                        onClick={(e) => {handleLogin(e)}} 
-                        sx={{mt: 2, mb:2, maxWidth: '340px', width: '100%'}}
-                    >
-                        Login
-                    </Button>
+            <AuthBrand />
+            <Card className="max-w-[24em] mx-auto">
+                <form id={"log-in"} method={"post"} onSubmit={handleLogin}>
+                    <Title size="xl" fontFamily="playfair">Welcome</Title>
+                    <p>Sign in with your email and password:</p>
+                    <div className="mt-5 max-w-[340px] mx-auto text-left">
+                        <Input
+                            label="Email"
+                            htmlType="email"
+                            autoComplete="email"
+                            placeholder="you@example.edu"
+                            value={email}
+                            onChange={(e) => {setEmail(e.target.value)}}
+                        />
+                    </div>
+                    <div className="mt-3 max-w-[340px] mx-auto text-left">
+                        <Input
+                            id="logPass"
+                            label="Password"
+                            htmlType="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => {setPassword(e.target.value)}}
+                        />
+                    </div>
+                    <div className="mt-4 mb-2 max-w-[340px] mx-auto">
+                        <Button
+                            label="Login"
+                            ariaLabel="Login"
+                            onClick={(e) => {handleLogin(e)}}
+                        />
+                    </div>
                 </form>
                 <div className={"register-section"}>
                     <p>Don't have an account?{" "}
-                        <span style={{ color: "orange", cursor: "pointer" }} onClick={() => navigate("/registration")}>
+                        <button type="button" style={{ color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, font: "inherit" }} onClick={() => navigate("/registration")}>
                             Register
-                        </span>
+                        </button>
                     </p>
                 </div>
             </Card>

@@ -1,0 +1,151 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Button.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Button from '@atoms/Button/Button';
+
+<Button
+  label="Save"
+  type="default"
+  fill="solid"
+  size="md"
+  mode="default"
+  onClick={() => {}}
+/>`;
+
+<ComponentDocsPage
+  title="Button"
+  badge="0.1.0"
+  description="Primary UI action with variants for `type`, `fill`, `size`, and `mode`, plus an optional icon and icon position."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Primary and secondary actions in forms and dialogs.',
+      'Color-typed actions (default, red, green, yellow) with solid, outline, or ghost fill.',
+      'Tool-mode buttons with large icons for toolbars and palettes.',
+      'Icon + label combinations with left/right (default) or top/bottom (tool) placement.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'variants',
+      label: 'Variants',
+      canvas: <Canvas of={Stories.Variants} layout="fullscreen" />,
+      badge: 'Pattern: Type × fill gallery',
+      description:
+        'Solid fills for primary actions; outline for secondary emphasis; ghost for low-chrome controls; icons pair with any fill and left/right placement.',
+      meta: [
+        {
+          label: 'Solid',
+          value: 'Filled background — strongest call to action',
+        },
+        {
+          label: 'Outline',
+          value: 'Bordered, transparent — secondary actions',
+        },
+        {
+          label: 'Ghost',
+          value: 'No border or fill until hover — quiet chrome',
+        },
+        {
+          label: 'With icon',
+          value: 'Optional icon · left or right of the label',
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'tools',
+      label: 'Tools',
+      canvas: <Canvas of={Stories.Tools} layout="fullscreen" />,
+      badge: 'Pattern: Tool mode',
+      description:
+        'Stacked icon-above-label (or icon-only) buttons for toolbars. Same type and fill tokens as default mode, with a compact vertical layout.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "mode='tool' · iconPosition='top'",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Toolbars, palettes, icon-first chrome',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'ButtonProps',
+    lead: 'Runtime props for Button.',
+    rows: [
+      {
+        name: 'label',
+        type: 'string',
+        description: 'Visible button text.',
+      },
+      {
+        name: 'onClick',
+        type: '() => void',
+        description: 'Click handler. Required.',
+      },
+      {
+        name: 'ariaLabel',
+        type: 'string',
+        description: 'Accessible name, especially for icon-only buttons.',
+      },
+      {
+        name: 'mode',
+        type: "'default' | 'tool'",
+        defaultValue: "'default'",
+        description: 'Layout mode: inline default vs tool (stacked icon).',
+      },
+      {
+        name: 'type',
+        type: "'default' | 'red' | 'green' | 'yellow'",
+        defaultValue: "'default'",
+        description: 'Color type.',
+      },
+      {
+        name: 'fill',
+        type: "'solid' | 'outline' | 'ghost'",
+        defaultValue: "'solid'",
+        description: 'Fill style.',
+      },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
+        defaultValue: "'md'",
+        description: 'Padding, type scale, rounding, and icon size.',
+      },
+      {
+        name: 'icon',
+        type: 'React.ReactNode',
+        description: 'Optional icon element.',
+      },
+      {
+        name: 'iconPosition',
+        type: "'left' | 'right' | 'top' | 'bottom'",
+        defaultValue: "'left'",
+        description:
+          'Icon placement. Left/right suit default mode; top/bottom suit tool mode.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Triggering actions with a clear label and optional icon.',
+      'Tool chrome where `mode="tool"` fits large icon buttons.',
+    ],
+    whenToAvoid: [
+      'Navigation between views—prefer Tabs or links.',
+      'Toggle state without an action—use Switch or Checkbox.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Button.example.tsx',
+    language: 'tsx',
+  }}
+/>

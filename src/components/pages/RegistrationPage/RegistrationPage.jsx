@@ -1,18 +1,31 @@
 import React, {useState, useContext} from "react";
-import {Button, TextField, Card, Divider, Typography} from "@mui/material";
-import logo from '@images/BookHuntLogoSmall.png'
+import { Button, Card, Input, Title } from "@jppinedo/lienzo";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword} from "firebase/auth";
-import { auth, app } from "@/../firebase.js";
 import { AppContext } from '@state/AppContext';
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { AuthContext } from '@state/AuthContext';
+import AuthBrand from '@custom/Shared/AuthBrand';
 import './RegistrationPage.css';
 
+/**
+ * RegistrationPage — was MUI + Firebase createUserWithEmailAndPassword +
+ * Firestore setDoc(userInfo). Now Lienzo primitives + AuthContext signUp
+ * (real Supabase Auth when configured, mock otherwise).
+ *
+ * Layout (fixed 2026-11-25, Juan's screenshot review): the card used to
+ * be a fixed max-w-[38.59rem] slab while every field was capped at
+ * 300px, so the form huddled on the left of an oversized card with a
+ * dead right half. The card now hugs its content like the Login card
+ * (max-w 26rem, centered) and the form is a single column of full-width
+ * fields. The header is the shared AuthBrand lockup (see its comment),
+ * and every field carries a real placeholder instead of Lienzo Input's
+ * "Enter your text" default. Success no longer calls alert() — blocked
+ * in the sandboxed preview frame — it navigates: to /search when the
+ * sign-up returned a session (email confirmation off), else to /login.
+ */
 const RegistrationPage = () => {
     const navigate = useNavigate();
     const { onShowError } = useContext(AppContext);
-
-    const db = getFirestore(app);
+    const { signUp } = useContext(AuthContext);
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -36,33 +49,20 @@ const RegistrationPage = () => {
             return
         }
         if (password === confirmedPassword) {
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((user) => {
-                    alert("Account Created");
-                    writeInfo(user.user)
-                    navigate("/login");
-                })
-                .catch((error) => {
-                    onShowError(error);
-                })
+            try {
+                const newUser = await signUp(email, { firstName, lastName, password });
+                navigate(newUser ? "/search" : "/login");
+            } catch (error) {
+                onShowError(error);
+            }
         }
         else {
             setConfirmedPasswordError(true);
         }
     }
 
-    async function writeInfo(user) {
-        await setDoc(doc(db, "userInfo", user.uid), {
-            firstName: firstName,
-            lastName: lastName,
-            userID: user.uid,
-            booksSaved: [],
-            booksListed: []
-        });
-    }
-
     function validateEmail() {
-        const emailRegex = /^[^\s@]+@[^\s@]+.\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
         if (emailRegex.test(email)) {
             return true
         }
@@ -99,118 +99,82 @@ const RegistrationPage = () => {
         }
     }
 
-    const intputStyles = {
-        maxWidth: '300px',
-        width: '100%',
-        "& .MuiOutlinedInput-root": {
-            "& fieldset": {
-                borderColor: "black",
-                borderWidth: "2px",
-            },
-            "&:hover fieldset": {
-                borderColor: "orange", // Ensures hover effect applies
-            },
-            "&.Mui-focused fieldset": {
-                borderColor: "orange",
-            },
-        },
-        "& .MuiInputLabel-root": {
-            color: "black",
-            "&.Mui-focused": {
-                color: "orange",
-            },
-        },
-    }
-
     return (
         <div className='register-wrapper'>
-            <div className={"site-title"}>
-                <h1 className={"appName"}>Book Hunt <img src={logo} alt="BookHuntLogo" width={45} height={45}/></h1>
-            </div>
-            <Card 
-                sx={{ 
-                maxWidth: '38.59rem',
-                borderRadius: '1rem', 
-                padding: '2rem 1.5rem 2rem', 
-                margin: '0 auto', 
-                }}
-                className="register-card"
-            >
-                <Typography variant='h4'>Register</Typography>
-                <Typography variant='body'>Fill out the form to create an account</Typography>
-                <form id={"log-in"} method={"post"} style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
-                    <TextField
-                        id={"crFirstName"}
-                        label={"First Name"}
-                        value={firstName}
-                        error={firstNameError}
-                        helperText={firstNameError ? "Invalid characters" : ""}
-                        variant={"outlined"}
-                        margin={"normal"}
-                        onChange={(e) => {setFirstName(e.target.value)}}
-                        sx={intputStyles}
-                    />
-                    <TextField
-                        id={"crLastName"}
-                        label={"Last Name"}
-                        value={lastName}
-                        error={lastNameError}
-                        helperText={lastNameError ? "Invalid characters" : ""}
-                        variant={"outlined"}
-                        margin={"normal"}
-                        onChange={(e) => {setLastName(e.target.value)}}
-                        sx={intputStyles}
-                    />
-                    <TextField
-                        id={"crEmail"}
-                        label={"Email"}
-                        helperText={emailError ? "Please enter a valid email address." : ""}
-                        value={email}
-                        error={emailError}
-                        variant={"outlined"}
-                        margin={"normal"}
-                        onChange={(e) => {setEmail(e.target.value)}}
-                        sx={intputStyles}
-                    />
-                    <Divider component="div" sx={{flex: '0 0 100%'}}/>
-                    <TextField
-                        id={"crPassword"}
-                        label={"Password"}
-                        helperText={passwordError ? "Password must be at least 6 characters." : ""}
-                        value={password}
-                        error={passwordError}
-                        variant={"outlined"}
-                        type={"password"}
-                        margin={"normal"}
-                        onChange={(e) => {handlePasswordInput(e)}}
-                        sx={intputStyles}
-                    />
-                    <TextField
-                        id={"confirmPassword"}
-                        label={"Confirm Password"}
-                        helperText={confirmedPasswordError ? "Passwords do not match." : ""}
-                        value={confirmedPassword}
-                        error={confirmedPasswordError}
-                        variant={"outlined"}
-                        type={"password"}
-                        margin={"normal"}
-                        onChange={(e) => {setConfirmedPassword(e.target.value)}}
-                        sx={intputStyles}
-                    />
-                    <Button 
-                        id={"logButton"} 
-                        variant="contained" 
-                        onClick={(e) => {handleSignUp(e)}} 
-                        sx={{maxWidth: '340px', width: '100%', margin: '1rem auto'}}
-                    >
-                        Create account
-                    </Button>
+            <AuthBrand />
+            <Card className="register-card">
+                <Title size="xl" fontFamily="playfair">Register</Title>
+                <p>Fill out the form to create an account</p>
+                <form id={"log-in"} method={"post"} style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                    <div className="w-full text-left">
+                        <Input
+                            label="First Name"
+                            placeholder="e.g. Jane"
+                            autoComplete="given-name"
+                            value={firstName}
+                            onChange={(e) => {setFirstName(e.target.value)}}
+                            hint={firstNameError ? "Invalid characters" : undefined}
+                        />
+                    </div>
+                    <div className="w-full text-left">
+                        <Input
+                            label="Last Name"
+                            placeholder="e.g. Doe"
+                            autoComplete="family-name"
+                            value={lastName}
+                            onChange={(e) => {setLastName(e.target.value)}}
+                            hint={lastNameError ? "Invalid characters" : undefined}
+                        />
+                    </div>
+                    <div className="w-full text-left">
+                        <Input
+                            label="Email"
+                            htmlType="email"
+                            autoComplete="email"
+                            placeholder="you@example.edu"
+                            value={email}
+                            onChange={(e) => {setEmail(e.target.value)}}
+                            hint={emailError ? "Please enter a valid email address." : undefined}
+                        />
+                    </div>
+                    <hr className="w-full border-gray-300" />
+                    <div className="w-full text-left">
+                        <Input
+                            id="crPassword"
+                            label="Password"
+                            htmlType="password"
+                            autoComplete="new-password"
+                            placeholder="At least 6 characters"
+                            value={password}
+                            onChange={handlePasswordInput}
+                            hint={passwordError ? "Password must be at least 6 characters." : undefined}
+                        />
+                    </div>
+                    <div className="w-full text-left">
+                        <Input
+                            id="confirmPassword"
+                            label="Confirm Password"
+                            htmlType="password"
+                            autoComplete="new-password"
+                            placeholder="Repeat your password"
+                            value={confirmedPassword}
+                            onChange={(e) => {setConfirmedPassword(e.target.value)}}
+                            hint={confirmedPasswordError ? "Passwords do not match." : undefined}
+                        />
+                    </div>
+                    <div className="w-full flex justify-center mt-2">
+                        <Button
+                            label="Create account"
+                            ariaLabel="Create account"
+                            onClick={(e) => {handleSignUp(e)}}
+                        />
+                    </div>
                 </form>
                 <div className="login-section">
                     <p>Already have an account?{" "}
-                        <span style={{ color: "orange", cursor: "pointer" }} onClick={() => navigate("/login")}>
+                        <button type="button" style={{ color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, font: "inherit" }} onClick={() => navigate("/login")}>
                                 Log in
-                        </span>
+                        </button>
                     </p>
                 </div>
             </Card>

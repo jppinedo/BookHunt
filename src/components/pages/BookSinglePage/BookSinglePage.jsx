@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { getEbayItem } from "@services/EbayAPI";
 import { getBookById } from "@services/BookFirestore";
-import { Container, Backdrop, CircularProgress } from '@mui/material';
+import { Spinner } from '@jppinedo/lienzo';
 import { transformEbayItem } from "@utils/search-utils";
 import BookCard from '@custom/Books/BookCard';
 
@@ -25,29 +25,36 @@ const BookSinglePage = () => {
 
     if(type === 'eBay' && loading) {
       callEbayItem().then((result) => {
-        setCurrentBook(transformEbayItem(result)); 
+        setCurrentBook(transformEbayItem(result));
         setLoading(false);
-      });
+      }).catch(() => setLoading(false));
     } else if(type === 'user' && loading) {
       callFirestoreItem().then((result) => {
         setCurrentBook(result);
         setLoading(false);
-      });
+      }).catch(() => setLoading(false));
     }
   }, []);
 
-    
+
   if (loading) {
     return (
-      <Backdrop open={true}>
-         <CircularProgress color="inherit" />
-      </Backdrop>
+      <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40">
+         <Spinner size="48px" thickness="6px" />
+      </div>
+    );
+  }
+  if (!currentBook) {
+    return (
+      <div className="max-w-3xl mx-auto w-full mt-24 mb-36 px-4 box-border">
+        <p className="on-bg-text">Book not found.</p>
+      </div>
     );
   }
   return (
-    <Container maxWidth="md" sx={{mt:6, mb: 15}}>
+    <div className="max-w-3xl mx-auto w-full mt-24 mb-36 px-4 box-border">
       <BookCard book={currentBook} type="view" isSingle={true} />
-    </Container>
+    </div>
   )
 }
 

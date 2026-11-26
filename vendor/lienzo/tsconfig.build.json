@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node", "vite/client"]
+  },
+  "include": [
+    "src/index.ts",
+    "src/components/atoms/**/*",
+    "src/components/molecules/**/*",
+    "src/components/templates/**/*",
+    "src/interfaces/**/*",
+    "src/hooks/**/*"
+  ],
+  "exclude": [
+    "**/*.stories.tsx",
+    "**/*.mdx",
+    "src/components/pages/**",
+    "src/docs/**"
+  ]
+}

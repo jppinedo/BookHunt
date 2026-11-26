@@ -1,0 +1,225 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './LineChart.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const lineChartExample = `import LineChart from '@molecules/LineChart/LineChart';
+
+const data = [
+  { day: 'Mon', series1: 0.6, series2: 2.1 },
+  { day: 'Tue', series1: 1.2, series2: 2.3 },
+  { day: 'Wed', series1: 2.9, series2: 1.5 },
+  { day: 'Thu', series1: 2.0, series2: 2.4 },
+  { day: 'Fri', series1: 0.9, series2: 3.7 },
+  { day: 'Sat', series1: 2.5, series2: 1.4 },
+  { day: 'Sun', series1: 2.2, series2: 1.5 },
+];
+
+const series = [
+  {
+    dataKey: 'series1',
+    name: 'Series 1',
+    stroke: 'rgb(var(--lz-pio-teal-dark))',
+  },
+  {
+    dataKey: 'series2',
+    name: 'Series 2',
+    stroke: 'rgb(var(--lz-pio-amber))',
+  },
+];
+
+<LineChart
+  data={data}
+  series={series}
+  xAxisKey="day"
+  height={280}
+  showTooltip
+  yAxisDomain={[0, 4]}
+/>`;
+
+<ComponentDocsPage
+  title="LineChart"
+  badge="0.1.0"
+  description="Line chart built with Recharts. Configurable series, curve type, grid, legend, tooltip, and reference lines. Uses the pio color palette for series strokes."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Show trends over continuous periods (day, week, or similar sequences).',
+      'Compare a small number of series on a shared axis with a legend.',
+      'Contrast actual values against a dashed forecast or target series.',
+      'Mark a threshold or SLA with a horizontal reference line.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'comparison',
+      label: 'Comparison',
+      canvas: <Canvas of={Stories.Comparison} layout="fullscreen" />,
+      badge: 'Pattern: Multi-series comparison',
+      description:
+        'Three pio-colored series on a shared axis with grid and legend for side-by-side comparison.',
+      meta: [
+        {
+          label: 'Data Signature',
+          value: '{ day, revenue, costs, margin }',
+          valueTone: 'code',
+        },
+        {
+          label: 'Component Props',
+          value: 'showLegend · showGrid · series×3',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Weekly KPIs, cost vs revenue, multi-metric trends',
+        },
+      ],
+    },
+    {
+      id: 'actual-vs-forecast',
+      label: 'Actual vs forecast',
+      canvas: <Canvas of={Stories.ActualVsForecast} layout="fullscreen" />,
+      badge: 'Pattern: Actual vs projected',
+      description:
+        'Solid actual line plus a dashed forecast series; legend and grid call out the contrast.',
+      meta: [
+        {
+          label: 'Data Signature',
+          value: '{ day, actual, forecast }',
+          valueTone: 'code',
+        },
+        {
+          label: 'Component Props',
+          value: 'strokeDasharray · showDots={false}',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Forecasts, targets vs actuals, projected ranges',
+        },
+      ],
+    },
+    {
+      id: 'with-threshold',
+      label: 'Threshold',
+      canvas: <Canvas of={Stories.WithThreshold} layout="fullscreen" />,
+      badge: 'Pattern: Target reference line',
+      description:
+        'Single series with a horizontal stone reference line marking a target value.',
+      meta: [
+        {
+          label: 'Data Signature',
+          value: '{ day, value }',
+          valueTone: 'code',
+        },
+        {
+          label: 'Component Props',
+          value: 'referenceLines · showGrid',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'SLA thresholds, goal lines, alert levels',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'LineChartProps',
+    lead: 'Runtime props for LineChart.',
+    rows: [
+      {
+        name: 'data',
+        type: 'LineChartDataItem[]',
+        description: 'Row objects keyed by axis and series fields.',
+      },
+      {
+        name: 'series',
+        type: 'LineChartSeriesConfig[]',
+        description:
+          'Series definitions: dataKey, optional name, stroke, dotFill, dotStroke, type, strokeWidth, strokeDasharray, and showDots.',
+      },
+      {
+        name: 'xAxisKey',
+        type: 'string',
+        description: 'Key on each data item used for the X axis.',
+      },
+      {
+        name: 'width',
+        type: "number | `${number}%`",
+        defaultValue: "'100%'",
+        description: 'Chart width passed to ResponsiveContainer.',
+      },
+      {
+        name: 'height',
+        type: "number | `${number}%`",
+        defaultValue: '280',
+        description: 'Chart height.',
+      },
+      {
+        name: 'showGrid',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Renders a horizontal Cartesian grid.',
+      },
+      {
+        name: 'showTooltip',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Shows the Recharts tooltip on hover.',
+      },
+      {
+        name: 'showLegend',
+        type: 'boolean',
+        defaultValue: 'false',
+        description:
+          'Shows a top-left series legend (colored dots + bold labels).',
+      },
+      {
+        name: 'showDots',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Renders dots on data points (overridable per series).',
+      },
+      {
+        name: 'curveType',
+        type: "'monotone' | 'linear' | 'step'",
+        defaultValue: "'monotone'",
+        description: 'Default curve interpolation for all series.',
+      },
+      {
+        name: 'yAxisDomain',
+        type: "[number | 'auto', number | 'auto']",
+        defaultValue: "[0, 'auto']",
+        description: 'Y-axis domain bounds.',
+      },
+      {
+        name: 'referenceLines',
+        type: 'LineChartReferenceLine[]',
+        defaultValue: '[]',
+        description:
+          'Horizontal reference lines (`y`, optional `label`, `stroke`, `strokeDasharray`).',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Values change continuously along an ordered axis (especially time).',
+      'You need to compare a few series and relative change matters more than absolute volume.',
+      'Readers should scan shape—rises, drops, and crossings—rather than exact cell values.',
+      'A dashed series or reference line helps separate actuals from targets or forecasts.',
+    ],
+    whenToAvoid: [
+      'Part-to-whole or ranked category comparisons (prefer bars or similar).',
+      'Many overlapping series that become hard to read as lines.',
+      'Emphasizing filled volume under the curve—that is a different chart type, not LineChart.',
+      'A single static snapshot with no trend to follow.',
+    ],
+  }}
+  example={{
+    code: lineChartExample,
+    filename: 'LineChart.example.tsx',
+    language: 'tsx',
+  }}
+/>

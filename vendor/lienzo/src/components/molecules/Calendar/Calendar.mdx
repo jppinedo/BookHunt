@@ -1,0 +1,101 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Calendar.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Calendar from '@molecules/Calendar/Calendar';
+
+<Calendar
+  mode="single"
+  caption="Pick a date"
+  showOutsideDays
+  animate
+  onSelect={(value) => console.log(value)}
+/>`;
+
+<ComponentDocsPage
+  title="Calendar"
+  badge="0.1.0"
+  description="Date picker with single or range selection. Lienzo-styled wrapper around React DayPicker."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Picking a single date in forms and filters.',
+      'Selecting a start/end range for reports or bookings.',
+      'Custom caption titles for branded date pickers.',
+      'Showing or hiding days from adjacent months.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'CalendarProps',
+    lead: 'Runtime props for Calendar.',
+    rows: [
+      {
+        name: 'mode',
+        type: "'single' | 'range'",
+        defaultValue: "'single'",
+        description: 'Selection mode.',
+      },
+      {
+        name: 'selected',
+        type: 'Date | DateRange | undefined',
+        description: 'Controlled selected date or range.',
+      },
+      {
+        name: 'onSelect',
+        type: '(value: Date | DateRange | undefined) => void',
+        description: 'Called when selection changes.',
+      },
+      {
+        name: 'defaultMonth',
+        type: 'Date',
+        description: 'Initial month displayed.',
+      },
+      {
+        name: 'caption',
+        type: 'string',
+        description:
+          'Optional small title above the month/year row. Does not replace the visible month label.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class on the root DayPicker element.',
+      },
+      {
+        name: 'disabled',
+        type: "DayPickerProps['disabled']",
+        description: 'Disabled dates passed through to DayPicker.',
+      },
+      {
+        name: 'showOutsideDays',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Show days from adjacent months.',
+      },
+      {
+        name: 'animate',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Animate month transitions.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Users need to pick a calendar date or date range.',
+      '`mode="single"` for one day; `mode="range"` for start/end spans.',
+    ],
+    whenToAvoid: [
+      'Free-text date entry without a calendar UI—use Input.',
+      'Choosing from a short fixed list of dates—Select may be simpler.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Calendar.example.tsx',
+    language: 'tsx',
+  }}
+/>

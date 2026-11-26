@@ -1,0 +1,118 @@
+/*
+ * Lienzo theme for consuming apps.
+ *
+ * Import alongside Tailwind 4 in the app entry CSS:
+ *   @import 'tailwindcss';
+ *   @import '@jppinedo/lienzo/theme.css';
+ *   @source '../node_modules/@jppinedo/lienzo/src';
+ *
+ * Tokens + @theme live here so apps can reuse the design system without
+ * pulling Storybook-only @source rules from src/tailwind.css.
+ */
+
+@import './css/tokens.css' layer(base);
+
+/* Dark mode: `dark:` utilities apply inside [data-mode="dark"]. */
+@custom-variant dark (&:where([data-mode='dark'] *));
+
+/*
+ * Theme tokens. Colors point to the CSS variables in css/tokens.css (R G B channels),
+ * so opacity modifiers like bg-pio-teal-black/80 keep working.
+ */
+@theme inline {
+  /* Replace Tailwind's default palette: only Lienzo colors exist (same as v3 theme.colors). */
+  --color-*: initial;
+  --color-gray-100: rgb(var(--lz-gray-100));
+  --color-gray-300: rgb(var(--lz-gray-300));
+  --color-gray-600: rgb(var(--lz-gray-600));
+  --color-gray-700: rgb(var(--lz-gray-700));
+  --color-gray-800: rgb(var(--lz-gray-800));
+  --color-gray-900: rgb(var(--lz-gray-900));
+  --color-gray-opacity-14: rgb(var(--lz-gray-300) / 0.14);
+  --color-gray-opacity-20: rgb(var(--lz-gray-300) / 0.2);
+  --color-gray-opacity-30: rgb(var(--lz-gray-300) / 0.3);
+  --color-white: rgb(var(--lz-white));
+  --color-white-opacity-14: rgb(var(--lz-white) / 0.14);
+  --color-black: rgb(var(--lz-black));
+  --color-black-opacity-14: rgb(var(--lz-black) / 0.14);
+  --color-black-opacity-20: rgb(var(--lz-black) / 0.2);
+  --color-blue-200: rgb(var(--lz-blue-200));
+  --color-blue-400: rgb(var(--lz-blue-400));
+  --color-blue-600: rgb(var(--lz-blue-600));
+  --color-transparent: transparent;
+  --color-pio-bg: rgb(var(--lz-pio-bg));
+  --color-pio-bg-light: rgb(var(--lz-pio-bg-light));
+  --color-pio-bg-soft: rgb(var(--lz-pio-bg-soft));
+  --color-pio-bg-opacity-90: rgb(var(--lz-pio-bg-opacity-90) / 0.9);
+  --color-pio-teal-dark: rgb(var(--lz-pio-teal-dark));
+  --color-pio-teal-dark-hover: rgb(var(--lz-pio-teal-dark-hover));
+  --color-pio-teal-dark-muted: rgb(var(--lz-pio-teal-dark-muted));
+  --color-pio-teal-dark-pale: rgb(var(--lz-pio-teal-dark-pale));
+  --color-pio-teal-dark-opacity-14: rgb(var(--lz-pio-teal-dark) / 0.14);
+  --color-pio-teal-dark-opacity-20: rgb(var(--lz-pio-teal-dark) / 0.2);
+  --color-pio-teal-black: rgb(var(--lz-pio-teal-black));
+  --color-pio-coral: rgb(var(--lz-pio-coral));
+  --color-pio-coral-hover: rgb(var(--lz-pio-coral-hover));
+  --color-pio-coral-dark: rgb(var(--lz-pio-coral-dark));
+  --color-pio-coral-muted: rgb(var(--lz-pio-coral-muted));
+  --color-pio-coral-pale: rgb(var(--lz-pio-coral-pale));
+  --color-pio-coral-opacity-14: rgb(var(--lz-pio-coral) / 0.14);
+  --color-pio-coral-opacity-20: rgb(var(--lz-pio-coral) / 0.2);
+  --color-pio-amber: rgb(var(--lz-pio-amber));
+  --color-pio-amber-hover: rgb(var(--lz-pio-amber-hover));
+  --color-pio-amber-dark: rgb(var(--lz-pio-amber-dark));
+  --color-pio-amber-muted: rgb(var(--lz-pio-amber-muted));
+  --color-pio-amber-pale: rgb(var(--lz-pio-amber-pale));
+  --color-pio-amber-opacity-14: rgb(var(--lz-pio-amber) / 0.14);
+  --color-pio-amber-opacity-20: rgb(var(--lz-pio-amber) / 0.2);
+  --color-pio-stone: rgb(var(--lz-pio-stone));
+  --color-pio-stone-dark: rgb(var(--lz-pio-stone-dark));
+  --color-pio-stone-pale: rgb(var(--lz-pio-stone-pale));
+  --color-pio-stone-opacity-14: rgb(var(--lz-pio-stone) / 0.14);
+  --color-pio-text: rgb(var(--lz-pio-text));
+  --color-pio-text-muted: rgb(var(--lz-pio-text-muted));
+  --color-pio-grid: rgb(var(--lz-pio-grid));
+  --color-pio-border-subtle: rgb(var(--lz-pio-border-subtle));
+  --color-dark-canvas: rgb(var(--lz-dark-canvas));
+  --color-light-canvas: rgb(var(--lz-light-canvas));
+
+  --font-lexend: Lexend, sans-serif;
+  --font-poppins: Poppins, sans-serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
+  --font-jakarta: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-jetbrains: "JetBrains Mono", ui-monospace, monospace;
+
+  --shadow-pio-soft: 0 10px 30px -5px rgba(47, 109, 104, 0.05), 0 4px 12px -2px rgba(255, 107, 87, 0.04);
+  --shadow-pio-card: 0 12px 36px -8px rgba(31, 36, 33, 0.06), 0 4px 12px rgba(0, 0, 0, 0.02);
+  --shadow-pio-float: 0 12px 32px -6px rgba(31, 36, 33, 0.12), 0 4px 12px -2px rgba(31, 36, 33, 0.06);
+  --shadow-pio-glow-coral: 0 0 25px -3px rgba(255, 107, 87, 0.4);
+  --shadow-pio-glow-teal: 0 0 25px -3px rgba(58, 125, 118, 0.35);
+
+  --font-weight-thin: 100;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+}
+
+/*
+ * Tailwind v3 defaults that v4 changed.
+ * gray-200 is not in the Lienzo palette, so a bare `border` already used currentColor.
+ */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+}

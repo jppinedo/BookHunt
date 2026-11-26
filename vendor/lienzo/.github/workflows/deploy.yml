@@ -1,0 +1,68 @@
+name: Deploy Storybook
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-storybook
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Verify and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck, lint, and build Storybook
+        run: yarn verify
+
+      - name: Normalize FTP host
+        id: ftp
+        env:
+          FTP_URL: ${{ secrets.FTP_URL }}
+        run: |
+          set -euo pipefail
+          host="$FTP_URL"
+          host="${host#ftp://}"
+          host="${host#ftps://}"
+          host="${host%%/*}"
+          host="${host%/}"
+          if [ -z "$host" ]; then
+            echo "::error::FTP_URL secret is empty or invalid after normalization."
+            exit 1
+          fi
+          echo "::add-mask::$host"
+          echo "host=$host" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@8a24039354ee91000cb948cb4a1dbdf1a1b94a3c # v4.3.4
+        with:
+          server: ${{ steps.ftp.outputs.host }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./storybook-static/
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+            **/.cursor/**
