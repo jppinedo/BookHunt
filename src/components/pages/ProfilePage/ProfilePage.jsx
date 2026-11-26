@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Input, Tabs, Title } from "@jppinedo/lienzo";
 import PasswordInput from '@custom/Shared/PasswordInput';
+import Modal from '@custom/Shared/Modal';
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
 import { getUserProfile, getListedBooks } from "@services/BookFirestore";
@@ -34,7 +35,9 @@ const ProfilePage = () => {
     // U5: the delete confirmation carries its OWN password field. The
     // old flow told the user to "type old password in text box" — the
     // Change Password section's field, two scrolls up — so the confirm
-    // step is now self-contained (see ProfileSettings).
+    // step is self-contained. U5.1: it renders in the app-level Modal
+    // (see ProfileSettings), not the inline panel U5 first shipped —
+    // Juan's review: a destructive confirm belongs in a modal.
     const [deletePassword, setDeletePassword] = useState('');
     const [deletePasswordError, setDeletePasswordError] = useState(false);
 
@@ -241,34 +244,38 @@ const ProfilePage = () => {
                 />
             </div>
             <div className="mt-6 flex flex-col items-center gap-3">
-                <Button label="Change Password" onClick={(e) => { changePassword(e) }} />
+                <Button label="Change Password" type="green" size="lg" onClick={(e) => { changePassword(e) }} />
                 <Button label="Delete Account" type="red" onClick={() => { showDelete(true) }} />
             </div>
-            <div>
-                {deleteVisible ?
-                    <div className="mt-2 rounded-lg border-2 border-pio-coral p-4">
-                        <h3 className="font-jakarta text-base font-semibold text-pio-text" style={{marginTop: 0}}>
-                            Delete your account permanently?
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                            This can't be undone. Confirm with your password to delete your account.
-                        </p>
-                        <div className="mt-3 text-left">
-                            <PasswordInput
-                                id="deleteConfirmPass"
-                                label="Password"
-                                autoComplete="current-password"
-                                value={deletePassword}
-                                onChange={(e) => { setDeletePassword(e.target.value); setDeletePasswordError(false); }}
-                                hint={deletePasswordError ? "Please type your password to confirm." : undefined}
-                            />
-                        </div>
-                        <div className="mt-4 flex justify-center gap-3">
-                            <Button label="Delete my account" type="red" onClick={(e) => deleteAccount(e)} />
-                            <Button label="Cancel" onClick={() => showDelete(false)} />
-                        </div>
-                    </div> : null}
-            </div>
+            {/* U5.1: the delete confirmation is a modal (shared Modal
+                component) — same self-contained password field and the
+                same deleteAccount logic as U5's inline panel; only the
+                presentation moved. Cancel, Escape, and an overlay click
+                all route through showDelete(false), which also clears
+                the field. */}
+            <Modal
+                open={deleteVisible}
+                onClose={() => showDelete(false)}
+                title="Delete your account permanently?"
+            >
+                <p className="text-sm text-gray-500">
+                    This can't be undone. Confirm with your password to delete your account.
+                </p>
+                <div className="mt-3 text-left">
+                    <PasswordInput
+                        id="deleteConfirmPass"
+                        label="Password"
+                        autoComplete="current-password"
+                        value={deletePassword}
+                        onChange={(e) => { setDeletePassword(e.target.value); setDeletePasswordError(false); }}
+                        hint={deletePasswordError ? "Please type your password to confirm." : undefined}
+                    />
+                </div>
+                <div className="mt-5 flex justify-center gap-3">
+                    <Button label="Delete my account" type="red" onClick={(e) => deleteAccount(e)} />
+                    <Button label="Cancel" onClick={() => showDelete(false)} />
+                </div>
+            </Modal>
         </div>
     )
 

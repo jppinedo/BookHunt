@@ -162,7 +162,9 @@ const BookAddForm = ({ book, onSaveBook }) => {
           className={canSubmit ? '' : 'pointer-events-none opacity-50'}
           aria-disabled={!canSubmit}
         >
-          <Button label={submitting ? 'Publishing…' : 'Sell Book'} onClick={handleSaveBook} />
+          {/* U5.1: form submits wear Lienzo's deep teal (type="green")
+              at lg padding — the pale default was too easy to miss. */}
+          <Button label={submitting ? 'Publishing…' : 'Sell Book'} type="green" size="lg" onClick={handleSaveBook} />
         </div>
         {!canSubmit && !submitting && (
           <p className="text-sm mt-2">Still needed: {missing.join(', ')}.</p>

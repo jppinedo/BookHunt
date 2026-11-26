@@ -28,6 +28,13 @@ import { AuthContext } from '@state/AuthContext';
  *                account existence.
  * The reset email itself lands back on the app and routes to
  * /reset-password (see ResetPasswordPage).
+ *
+ * U5.1 (Juan's screenshot review): the AuthSwitch shrank (see its
+ * comment), "Forgot password?" dropped a size, and the form submits
+ * across the auth/profile/sell forms now wear Lienzo's deep teal —
+ * Button type="green" (pio-teal-dark) at xl padding, full-width on
+ * the auth cards — because the pale default submit was too easy to
+ * miss. Coral stays reserved for nav/tabs/links, per his call.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -61,6 +68,10 @@ const LoginPage = () => {
     }
 
     const textLinkStyle = { color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, font: "inherit" };
+    // U5.1: Juan's review — "Forgot password?" read too large next to
+    // the field; it drops to 13px (the "Back to login" link keeps the
+    // standard text-link size).
+    const forgotLinkStyle = { color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: "inherit", fontSize: "13px" };
 
     return (
         <>
@@ -94,14 +105,16 @@ const LoginPage = () => {
                                 />
                             </div>
                             <div className="mt-2 max-w-[340px] mx-auto text-right">
-                                <button type="button" style={textLinkStyle} onClick={() => setView('forgot')}>
+                                <button type="button" style={forgotLinkStyle} onClick={() => setView('forgot')}>
                                     Forgot password?
                                 </button>
                             </div>
-                            <div className="mt-4 mb-2 max-w-[340px] mx-auto">
+                            <div className="mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full">
                                 <Button
                                     label="Login"
                                     ariaLabel="Login"
+                                    type="green"
+                                    size="xl"
                                     onClick={(e) => {handleLogin(e)}}
                                 />
                             </div>
@@ -122,10 +135,12 @@ const LoginPage = () => {
                                 onChange={(e) => {setEmail(e.target.value)}}
                             />
                         </div>
-                        <div className="mt-4 max-w-[340px] mx-auto">
+                        <div className="mt-4 max-w-[340px] mx-auto [&>button]:w-full">
                             <Button
                                 label="Send reset link"
                                 ariaLabel="Send reset link"
+                                type="green"
+                                size="xl"
                                 onClick={(e) => {handleResetRequest(e)}}
                             />
                         </div>
@@ -143,10 +158,12 @@ const LoginPage = () => {
                             If an account exists for {email || 'that email address'}, we've sent a
                             password reset link. Open it to choose a new password.
                         </p>
-                        <div className="mt-4 mb-2 max-w-[340px] mx-auto">
+                        <div className="mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full">
                             <Button
                                 label="Back to login"
                                 ariaLabel="Back to login"
+                                type="green"
+                                size="xl"
                                 onClick={() => setView('login')}
                             />
                         </div>

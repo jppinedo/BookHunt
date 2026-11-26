@@ -10,6 +10,10 @@ import { useNavigate } from "react-router-dom";
  * missed text link). Same treatment on both screens, at the top of
  * the card: a muted track with the current screen as a solid coral
  * pill — the active-state language the bottom HubNav already uses.
+ *
+ * U5.1: Juan's screenshot review — the switch read as oversized
+ * next to the form, so the track and segments shed padding and the
+ * labels drop to text-sm. The coral active pill stays.
  */
 const AuthSwitch = ({ active }) => {
     const navigate = useNavigate();
@@ -22,7 +26,7 @@ const AuthSwitch = ({ active }) => {
                 onClick={() => { if (!isActive) navigate(path); }}
                 aria-current={isActive ? "page" : undefined}
                 className={
-                    "flex-1 cursor-pointer rounded-full border-0 px-4 py-2.5 font-jakarta text-[15px] font-semibold transition-colors " +
+                    "flex-1 cursor-pointer rounded-full border-0 px-3 py-1.5 font-jakarta text-sm font-semibold transition-colors " +
                     (isActive
                         ? "bg-pio-coral text-white"
                         : "bg-transparent text-gray-500 hover:text-pio-text")
@@ -34,7 +38,7 @@ const AuthSwitch = ({ active }) => {
     };
 
     return (
-        <nav aria-label="Log in or register" className="flex gap-1 rounded-full bg-gray-opacity-14 p-1">
+        <nav aria-label="Log in or register" className="flex gap-0.5 rounded-full bg-gray-opacity-14 p-0.5">
             {option('login', 'Log in', '/login')}
             {option('register', 'Register', '/registration')}
         </nav>

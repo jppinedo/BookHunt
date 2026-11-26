@@ -78,10 +78,12 @@ const ResetPasswordPage = () => {
                     <>
                         <Title size="xl" fontFamily="playfair">Link expired</Title>
                         <p>This password reset link is invalid or has expired. Request a new one from the login screen.</p>
-                        <div className="mt-4 mb-2 max-w-[340px] mx-auto">
+                        <div className="mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full">
                             <Button
                                 label="Back to login"
                                 ariaLabel="Back to login"
+                                type="green"
+                                size="xl"
                                 onClick={() => navigate("/login")}
                             />
                         </div>
@@ -112,10 +114,12 @@ const ResetPasswordPage = () => {
                                 hint={confirmedPasswordError ? "Passwords do not match." : undefined}
                             />
                         </div>
-                        <div className="mt-4 mb-2 max-w-[340px] mx-auto">
+                        <div className="mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full">
                             <Button
                                 label="Update password"
                                 ariaLabel="Update password"
+                                type="green"
+                                size="xl"
                                 onClick={(e) => { handleUpdate(e) }}
                             />
                         </div>

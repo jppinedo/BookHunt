@@ -165,10 +165,12 @@ const RegistrationPage = () => {
                             hint={confirmedPasswordError ? "Passwords do not match." : undefined}
                         />
                     </div>
-                    <div className="w-full flex justify-center mt-2">
+                    <div className="w-full mt-2 [&>button]:w-full">
                         <Button
                             label="Create account"
                             ariaLabel="Create account"
+                            type="green"
+                            size="xl"
                             onClick={(e) => {handleSignUp(e)}}
                         />
                     </div>
