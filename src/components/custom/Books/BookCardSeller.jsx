@@ -5,6 +5,7 @@ import { deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
 import { Trash2 } from 'react-feather';
 import { useNavigate } from "react-router-dom";
+import BookCover from './BookCover';
 import './BookCard.css';
 
 /**
@@ -48,9 +49,9 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
         tabIndex={isClickable ? 0 : undefined}
         onKeyDown={isClickable ? (e) => { if (e.key === 'Enter') handleCardClick(); } : undefined}
       >
-        <img
+        <BookCover
           src={book.thumbnail}
-          alt={book.title}
+          title={book.title}
           className="h-full object-contain self-start"
           style={{ maxWidth: isSingle ? '290px' : '200px', padding: isSingle ? '1rem' : 0 }}
         />
@@ -64,7 +65,8 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
             ) : null}
             {(type === 'view' || type === 'grid') && (
               <>
-                <p className="my-1">Condition: {book.condition}</p>
+                {/* U3 / D3: condition shows once — the pill below (same
+                    dedupe as BookCard). */}
                 <p className="my-1">Sold by: {book.sellerName} ({book.sellerType})</p>
                 {book.condition && (
                   <Badge label={book.condition} tone="teal" className="mt-1" />

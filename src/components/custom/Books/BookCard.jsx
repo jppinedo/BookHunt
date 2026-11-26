@@ -3,6 +3,7 @@ import { AuthContext } from "@state/AuthContext";
 import { isBookSaved, toggleSavedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
 import { Bookmark } from 'react-feather';
+import BookCover from './BookCover';
 import './BookCard.css';
 
 /**
@@ -61,9 +62,9 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
         tabIndex={isClickable ? 0 : undefined}
         onKeyDown={isClickable ? (e) => { if (e.key === 'Enter') handleCardClick(); } : undefined}
       >
-        <img
+        <BookCover
           src={book.thumbnail}
-          alt={book.title}
+          title={book.title}
           className="h-full object-contain self-start"
           style={{ maxWidth: isSingle ? '290px' : '200px', padding: isSingle ? '1rem' : 0 }}
         />
@@ -77,7 +78,9 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
             ) : null}
             {(type === 'view' || type === 'grid') && (
               <>
-                <p className="my-1">Condition: {book.condition}</p>
+                {/* U3 / D3: condition appears ONCE — the pill below. The
+                    old "Condition: Good" text line duplicated it on the
+                    deals, detail, and Saved Books screens. */}
                 <p className="my-1">Sold by: {book.sellerName} ({book.sellerType})</p>
                 {book.condition && (
                   <Badge label={book.condition} tone="teal" className="mt-1" />

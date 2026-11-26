@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Title } from '@jppinedo/lienzo';
 import { truncateText } from '@utils/search-utils.js';
+import BookCover from '@custom/Books/BookCover';
 import './BookResults.css';
 
 /**
@@ -51,9 +52,9 @@ const BookResults = ({ books, onClickItem }) => {
                   }
                 }}
               >
-                <img
+                <BookCover
                   src={book.thumbnail}
-                  alt={book.title}
+                  title={book.title}
                   className="w-[104px] h-[156px] sm:w-[120px] sm:h-[180px] object-cover shrink-0 rounded-[10px] bg-pio-bg-light"
                 />
                 <div className="flex flex-col min-w-0 py-0.5">
@@ -63,6 +64,17 @@ const BookResults = ({ books, onClickItem }) => {
                   <p className="text-[13px] text-pio-text-muted mt-1.5 line-clamp-1">
                     by {Array.isArray(book.authors) && book.authors.length ? book.authors.join(', ') : 'Unknown author'}
                   </p>
+                  {/* U3: muted edition line — year + ISBN (ISBN-13
+                      preferred; formatGoogleBook already resolves
+                      isbn13 → isbn10 into book.isbn). This is what
+                      tells the surviving near-identical editions
+                      apart after de-duplication. Missing parts are
+                      simply omitted. */}
+                  {(book.year || book.isbn) ? (
+                    <p className="text-[12.5px] text-pio-text-muted mt-0.5 line-clamp-1">
+                      {[book.year, book.isbn ? `ISBN ${book.isbn}` : null].filter(Boolean).join(' · ')}
+                    </p>
+                  ) : null}
                   <p className='text-[13px] leading-relaxed text-pio-text-muted mt-2 line-clamp-3'>
                     {book.description ? truncateText(book.description, 200) : ''}
                   </p>

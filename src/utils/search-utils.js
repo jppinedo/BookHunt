@@ -26,15 +26,82 @@ export function truncateText(text, maxLength, ellipsis = '...') {
   return truncatedText + ellipsis;
 }
 
+// --- U3: text hygiene -------------------------------------------------------
+// Google Books descriptions arrive with real HTML in them ("<p>…", "<i>…")
+// and eBay titles/descriptions carry HTML and entities ("&amp;"). React
+// escapes both, so the markup leaked onto cards and detail pages as
+// visible text (UX audit finding 4). Strip markup and decode entities
+// where the data is produced — here, in the transforms — so every
+// consumer downstream gets clean plain text.
+const NAMED_ENTITIES = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  hellip: '…', mdash: '—', ndash: '–',
+  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
+};
+
+export function stripHtml(text) {
+  if (!text) return '';
+  return String(text)
+    // Block-level breaks become spaces so stripped paragraphs don't fuse.
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/(p|div|li|ul|ol|h[1-6])>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&([a-zA-Z]+);/g, (match, name) => NAMED_ENTITIES[name] ?? match)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// --- U3: Google Books result de-duplication ---------------------------------
+// One Google Books search returns the same book ~6 times (editions and
+// reprints with near-identical rows). Rule, applied in result order —
+// first occurrence wins. A candidate is dropped as a duplicate of an
+// already-kept entry when EITHER:
+//   (a) both carry an ISBN and the ISBNs are equal (exact duplicate), OR
+//   (b) normalized title AND normalized primary (first) author are equal
+//       AND nothing distinguishes them: it is NOT the case that both
+//       years are present and different, and NOT the case that both
+//       ISBNs are present and different.
+// Entries that genuinely differ by year or by ISBN are editions and are
+// kept — the result rows now print year + ISBN so users can tell them
+// apart. Normalization: lowercase, every run of non-alphanumerics
+// collapses to one space, trimmed; ISBNs compared hyphen-free.
+const normalizeKeyPart = (value) =>
+  String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+export function dedupeGoogleBooks(books) {
+  const kept = [];
+  for (const book of books) {
+    const isbn = cleanQuery(book.isbn || '');
+    const titleKey = normalizeKeyPart(book.title);
+    const authorKey = normalizeKeyPart(book.authors?.[0]);
+    const year = book.year ? String(book.year) : '';
+    const isDuplicate = kept.some((other) => {
+      const otherIsbn = cleanQuery(other.isbn || '');
+      if (isbn && otherIsbn && isbn === otherIsbn) return true; // (a)
+      if (!titleKey) return false;
+      if (titleKey !== normalizeKeyPart(other.title)) return false;
+      if (authorKey !== normalizeKeyPart(other.authors?.[0])) return false;
+      const otherYear = other.year ? String(other.year) : '';
+      const yearsDistinguish = Boolean(year && otherYear && year !== otherYear);
+      const isbnsDistinguish = Boolean(isbn && otherIsbn && isbn !== otherIsbn);
+      return !yearsDistinguish && !isbnsDistinguish; // (b)
+    });
+    if (!isDuplicate) kept.push(book);
+  }
+  return kept;
+}
+
 // eBay single item to BookHunt Book
 export function transformEbayItem(ebayItem) {
   return {
     id: ebayItem.itemId, 
-    title: ebayItem.title, 
+    title: stripHtml(ebayItem.title),
     thumbnail: ebayItem.image?.imageUrl || '',
     images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], 
     condition: ebayItem.condition, 
-    description: ebayItem.shortDescription || '',
+    description: stripHtml(ebayItem.shortDescription || ''),
     sellerType: 'eBay', 
     URL: ebayItem.itemWebUrl, 
     sellerName: ebayItem.seller?.username || '', 
@@ -48,7 +115,7 @@ export function transformEbayItem(ebayItem) {
 export function formatEbayBook(item) {
   return {
     id: item.itemId,
-    title: item.title,
+    title: stripHtml(item.title),
     thumbnail: item.image?.imageUrl || '',
     images: item.additionalImages,
     condition: item.condition,
@@ -79,7 +146,7 @@ export function formatGoogleBook(googleBook) {
     price: '0.00', 
     currency: 'USD', 
     condition: '', 
-    description: volumeInfo.description || '',
+    description: stripHtml(volumeInfo.description || ''),
     thumbnail: imageLinks.thumbnail || '',
     images: [],
     sellerName: '', 

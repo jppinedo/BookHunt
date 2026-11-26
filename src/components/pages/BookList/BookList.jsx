@@ -10,9 +10,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { formatEbayBook } from '@utils/search-utils';
 import { Spinner } from "@jppinedo/lienzo";
 import BookCard from "@custom/Books/BookCard";
-import NoResults from "@custom/Search/NoResults";
 import LoadingResults from "@custom/Search/LoadingResults";
-import NoMoreResults from "@custom/Search/NoMoreResults";
 import SearchInput from "@custom/Search/SearchInput";
 
 /** BookList — MUI Container/Backdrop/CircularProgress replaced by a Tailwind
@@ -111,7 +109,10 @@ const BookList = () => {
     navigate(`/search?query=${encodeURIComponent(query)}`);
   }
 
-  if (loading && !queryCompleted) {
+  // U3: also covers the first paint before the fetch effect flips
+  // `loading` — the sections below would otherwise flash "· 0" counts
+  // and empty notes for a frame now that they render the empty state.
+  if ((loading || query) && !queryCompleted) {
     return (
       <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40">
          <Spinner size="48px" thickness="6px" />
@@ -128,16 +129,36 @@ const BookList = () => {
     { label: title || 'Deals', current: true },
   ];
 
-  if (queryCompleted && results.length === 0) {
-    return (
-      <div className="page-shell pt-4">
-        <BreadcrumbNav crumbs={crumbs} fallback={backFallback} />
-        <div className="mt-4">
-          <NoResults />
-        </div>
-      </div>
-    );
-  }
+  // U3: the two sources are no longer one merged card stream. Campus
+  // listings (Supabase/user rows — the marketplace's whole point) come
+  // first under their own heading; eBay deals follow under theirs.
+  // Each heading carries its count, and a source with nothing to show
+  // gets a one-line note instead of the old generic "No more results
+  // found." card (which also used to be the whole screen when both
+  // sources came back empty).
+  const campusListings = results.filter((item) => item.sellerType !== 'eBay');
+  const ebayListings = results.filter((item) => item.sellerType === 'eBay');
+
+  const cardGridStyle = {
+    display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center',
+  };
+  const renderCard = (item, index) => (
+    <BookCard
+      key={`${item.sellerType}-${item.id}-${index}`}
+      book={item}
+      type="grid"
+      onCardClick={handleBookClick}
+    />
+  );
+  const sectionHeading = (label, count) => (
+    <h2 className="font-playfair text-[22px] font-semibold text-pio-text text-left mb-4">
+      {label}
+      <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
+    </h2>
+  );
+  const emptyNote = (text) => (
+    <p className="text-sm text-pio-text-muted text-left my-0">{text}</p>
+  );
 
   return (
 
@@ -145,19 +166,51 @@ const BookList = () => {
       <SearchInput onSearch={handleSearch} inputValue={title} className="mb-1" />
       <BreadcrumbNav crumbs={crumbs} fallback={backFallback} className="mb-3" />
 
-      <InfiniteScroll
-        dataLength={results.length}
-        next={fetchMoreResults}
-        hasMore={hasMore}
-        loader={<LoadingResults className="mt-6 mb-16"/>}
-        endMessage={<NoMoreResults />}
-        scrollThreshold={1}
-        style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '15rem', justifyContent: 'center' }}
-      >
-        {results.map((item, index) => (
-          <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
-        ))}
-      </InfiniteScroll>
+      {/* U3: a compact book header — the audit found this screen never
+          named the book or its author outside the breadcrumb. */}
+      {(title || author) && (
+        <header className="mb-6 text-left">
+          <h1 className="font-playfair text-[26px] sm:text-3xl font-semibold leading-tight text-pio-text my-0">
+            {title}
+          </h1>
+          {(author || year) && (
+            <p className="text-sm text-pio-text-muted mt-1.5 mb-0">
+              {[author ? `by ${author}` : null, year].filter(Boolean).join(' · ')}
+            </p>
+          )}
+        </header>
+      )}
+
+      <section className="mb-9">
+        {sectionHeading('Campus listings', campusListings.length)}
+        {campusListings.length ? (
+          <div style={cardGridStyle}>{campusListings.map(renderCard)}</div>
+        ) : (
+          emptyNote('No campus listings for this book yet.')
+        )}
+      </section>
+
+      <section>
+        {sectionHeading('eBay deals', ebayListings.length)}
+        {ebayListings.length ? (
+          <InfiniteScroll
+            dataLength={ebayListings.length}
+            next={fetchMoreResults}
+            hasMore={hasMore}
+            loader={<LoadingResults className="mt-6 mb-16"/>}
+            scrollThreshold={1}
+            style={{ paddingBottom: '15rem' }}
+          >
+            <div style={cardGridStyle}>{ebayListings.map(renderCard)}</div>
+          </InfiniteScroll>
+        ) : (
+          <>
+            {emptyNote('No eBay deals found.')}
+            {/* Keep the empty state clear of the floating hub nav. */}
+            <div style={{ paddingBottom: '15rem' }} />
+          </>
+        )}
+      </section>
     </div>
 
   );
