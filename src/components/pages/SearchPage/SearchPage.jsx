@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
+import { SearchContext } from '@state/SearchContext';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
@@ -37,28 +37,14 @@ const ExampleSearches = ({ onPick }) => (
 );
 
 const SearchPage = () => {
-  const [books, setBooks] = useState([]);
-  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'done'
-  const [searchedQuery, setSearchedQuery] = useState('');
+  // U1: search state (books / status / searchedQuery) is owned by
+  // SearchContext at App level, not by this page — the page unmounts when
+  // the user drills into a book, and the session must survive that.
+  const { books, status, searchedQuery, runSearch } = useContext(SearchContext);
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('query');
 
   const navigate = useNavigate();
-
-  const handleSearch = async (query) => {
-    setStatus('loading');
-    try {
-      const results = await searchGoogleBooks(query);
-      setBooks(results);
-      setSearchedQuery(query);
-    } catch (err) {
-      console.error('Search failed:', err);
-      setBooks([]);
-      setSearchedQuery(query);
-    } finally {
-      setStatus('done');
-    }
-  };
 
   const handleItemClick = (book) => {
     const params = {
@@ -81,15 +67,17 @@ const SearchPage = () => {
     navigate(`/search?query=${encodeURIComponent(query)}`);
   }
 
+  // Search only when the URL asks for something the session doesn't
+  // already hold. Returning here (Back from a book's deals, the Home
+  // button, the bottom nav) with the same — or no — query re-renders the
+  // preserved results instead of wiping them and searching again. The old
+  // code reset the page on every bare /search visit, which is exactly
+  // what threw the user's results away.
   useEffect(() => {
-    if(urlQuery?.length) {
-      handleSearch(urlQuery);
-    } else {
-      setBooks([]);
-      setSearchedQuery('');
-      setStatus('idle');
+    if (urlQuery?.length && urlQuery !== searchedQuery) {
+      runSearch(urlQuery);
     }
-  }, [urlQuery])
+  }, [urlQuery, searchedQuery, runSearch])
 
   const isLoading = status === 'loading';
   const showNoResults = status === 'done' && !books.length && searchedQuery;
@@ -122,7 +110,7 @@ const SearchPage = () => {
         </div>
       ) : null}
 
-      <SearchInput onSearch={setQueryParam} inputValue={urlQuery || ''}/>
+      <SearchInput onSearch={setQueryParam} inputValue={urlQuery || searchedQuery || ''}/>
 
       {status === 'idle' ? (
         <ExampleSearches onPick={setQueryParam} />

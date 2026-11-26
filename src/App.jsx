@@ -28,10 +28,14 @@ import RedirectHandler from "@state/RedirectHandler.jsx";
 import { Protected } from "@/Protected";
 
 /**
- * PageBrand — small logo at the top-left for internal pages that are NOT
- * part of the book search flow (Saved Books, Profile, listing management).
- * The search-flow pages keep the large centered logo instead. Clicking it
- * returns to Book Search.
+ * PageBrand — the Home button on internal pages that are NOT part of the
+ * book search flow (Saved Books, Profile, listing management). The
+ * search-flow pages keep the large centered logo instead. U1: the audit
+ * found the old version (bare logo + wordmark) didn't read as a button or
+ * as "Home" at all, so it now carries a visible "Home" label beside the
+ * logo, a matching aria-label, and hover/focus treatment so it looks
+ * tappable. Clicking it returns to Book Search — which, since U1, shows
+ * the preserved search session rather than a wiped page.
  */
 function PageBrand() {
   const navigate = useNavigate();
@@ -40,11 +44,11 @@ function PageBrand() {
       <button
         type="button"
         onClick={() => navigate('/search')}
-        aria-label="Book Hunt — back to Book Search"
-        className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-1"
+        aria-label="Home — Book Search"
+        className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer px-2.5 py-1.5 -ml-2.5 rounded-full transition-colors hover:bg-pio-coral-pale/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
       >
         <img src={logoSmall} alt="" style={{ width: '38px', height: '38px', display: 'block' }} />
-        <span className="text-pio-text text-lg font-bold font-jakarta">Book Hunt</span>
+        <span className="text-pio-text text-lg font-bold font-jakarta">Home</span>
       </button>
     </div>
   );

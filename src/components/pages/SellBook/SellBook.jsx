@@ -6,6 +6,7 @@ import BookResults from '@custom/Search/BookResults';
 import { BookOpen as MenuBookIcon } from 'react-feather';
 import logo from '@assets/images/book_hunt_logo.png';
 import InfoBox from '@custom/Shared/InfoBox';
+import BackButton from '@custom/Navigation/BackButton';
 
 const SellBook = () => {
 
@@ -23,6 +24,11 @@ const SellBook = () => {
 
   return (
     <div>
+      {/* U1: Sell is reached from the menu and used to be a dead end —
+          Back returns to wherever the user came from (Home fallback). */}
+      <div className="w-full max-w-[1200px] mx-auto px-4 pt-3 box-border">
+        <BackButton fallback="/search" />
+      </div>
       <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
       {!books.length ? (
         <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking to sell." />

@@ -1,7 +1,9 @@
 
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { useSearchParams } from 'react-router-dom';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { SearchContext } from '@state/SearchContext';
+import BackButton from '@custom/Navigation/BackButton';
 import { searchEbay } from "@services/EbayAPI";
 import { searchBookInDB } from "@services/BookFirestore";
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -39,6 +41,17 @@ const BookList = () => {
     .filter(([key, value]) => value !== null && value !== undefined && value !== '')
     .map(([key, value]) => `${key}:${value}`)
     .join('+');
+
+  // U1: remember this deals URL so the listing detail screen's Back
+  // button can fall back to "deals for this book", and give this screen's
+  // own Back button a fallback: the preserved Google results for the
+  // book's title (normally Back just retraces history to them).
+  const location = useLocation();
+  const { setLastDealsUrl } = useContext(SearchContext);
+  useEffect(() => {
+    setLastDealsUrl(`${location.pathname}${location.search}`);
+  }, [location.pathname, location.search, setLastDealsUrl]);
+  const backFallback = title ? `/search?query=${encodeURIComponent(title)}` : '/search';
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -107,12 +120,20 @@ const BookList = () => {
   }
 
   if (queryCompleted && results.length === 0) {
-    return <NoResults />;
+    return (
+      <div className="w-full max-w-[1200px] mx-auto px-4 pt-16 box-border">
+        <BackButton fallback={backFallback} />
+        <div className="mt-8">
+          <NoResults />
+        </div>
+      </div>
+    );
   }
 
   return (
 
     <div className="w-full max-w-[1200px] mx-auto px-4 pt-16 box-border">
+      <BackButton fallback={backFallback} className="mb-1" />
       <SearchInput onSearch={handleSearch} inputValue={title} className="mb-4" />
 
       <InfiniteScroll
