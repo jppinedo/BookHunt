@@ -101,7 +101,20 @@ const MenuNav = () => {
     });
 
     return (
-        <div ref={wrapperRef} className="absolute top-3 right-3 z-50 flex flex-col items-end gap-2">
+        // U6: the trigger used to be `absolute top-3 right-3` with no
+        // positioned ancestor, so it pinned to the VIEWPORT's top-right
+        // corner — on desktop it floated far right of the app column,
+        // detached from the header (final audit finding). It now sits
+        // inside the shared .page-shell (U1.2), so its right edge tracks
+        // the column's content edge at every width. The -mr-1 keeps the
+        // original 12px corner offset (the shell's padding is 16px), so
+        // at phone widths — where the shell spans the full viewport —
+        // the button lands exactly where it always did. The strip is
+        // pointer-events-none except on the wrapper itself, so it never
+        // blocks taps on the PageBrand header beneath it.
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-50">
+          <div className="page-shell">
+            <div ref={wrapperRef} className="pointer-events-auto relative ml-auto flex w-fit flex-col items-end gap-2 pt-3 -mr-1">
             <button
                 ref={triggerRef}
                 type="button"
@@ -136,6 +149,8 @@ const MenuNav = () => {
                     ]}
                 />
             )}
+            </div>
+          </div>
         </div>
     )
 }
