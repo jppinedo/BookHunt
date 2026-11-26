@@ -28,8 +28,17 @@ import { ChevronLeft, ChevronRight } from 'react-feather';
  *
  * crumbs: [{ label, to?, onClick?, current? }] — the final crumb is
  * treated as current even without the flag.
+ *
+ * U1.2: `end` is an optional right-aligned slot (ml-auto) — the search
+ * results page puts its result count there ("20 results for …"), so the
+ * count lives in the bar instead of floating as a separate line above
+ * the grid. Other pages pass nothing and the bar stays clean.
+ * The Back button was also restyled: in U1.1 it was bare coral text at a
+ * larger size than the crumbs, so it read as a stray link, not a
+ * button. It is now a pill at the SAME text-sm size as the crumbs, with
+ * a coral border and a light coral tint that deepens on hover.
  */
-const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '' }) => {
+const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '', end = null }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -93,9 +102,9 @@ const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '' }) =>
         type="button"
         onClick={handleBack}
         aria-label="Go back"
-        className="inline-flex items-center gap-0.5 min-h-[44px] pl-1.5 pr-3 -ml-1.5 rounded-full bg-transparent border-0 cursor-pointer font-jakarta text-[15px] font-semibold text-pio-coral shrink-0 transition-colors hover:bg-pio-coral-pale/40 hover:text-pio-coral-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
+        className="inline-flex items-center gap-0.5 min-h-[40px] my-[2px] pl-2 pr-3.5 rounded-full bg-pio-coral-pale/50 border border-solid border-pio-coral cursor-pointer font-jakarta text-sm font-semibold text-pio-coral-dark shrink-0 transition-colors hover:bg-pio-coral-opacity-20 hover:border-pio-coral-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
       >
-        <ChevronLeft size={22} aria-hidden="true" className="shrink-0" />
+        <ChevronLeft size={18} aria-hidden="true" className="shrink-0" />
         Back
       </button>
       {crumbs.length > 0 && (
@@ -110,6 +119,11 @@ const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '' }) =>
           ))}
         </ol>
       )}
+      {end ? (
+        <span className="ml-auto shrink-0 pl-3 inline-flex items-center min-h-[44px] font-jakarta text-xs sm:text-[13px] text-pio-text-muted whitespace-nowrap">
+          {end}
+        </span>
+      ) : null}
     </nav>
   );
 };

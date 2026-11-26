@@ -35,3 +35,31 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* U1.2 — ONE shared content container for the whole app.
+   Juan's screenshot verdict on U1.1: the breadcrumb bar and the results
+   list used different widths/padding (the bar sat in a 1200px/px-4
+   wrapper, the grid in a 1100px wrapper inside px-3), so their edges
+   never lined up. Every page block — brand header, search bar block,
+   hint line, breadcrumb bar, results grid, page content — now sits in
+   .page-shell (or .page-shell-narrow for the single-book views), so
+   horizontal edges align at every resolution by construction, not by
+   per-page numbers that can drift apart again.
+   - .page-shell:         max-width 1200px, 16px inline padding.
+   - .page-shell-narrow:  max-width 768px (Tailwind's max-w-3xl, the
+     width the single-book views already used), same 16px padding. */
+.page-shell {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  box-sizing: border-box;
+}
+
+.page-shell-narrow {
+  width: 100%;
+  max-width: 768px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  box-sizing: border-box;
+}

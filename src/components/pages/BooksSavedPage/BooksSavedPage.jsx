@@ -35,7 +35,7 @@ const BooksSavedPage = () => {
     }
 
     return (
-        <div className="w-full max-w-[1200px] mx-auto px-4 box-border">
+        <div className="page-shell">
             <div className="page-heading">
                 <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6">Saved Books</Title>
             </div>
@@ -51,7 +51,7 @@ const BooksSavedPage = () => {
             />
 
             {savedBooks.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', maxWidth: '1140px', margin: '0 auto', justifyContent: 'center'}}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', justifyContent: 'center'}}>
                     {savedBooks.map((item, index) => (
                         <BookCard key={`${item.id}-${index}`} book={item} type="grid" onCardClick={handleBookClick} />
                     ))}

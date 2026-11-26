@@ -44,7 +44,7 @@ import { Protected } from "@/Protected";
 function PageBrand() {
   const navigate = useNavigate();
   return (
-    <div className="w-full max-w-[1200px] mx-auto px-4 pt-3 box-border">
+    <div className="page-shell pt-3">
       <button
         type="button"
         onClick={() => navigate('/search')}

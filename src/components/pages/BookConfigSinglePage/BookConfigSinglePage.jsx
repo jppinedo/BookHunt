@@ -46,13 +46,13 @@ const BookConfigSinglePage = () => {
   }
   if (!currentBook) {
     return (
-      <div className="max-w-3xl mx-auto w-full px-4 pb-20 box-border">
+      <div className="page-shell-narrow pb-20">
         <p className="on-bg-text">Book not found.</p>
       </div>
     );
   }
   return (
-      <div className="max-w-3xl mx-auto w-full px-4 pb-20 box-border">
+      <div className="page-shell-narrow pb-20">
         <BookCardSeller book={currentBook} type="view" isSingle={true} />
       </div>
   )

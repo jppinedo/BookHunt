@@ -54,7 +54,7 @@ const BookSinglePage = () => {
   }
   if (!currentBook) {
     return (
-      <div className="max-w-3xl mx-auto w-full mt-6 mb-36 px-4 box-border">
+      <div className="page-shell-narrow mt-6 mb-36">
         <BreadcrumbNav
           crumbs={[
             { label: 'Home', to: '/search' },
@@ -72,7 +72,7 @@ const BookSinglePage = () => {
   // jumps straight back to this book's deals list.
   const dealsUrl = lastDealsUrl || `/search?query=${encodeURIComponent(currentBook.title || '')}`;
   return (
-    <div className="max-w-3xl mx-auto w-full mt-6 mb-36 px-4 box-border">
+    <div className="page-shell-narrow mt-6 mb-36">
       <BreadcrumbNav
         crumbs={[
           { label: 'Home', to: '/search' },

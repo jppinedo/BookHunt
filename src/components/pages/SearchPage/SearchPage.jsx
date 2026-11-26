@@ -123,17 +123,37 @@ const SearchPage = () => {
 
       <SearchInput onSearch={setQueryParam} inputValue={urlQuery || searchedQuery || ''}/>
 
-      {/* U1.1: once a search session exists, the breadcrumb bar sits
-          directly under the search bar (Home / Results), so the results
-          state carries the same navigation as every inner page. */}
+      {/* U1.2 order (Juan's screenshot review): search input → hint →
+          breadcrumb bar → results grid. The hint sits directly below
+          the search input; the breadcrumb bar below the hint. All three
+          blocks live in the shared .page-shell so their edges align
+          with the grid's. */}
+      {books.length ? (
+        <div className="page-shell">
+          <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
+        </div>
+      ) : null}
+
+      {/* U1.1: once a search session exists, the breadcrumb bar carries
+          the same navigation as every inner page (Home / Results).
+          U1.2: the result count moved INTO the bar's right end — it
+          used to be a separate line above the grid. */}
       {status !== 'idle' ? (
-        <div className="w-full max-w-[1200px] mx-auto px-4 box-border">
+        <div className="page-shell">
           <BreadcrumbNav
             crumbs={[
               { label: 'Home', to: '/search' },
               { label: 'Results', current: true },
             ]}
             fallback="/search"
+            end={status === 'done' && books.length ? (
+              <>
+                <span className="font-semibold text-pio-text">
+                  {books.length} {books.length === 1 ? 'result' : 'results'}
+                </span>
+                &nbsp;for &ldquo;{searchedQuery}&rdquo;
+              </>
+            ) : null}
           />
         </div>
       ) : null}
@@ -153,13 +173,7 @@ const SearchPage = () => {
           <ExampleSearches onPick={setQueryParam} />
         </>
       ) : (
-        <>
-        {books.length ? (
-          <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
-        ) : null}
-
-        <BookResults books={books} onClickItem={handleItemClick} query={searchedQuery} />
-        </>
+        <BookResults books={books} onClickItem={handleItemClick} />
       )}
 
     </div>

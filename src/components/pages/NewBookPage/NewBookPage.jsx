@@ -43,7 +43,7 @@ const NewBookPage = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full mt-32 mb-36 px-4 box-border">
+    <div className="page-shell-narrow mt-32 mb-36">
       <BookCardSeller book={currentBook} type="form" isSingle={true} isNew={true}/>
       <BookAddForm book={currentBook} onSaveBook={saveBook} />
     </div>

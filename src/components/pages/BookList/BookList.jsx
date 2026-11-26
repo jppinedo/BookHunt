@@ -130,7 +130,7 @@ const BookList = () => {
 
   if (queryCompleted && results.length === 0) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 pt-4 box-border">
+      <div className="page-shell pt-4">
         <BreadcrumbNav crumbs={crumbs} fallback={backFallback} />
         <div className="mt-4">
           <NoResults />
@@ -141,7 +141,7 @@ const BookList = () => {
 
   return (
 
-    <div className="w-full max-w-[1200px] mx-auto px-4 pt-4 box-border">
+    <div className="page-shell pt-4">
       <SearchInput onSearch={handleSearch} inputValue={title} className="mb-1" />
       <BreadcrumbNav crumbs={crumbs} fallback={backFallback} className="mb-3" />
 

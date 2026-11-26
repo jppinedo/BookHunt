@@ -28,7 +28,7 @@ const SellBook = () => {
           the lone Back button, and the big centered logo is gone — the
           PageBrand header in the app shell is this page's brand now, so
           the logo is always at the top and always links Home. */}
-      <div className="w-full max-w-[1200px] mx-auto px-4 pt-2 box-border">
+      <div className="page-shell pt-2">
         <BreadcrumbNav
           crumbs={[
             { label: 'Home', to: '/search' },

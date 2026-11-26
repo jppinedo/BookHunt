@@ -14,26 +14,24 @@ import './BookResults.css';
  * sits directly on the page background; bottom padding keeps the last
  * row clear of the floating hub navigation.
  *
- * D2 polish: an optional result-count line ("N results for "query"")
- * gives the grid a header; cards get one consistent interior (16px
- * padding, 16px gap), a true 2:3 cover at a responsive size, muted
- * token-colored metadata, and a 3-line clamped description — replacing
- * the ad-hoc grays and the old phone rule that stretched covers to
- * `width: inherit`.
+ * D2 polish: cards get one consistent interior (16px padding, 16px
+ * gap), a true 2:3 cover at a responsive size, muted token-colored
+ * metadata, and a 3-line clamped description — replacing the ad-hoc
+ * grays and the old phone rule that stretched covers to `width:
+ * inherit`.
+ *
+ * U1.2: the grid sits in the shared .page-shell container (it used to
+ * be a private 1100px wrapper inside px-3, which is exactly why its
+ * edges never aligned with the breadcrumb bar's 1200px/px-4 wrapper).
+ * The D2 result-count line is gone from here — Juan asked for the
+ * count inside the breadcrumb bar; SearchPage passes it to
+ * BreadcrumbNav's `end` slot instead.
  */
-const BookResults = ({ books, onClickItem, query }) => {
+const BookResults = ({ books, onClickItem }) => {
   if (!books.length) return null;
   return (
-    <div className="w-full px-3 pb-32">
-      <div className="max-w-[1100px] mx-auto pt-5">
-        {query ? (
-          <p className="text-left text-sm text-pio-text-muted px-1 pb-4 m-0">
-            <span className="font-semibold text-pio-text">
-              {books.length} {books.length === 1 ? 'result' : 'results'}
-            </span>
-            {' '}for <span className="text-pio-text">&ldquo;{query}&rdquo;</span>
-          </p>
-        ) : null}
+    <div className="page-shell pb-32">
+      <div className="pt-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 justify-items-center">
           {books.map((book) => (
             <Card
