@@ -1,5 +1,5 @@
-import React, {useContext, useEffect, useState} from "react";
-import { useNavigate } from "react-router-dom";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Input, Tabs, Title } from "@jppinedo/lienzo";
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
@@ -20,8 +20,9 @@ import './ProfilePage.css';
  */
 const ProfilePage = () => {
     const { user, signOut } = useContext(AuthContext);
-    const { onShowError } = useContext(AppContext);
+    const { onShowError, profileTab, setProfileTab } = useContext(AppContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [fullName, setFullName] = useState('');
     const [oldPassword, setOldPassword] = useState('');
@@ -36,7 +37,11 @@ const ProfilePage = () => {
     // clicks on the rendered tab buttons (click-capture on the wrapper
     // below), and the "Profile" crumb switches back by clicking the
     // real tab button.
-    const [activeTab, setActiveTab] = useState('profile');
+    // U2: the active tab now lives in AppContext (profileTab) because
+    // the header menu's "My Listings" item needs to read it (active
+    // mark) and target it (deep link, next effect).
+    const activeTab = profileTab;
+    const setActiveTab = setProfileTab;
 
     const handleTabsClick = (e) => {
         const tabEl = e.target.closest('[role="tab"]');
@@ -48,6 +53,19 @@ const ProfilePage = () => {
         document.getElementById('tab-profile-tab')?.click();
         setActiveTab('profile');
     };
+
+    // U2 deep link: the header menu's "My Listings" navigates here with
+    // location state { tab: 'listings' }. Tabs has no prop to open on a
+    // given tab, so switch the same way the breadcrumb does — click the
+    // real tab button. The location.key guard makes each navigation
+    // count once (a manual tab switch afterwards isn't overridden).
+    const handledNavKey = useRef(null);
+    useEffect(() => {
+        if (location.state?.tab !== 'listings' || handledNavKey.current === location.key) return;
+        handledNavKey.current = location.key;
+        document.getElementById('tab-listings-tab')?.click();
+        setActiveTab('listings');
+    }, [location, setActiveTab]);
 
     const [oldPasswordError, setOldPasswordError] = useState(false);
     const [newPasswordError, setNewPasswordError] = useState(false);

@@ -1,8 +1,9 @@
-import React, { useContext, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from '@jppinedo/lienzo';
-import { Menu as MenuIcon } from 'react-feather';
+import { Menu as MenuIcon, Tag, List, LogOut } from 'react-feather';
 import { AuthContext } from "@state/AuthContext";
+import { AppContext } from "@state/AppContext";
 
 /**
  * MenuNav — was MUI AppBar + IconButton + Menu/MenuItem anchored to the
@@ -17,11 +18,64 @@ import { AuthContext } from "@state/AuthContext";
  * (DS gap), so the trigger is now a plain square button: 44×44,
  * fully rounded, icon dead-center, 12px from the top-right corner,
  * with the dropdown spaced below it by the flex gap.
+ *
+ * U2: the menu held only "Sell Book" and "Logout", and the audit
+ * found it didn't close on Escape and didn't reliably close when the
+ * trigger was re-tapped. Changes:
+ * - Items are now "Sell a Book", "My Listings", "Logout" — My Listings
+ *   gives the selling list a direct route (it used to be buried under
+ *   Profile → Book Listings). Each item carries a react-feather icon
+ *   through Lienzo Label's icon prop, and the item for the screen
+ *   you're on is marked with a coral icon + semibold label (Lienzo
+ *   Menu items have no active state — DS gap).
+ * - "My Listings" navigates to /profile with location state
+ *   { tab: 'listings' }; ProfilePage reads it and switches tabs (see
+ *   there). Its active mark reads the shared profileTab in AppContext.
+ * - Close behaviour is handled HERE, not via Lienzo Menu's
+ *   onClickOutside: that listener only knows the menu panel, so a
+ *   mousedown on the trigger counted as "outside" and closed the menu
+ *   just before the trigger's click toggled it back open — the
+ *   re-tap bug. The wrapper below contains BOTH trigger and panel, so
+ *   outside means truly outside; Escape closes too, and any route
+ *   change closes the menu.
  */
 const MenuNav = () => {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const { signOut } = useContext(AuthContext);
+    const { profileTab } = useContext(AppContext);
+    const wrapperRef = useRef(null);
+    const triggerRef = useRef(null);
+
+    // Close on any navigation (item selection included).
+    useEffect(() => {
+        setOpen(false);
+    }, [pathname]);
+
+    // Close on outside mousedown / Escape while open.
+    useEffect(() => {
+        if (!open) return;
+
+        function handlePointerDown(event) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        }
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                setOpen(false);
+                triggerRef.current?.focus();
+            }
+        }
+
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open ]);
 
     // Should print null once logged out (mock auth: clears the demo user).
     async function handleLogout() {
@@ -34,9 +88,22 @@ const MenuNav = () => {
         navigate("/login");
     }
 
+    const onSell = pathname === "/sell" || pathname.startsWith("/new/");
+    const onListings = pathname === "/profile" && profileTab === 'listings';
+
+    // Lienzo Label: the icon span's own colour is a pale gray for the
+    // default type, so the feather icon carries its own text colour
+    // (coral when the item is the current screen, muted otherwise).
+    const itemLabel = (text, Icon, active) => ({
+        text,
+        icon: <Icon size={16} aria-hidden="true" className={active ? 'text-pio-coral' : 'text-pio-text-muted'} />,
+        className: active ? 'font-semibold' : '',
+    });
+
     return (
-        <div className="absolute top-3 right-3 z-50 flex flex-col items-end gap-2">
+        <div ref={wrapperRef} className="absolute top-3 right-3 z-50 flex flex-col items-end gap-2">
             <button
+                ref={triggerRef}
                 type="button"
                 aria-label="menu"
                 aria-expanded={open}
@@ -49,18 +116,24 @@ const MenuNav = () => {
                 <Menu
                     items={[
                         {
-                            label: { text: "Logout", type: "red" },
-                            onClick: handleLogout,
-                        },
-                        {
-                            label: { text: "Sell Book" },
+                            label: itemLabel("Sell a Book", Tag, onSell),
                             onClick: () => {
                                 setOpen(false);
                                 navigate("/sell");
                             },
                         },
+                        {
+                            label: itemLabel("My Listings", List, onListings),
+                            onClick: () => {
+                                setOpen(false);
+                                navigate("/profile", { state: { tab: 'listings' } });
+                            },
+                        },
+                        {
+                            label: { text: "Logout", type: "red", icon: <LogOut size={16} aria-hidden="true" /> },
+                            onClick: handleLogout,
+                        },
                     ]}
-                    onClickOutside={() => setOpen(false)}
                 />
             )}
         </div>
