@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import { useSearchParams } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router';
 import { SearchContext } from '@state/SearchContext';
-import BackButton from '@custom/Navigation/BackButton';
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 import { searchEbay } from "@services/EbayAPI";
 import { searchBookInDB } from "@services/BookFirestore";
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -42,9 +42,9 @@ const BookList = () => {
     .map(([key, value]) => `${key}:${value}`)
     .join('+');
 
-  // U1: remember this deals URL so the listing detail screen's Back
-  // button can fall back to "deals for this book", and give this screen's
-  // own Back button a fallback: the preserved Google results for the
+  // U1: remember this deals URL so the listing detail screen's
+  // breadcrumb can fall back to "deals for this book", and give this
+  // screen's own Back a fallback: the preserved Google results for the
   // book's title (normally Back just retraces history to them).
   const location = useLocation();
   const { setLastDealsUrl } = useContext(SearchContext);
@@ -119,11 +119,20 @@ const BookList = () => {
     );
   }
 
+  // U1.1: the breadcrumb trail for the deals screen. "Results" (and
+  // "Home") land on /search, which since U1 restores the preserved
+  // Google Books session — the results the user drilled in from.
+  const crumbs = [
+    { label: 'Home', to: '/search' },
+    { label: 'Results', to: '/search' },
+    { label: title || 'Deals', current: true },
+  ];
+
   if (queryCompleted && results.length === 0) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 pt-16 box-border">
-        <BackButton fallback={backFallback} />
-        <div className="mt-8">
+      <div className="w-full max-w-[1200px] mx-auto px-4 pt-4 box-border">
+        <BreadcrumbNav crumbs={crumbs} fallback={backFallback} />
+        <div className="mt-4">
           <NoResults />
         </div>
       </div>
@@ -132,9 +141,9 @@ const BookList = () => {
 
   return (
 
-    <div className="w-full max-w-[1200px] mx-auto px-4 pt-16 box-border">
-      <BackButton fallback={backFallback} className="mb-1" />
-      <SearchInput onSearch={handleSearch} inputValue={title} className="mb-4" />
+    <div className="w-full max-w-[1200px] mx-auto px-4 pt-4 box-border">
+      <SearchInput onSearch={handleSearch} inputValue={title} className="mb-1" />
+      <BreadcrumbNav crumbs={crumbs} fallback={backFallback} className="mb-3" />
 
       <InfiniteScroll
         dataLength={results.length}

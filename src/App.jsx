@@ -28,14 +28,18 @@ import RedirectHandler from "@state/RedirectHandler.jsx";
 import { Protected } from "@/Protected";
 
 /**
- * PageBrand — the Home button on internal pages that are NOT part of the
- * book search flow (Saved Books, Profile, listing management). The
- * search-flow pages keep the large centered logo instead. U1: the audit
- * found the old version (bare logo + wordmark) didn't read as a button or
- * as "Home" at all, so it now carries a visible "Home" label beside the
- * logo, a matching aria-label, and hover/focus treatment so it looks
- * tappable. Clicking it returns to Book Search — which, since U1, shows
- * the preserved search session rather than a wiped page.
+ * PageBrand — the Home button in the header of every logged-in page.
+ * U1 gave it a visible "Home" label beside the logo, a matching
+ * aria-label, and hover/focus treatment so it reads as tappable (the
+ * audit found the old bare logo + wordmark didn't read as a button or as
+ * "Home" at all). U1.1: Juan's rule is that the logo is ALWAYS visible
+ * and ALWAYS links home — the deals and listing-detail screens had no
+ * header at all, so PageBrand now renders on every logged-in route. The
+ * one exception is /search itself: that page's large centered hero logo
+ * is its brand lockup, and SearchPage makes it a Home button too, so
+ * the rule holds there without stacking two logos. Clicking Home
+ * returns to Book Search — which, since U1, shows the preserved search
+ * session rather than a wiped page.
  */
 function PageBrand() {
   const navigate = useNavigate();
@@ -68,14 +72,11 @@ function AppShell() {
   }, [user]);
 
   const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration";
-  // Small top-left logo on internal pages outside the search flow. The
-  // search flow (/search, /results, /book/*, /sell) keeps its own header.
-  const showBrand = showNav && (
-    pathname === "/saved" ||
-    pathname === "/profile" ||
-    pathname.startsWith("/new") ||
-    pathname.startsWith("/bookConfig")
-  );
+  // U1.1: the brand header (logo + "Home") shows on EVERY logged-in
+  // page — previously /results and /book/* had no header at all. The
+  // only exception is /search, whose hero logo is the brand there (and
+  // is itself a Home button; see SearchPage).
+  const showBrand = showNav && pathname !== "/search";
 
   return (
     <>

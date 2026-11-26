@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@state/AuthContext.jsx";
 import { getSavedBooks } from "@services/BookFirestore";
 import BookCard from "@custom/Books/BookCard.jsx";
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 import { Title } from "@jppinedo/lienzo";
 import {useNavigate} from "react-router";
 
@@ -38,6 +39,16 @@ const BooksSavedPage = () => {
             <div className="page-heading">
                 <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6">Saved Books</Title>
             </div>
+
+            {/* U1.1: breadcrumb bar below the page title (Home / Saved Books). */}
+            <BreadcrumbNav
+                crumbs={[
+                    { label: 'Home', to: '/search' },
+                    { label: 'Saved Books', current: true },
+                ]}
+                fallback="/search"
+                className="mb-4"
+            />
 
             {savedBooks.length > 0 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', paddingBottom: '5rem', maxWidth: '1140px', margin: '0 auto', justifyContent: 'center'}}>

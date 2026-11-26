@@ -4,9 +4,8 @@ import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
 import { BookOpen as MenuBookIcon } from 'react-feather';
-import logo from '@assets/images/book_hunt_logo.png';
 import InfoBox from '@custom/Shared/InfoBox';
-import BackButton from '@custom/Navigation/BackButton';
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 
 const SellBook = () => {
 
@@ -24,12 +23,20 @@ const SellBook = () => {
 
   return (
     <div>
-      {/* U1: Sell is reached from the menu and used to be a dead end —
-          Back returns to wherever the user came from (Home fallback). */}
-      <div className="w-full max-w-[1200px] mx-auto px-4 pt-3 box-border">
-        <BackButton fallback="/search" />
+      {/* U1: Sell is reached from the menu and used to be a dead end.
+          U1.1: the breadcrumb bar (Back + Home / Sell a Book) replaces
+          the lone Back button, and the big centered logo is gone — the
+          PageBrand header in the app shell is this page's brand now, so
+          the logo is always at the top and always links Home. */}
+      <div className="w-full max-w-[1200px] mx-auto px-4 pt-2 box-border">
+        <BreadcrumbNav
+          crumbs={[
+            { label: 'Home', to: '/search' },
+            { label: 'Sell a Book', current: true },
+          ]}
+          fallback="/search"
+        />
       </div>
-      <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
       {!books.length ? (
         <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking to sell." />
       ) : null}

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 import { SearchContext } from '@state/SearchContext';
 import SearchInput from '@custom/Search/SearchInput';
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
 import { BookOpen as MenuBookIcon } from 'react-feather';
@@ -92,7 +93,17 @@ const SearchPage = () => {
       className={isHomeState ? 'flex flex-col justify-center box-border' : undefined}
       style={isHomeState ? { minHeight: 'calc(100dvh - 5.5rem)', paddingBottom: '4.5rem' } : undefined}
     >
-      <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
+      {/* U1.1: this page has no PageBrand header — its hero logo IS the
+          brand lockup, so the logo itself is the Home button (Juan's
+          rule: the logo is always visible and always links home). */}
+      <button
+        type="button"
+        onClick={() => navigate('/search')}
+        aria-label="Home — Book Search"
+        className="block mx-auto bg-transparent border-0 p-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pio-coral"
+      >
+        <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
+      </button>
       {/* D2 hero: in the idle home state the logo gets a headline and a
           one-line promise, so the centered hero reads as a composed
           unit (logo → headline → subline → pill search → example
@@ -111,6 +122,21 @@ const SearchPage = () => {
       ) : null}
 
       <SearchInput onSearch={setQueryParam} inputValue={urlQuery || searchedQuery || ''}/>
+
+      {/* U1.1: once a search session exists, the breadcrumb bar sits
+          directly under the search bar (Home / Results), so the results
+          state carries the same navigation as every inner page. */}
+      {status !== 'idle' ? (
+        <div className="w-full max-w-[1200px] mx-auto px-4 box-border">
+          <BreadcrumbNav
+            crumbs={[
+              { label: 'Home', to: '/search' },
+              { label: 'Results', current: true },
+            ]}
+            fallback="/search"
+          />
+        </div>
+      ) : null}
 
       {status === 'idle' ? (
         <ExampleSearches onPick={setQueryParam} />

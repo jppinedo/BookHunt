@@ -6,14 +6,15 @@ import { Spinner } from '@jppinedo/lienzo';
 import { transformEbayItem } from "@utils/search-utils";
 import BookCard from '@custom/Books/BookCard';
 import { SearchContext } from '@state/SearchContext';
-import BackButton from '@custom/Navigation/BackButton';
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 
 
 const BookSinglePage = () => {
   const { type, id } = useParams();
   // U1: Back normally retraces history to this book's deals list; the
   // fallback is the last deals URL the session visited (kept in
-  // SearchContext), or the preserved search results.
+  // SearchContext), or the preserved search results. U1.1: the same
+  // deals URL is where the book-title breadcrumb crumb points.
   const { lastDealsUrl } = useContext(SearchContext);
   const backFallback = lastDealsUrl || '/search';
   const [ currentBook, setCurrentBook ] = useState(null);
@@ -53,15 +54,35 @@ const BookSinglePage = () => {
   }
   if (!currentBook) {
     return (
-      <div className="max-w-3xl mx-auto w-full mt-24 mb-36 px-4 box-border">
-        <BackButton fallback={backFallback} className="mb-2" />
+      <div className="max-w-3xl mx-auto w-full mt-6 mb-36 px-4 box-border">
+        <BreadcrumbNav
+          crumbs={[
+            { label: 'Home', to: '/search' },
+            { label: 'Results', to: '/search' },
+            { label: 'Deal', current: true },
+          ]}
+          fallback={backFallback}
+          className="mb-2"
+        />
         <p className="on-bg-text">Book not found.</p>
       </div>
     );
   }
+  // U1.1 trail: Home / Results / <book title> / Deal — the title crumb
+  // jumps straight back to this book's deals list.
+  const dealsUrl = lastDealsUrl || `/search?query=${encodeURIComponent(currentBook.title || '')}`;
   return (
-    <div className="max-w-3xl mx-auto w-full mt-24 mb-36 px-4 box-border">
-      <BackButton fallback={backFallback} className="mb-2" />
+    <div className="max-w-3xl mx-auto w-full mt-6 mb-36 px-4 box-border">
+      <BreadcrumbNav
+        crumbs={[
+          { label: 'Home', to: '/search' },
+          { label: 'Results', to: '/search' },
+          { label: currentBook.title || 'Book', to: dealsUrl },
+          { label: 'Deal', current: true },
+        ]}
+        fallback={backFallback}
+        className="mb-2"
+      />
       <BookCard book={currentBook} type="view" isSingle={true} />
     </div>
   )

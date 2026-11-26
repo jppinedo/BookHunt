@@ -5,6 +5,7 @@ import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
 import { getUserProfile, getListedBooks } from "@services/BookFirestore";
 import BookCardSeller from "@custom/Books/BookCardSeller.jsx";
+import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 import './ProfilePage.css';
 
 /**
@@ -28,6 +29,25 @@ const ProfilePage = () => {
     const [listedBooks, setListedBooks] = useState([])
 
     const [deleteVisible, setDeleteVisible] = useState(false);
+
+    // U1.1: the breadcrumb trail changes with the active tab (Profile /
+    // My Listings). Lienzo Tabs is uncontrolled — it owns its active tab
+    // and offers no onChange — so the page learns about switches from
+    // clicks on the rendered tab buttons (click-capture on the wrapper
+    // below), and the "Profile" crumb switches back by clicking the
+    // real tab button.
+    const [activeTab, setActiveTab] = useState('profile');
+
+    const handleTabsClick = (e) => {
+        const tabEl = e.target.closest('[role="tab"]');
+        if (!tabEl) return;
+        setActiveTab(tabEl.id === 'tab-listings-tab' ? 'listings' : 'profile');
+    };
+
+    const goToProfileTab = () => {
+        document.getElementById('tab-profile-tab')?.click();
+        setActiveTab('profile');
+    };
 
     const [oldPasswordError, setOldPasswordError] = useState(false);
     const [newPasswordError, setNewPasswordError] = useState(false);
@@ -199,12 +219,29 @@ const ProfilePage = () => {
     return (
         <div className={"profile-background"} style={{marginTop: '1rem', marginBottom: '6rem'}}>
             <Title size="lg" thikness="bold" fontFamily="playfair" className="pt-4">Profile</Title>
-            <Tabs
-                tabs={[
-                    { id: 'profile-tab', label: 'Profile', content: ProfileSettings },
-                    { id: 'listings-tab', label: 'Book Listings', content: BookListingView },
-                ]}
-            />
+            {/* U1.1: breadcrumb bar below the title; the trail extends to
+                "My Listings" while the Book Listings tab is active. */}
+            <div className="px-5">
+                <BreadcrumbNav
+                    crumbs={activeTab === 'listings' ? [
+                        { label: 'Home', to: '/search' },
+                        { label: 'Profile', onClick: goToProfileTab },
+                        { label: 'My Listings', current: true },
+                    ] : [
+                        { label: 'Home', to: '/search' },
+                        { label: 'Profile', current: true },
+                    ]}
+                    fallback="/search"
+                />
+            </div>
+            <div onClickCapture={handleTabsClick}>
+                <Tabs
+                    tabs={[
+                        { id: 'profile-tab', label: 'Profile', content: ProfileSettings },
+                        { id: 'listings-tab', label: 'Book Listings', content: BookListingView },
+                    ]}
+                />
+            </div>
         </div>
     );
 };
