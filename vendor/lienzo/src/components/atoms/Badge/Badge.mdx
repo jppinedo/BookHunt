@@ -1,0 +1,68 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Badge.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Badge from '@atoms/Badge/Badge';
+
+<Badge label="0.1.0" tone="coral" dot />`;
+
+<ComponentDocsPage
+  title="Badge"
+  badge="0.1.0"
+  description="Pill label for Docs chrome (version chips, “Interactive”, pattern tags). Tones use coral-pale, teal wash, or amber-pale fills with an optional color dot."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Version chips next to a Docs page title.',
+      'Pattern or status tags in galleries (“Interactive”, “Pattern”).',
+      'Compact tone labels where a full Label with icon would be too heavy.',
+      'Related: prefer Label when you need icons, counts, or body-adjacent text.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'BadgeProps',
+    lead: 'Runtime props for Badge.',
+    rows: [
+      {
+        name: 'label',
+        type: 'string',
+        description: 'Visible badge text.',
+      },
+      {
+        name: 'tone',
+        type: "'coral' | 'teal' | 'amber'",
+        defaultValue: "'coral'",
+        description: 'Fill and border color tone.',
+      },
+      {
+        name: 'dot',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Shows a small tone-colored dot before the label.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Short chrome labels (version, pattern, interactive) in Docs or similar UI.',
+      'You need a compact pill with a fixed tone set (coral, teal, amber).',
+    ],
+    whenToAvoid: [
+      'Body text, icons, or item counts—use Label instead.',
+      'Primary actions or navigation—use Button or Tabs.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Badge.example.tsx',
+    language: 'tsx',
+  }}
+/>

@@ -1,0 +1,142 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Box.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Box from '@atoms/Box/Box';
+import Title from '@atoms/Title/Title';
+
+<Box
+  type="default"
+  header={<Title size="lg">Sample title</Title>}
+  headerOutside={false}
+>
+  <p>Box content</p>
+</Box>`;
+
+<ComponentDocsPage
+  title="Box"
+  badge="0.1.0"
+  description="Container with default or glass style, optional header and footer slots, optional elevation (`shadow`), and dark mode. On the default type, the header sits in the lighter inner area; set `headerOutside` to place the header in the outer container (matching the footer). The footer always sits outside the lighter inner area."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Product panels with a title header and optional footer actions.',
+      'Glass overlays on rich backgrounds.',
+      'Compositions where the header should sit outside the inner content area.',
+      'Related: use Card for a simple elevated surface without header/footer slots.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'product-panel',
+      label: 'Product panel',
+      canvas: <Canvas of={Stories.ProductPanel} layout="fullscreen" />,
+      badge: 'Pattern: Default type',
+      description:
+        'Default nested surface with a Playfair title, green footer action, and soft shadow.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='default' · shadow='soft'",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Slots',
+          value: 'Title fontFamily playfair · Button type green',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Product summaries, report cards, action panels',
+        },
+      ],
+    },
+    {
+      id: 'glass-panel',
+      label: 'Glass panel',
+      canvas: <Canvas of={Stories.GlassPanel} layout="fullscreen" />,
+      badge: 'Pattern: Glass type',
+      description:
+        'Glass container with a Jakarta title, yellow footer action, and card shadow on a dotted Background (`pio-bg-light` / `pio-grid`, vignette).',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='glass' · shadow='card'",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Slots',
+          value: 'Title fontFamily jakarta · Button type yellow',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Overlays on warm light surfaces and dotted fields',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'BoxProps',
+    lead: 'Runtime props for Box.',
+    rows: [
+      {
+        name: 'children',
+        type: 'React.ReactNode',
+        description: 'Main body content inside the box.',
+      },
+      {
+        name: 'type',
+        type: "'glass' | 'default'",
+        defaultValue: "'default'",
+        description: 'Visual style: solid default container or glass.',
+      },
+      {
+        name: 'header',
+        type: 'React.ReactNode',
+        description: 'Optional header slot.',
+      },
+      {
+        name: 'footer',
+        type: 'React.ReactNode',
+        description: 'Optional footer slot outside the lighter inner area.',
+      },
+      {
+        name: 'headerOutside',
+        type: 'boolean',
+        defaultValue: 'false',
+        description:
+          'When true on the default type, places the header in the outer container.',
+      },
+      {
+        name: 'shadow',
+        type: "'soft' | 'card' | 'none'",
+        defaultValue: "'none'",
+        description:
+          'Elevation using the same pio shadow tokens as Card (`shadow-pio-soft`, `shadow-pio-card`).',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Containers that need header and/or footer slots.',
+      'Glass panels over imagery or gradients.',
+    ],
+    whenToAvoid: [
+      'Simple elevated content surfaces without slots—use Card.',
+      'Inline chrome like toolbars—use Toolbar.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Box.example.tsx',
+    language: 'tsx',
+  }}
+/>

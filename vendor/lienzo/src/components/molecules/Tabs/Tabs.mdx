@@ -1,0 +1,88 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Tabs.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Tabs from '@molecules/Tabs/Tabs';
+
+<Tabs
+  variant="underline"
+  tabs={[
+    { id: 'one', label: 'One', content: <p>First panel</p> },
+    { id: 'two', label: 'Two', content: <p>Second panel</p> },
+  ]}
+/>`;
+
+<ComponentDocsPage
+  title="Tabs"
+  badge="0.1.0"
+  description="Tabbed navigation with tab buttons. Each tab has a label and content panel. Variants: `underline` (default), `pills`, and `segmented`. Only the active panel is mounted."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Switching between related content panels in place.',
+      'Docs galleries that need pill-style tab chrome.',
+      'Segmented mutually exclusive choices with a track treatment.',
+      'Underline tabs for classic page-section navigation.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'underline',
+      label: 'Underline',
+      canvas: <Canvas of={Stories.Underline} />,
+      description: 'Default variant: coral underline on the active tab.',
+    },
+    {
+      id: 'pills',
+      label: 'Pills',
+      canvas: <Canvas of={Stories.Pills} />,
+      description: 'Active tab as a coral-filled pill; used in Docs galleries such as Variations.',
+    },
+    {
+      id: 'segmented',
+      label: 'Segmented',
+      canvas: <Canvas of={Stories.Segmented} />,
+      description: 'White chip on a beige track for mutually exclusive choices.',
+    },
+  ]}
+  props={{
+    interfaceName: 'TabSystemProps',
+    lead: 'Runtime props for Tabs (TabSystem).',
+    rows: [
+      {
+        name: 'activeTab',
+        type: 'string',
+        description: 'Optional initially active tab id. Defaults to the first tab.',
+      },
+      {
+        name: 'tabs',
+        type: 'TabType[]',
+        description:
+          'Tab definitions: `id`, `label`, and `content`.',
+      },
+      {
+        name: 'variant',
+        type: "'underline' | 'pills' | 'segmented'",
+        defaultValue: "'underline'",
+        description: 'Visual style of the tab list.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Related panels that share one viewport region.',
+      '`underline` for classic section tabs; `pills` for Docs galleries; `segmented` for exclusive choices.',
+    ],
+    whenToAvoid: [
+      'Primary site navigation across routes—prefer dedicated nav.',
+      'A single action—use Button.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Tabs.example.tsx',
+    language: 'tsx',
+  }}
+/>

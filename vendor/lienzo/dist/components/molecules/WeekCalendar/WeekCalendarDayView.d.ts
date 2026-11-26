@@ -1,0 +1,22 @@
+import React from 'react';
+import { type DayBuckets, type WeekCalendarEvent } from './WeekCalendarTypes';
+export type DayViewProps = {
+    days: Date[];
+    weekStart: Date;
+    selectedDate: Date;
+    onSelectedDateChange: (date: Date) => void;
+    onWeekStartChange?: (weekStart: Date) => void;
+    today: Date;
+    showHours: boolean;
+    showSwipeHint: boolean;
+    hours: number[];
+    safeRangeStart: number;
+    safeRangeEnd: number;
+    gridHeight: number;
+    showNowIndicator: boolean;
+    nowOffset: number;
+    eventsByDay: Map<string, WeekCalendarEvent[]>;
+    bucketsByDay: Map<string, DayBuckets>;
+    renderEvent?: (event: WeekCalendarEvent) => React.ReactNode;
+};
+export declare function WeekCalendarDayView({ days, weekStart, selectedDate, onSelectedDateChange, onWeekStartChange, today, showHours, showSwipeHint, hours, safeRangeStart, safeRangeEnd, gridHeight, showNowIndicator, nowOffset, eventsByDay, bucketsByDay, renderEvent, }: DayViewProps): React.JSX.Element;

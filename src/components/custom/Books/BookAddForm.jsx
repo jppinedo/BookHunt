@@ -1,23 +1,25 @@
 import React, { useState } from "react";
 import { isValidUSD, formatUSD } from "@utils/common-utils";
-import { 
-  Typography,
-  Card, 
-  CardContent, 
-  CardActions,
-  Button, 
-  FormHelperText,
-  FormControl, 
-  InputLabel, 
-  InputAdornment, 
-  OutlinedInput, 
-  Select,
-  MenuItem } from '@mui/material';
+import { Button, Card, Input, Label, Title } from '@jppinedo/lienzo';
 
+const CONDITION_OPTIONS = ["Brand new", "Very good", "Good", "Readable"];
+
+/**
+ * BookAddForm — was MUI Card/FormControl/OutlinedInput/Select/MenuItem.
+ * Now: Lienzo Card/Title/Input/Button.
+ *
+ * DS GAP: Lienzo's Select is uncontrolled — it accepts only `options` and
+ * `placeholder`, with no value/onChange — so a form cannot read the chosen
+ * condition from it. The condition picker below is therefore a native
+ * <select> styled with Tailwind utilities, with a Lienzo Label. Making
+ * Select controlled (value + onChange) is the fix on the DS side.
+ * Lienzo Input also has no adornment support, so the "$ USD" prefix the
+ * MUI version showed is rendered as hint text instead.
+ */
 const BookAddForm = ({ book, onSaveBook }) => {
 
   const [currentPrice, setCurrentPrice] = useState(book.price);
-  const [bookContidion, setBookCondition] = useState('');
+  const [bookCondition, setBookCondition] = useState('');
   const [priceError, setPriceError] = useState(false);
   const [conditionError, setConditionError] = useState(false);
 
@@ -25,75 +27,56 @@ const BookAddForm = ({ book, onSaveBook }) => {
     setCurrentPrice(e.target.value)
   }
 
-  const handlePriceBlur = (e) => {
-    setCurrentPrice(formatUSD(e.target.value));
-  }
-
-  const handleConditionChange = (e) => {
-    setBookCondition(e.target.value);
+  const handlePriceBlur = () => {
+    setCurrentPrice(formatUSD(currentPrice));
   }
 
   const handleSaveBook = () => {
     if (!isValidUSD(currentPrice)) {
       setPriceError(true);
     }
-    if (!bookContidion) {
+    if (!bookCondition) {
       setConditionError(true);
     }
-    if (currentPrice && bookContidion) {
-      onSaveBook({...book, ...{ price: currentPrice, condition: bookContidion }});
+    if (currentPrice && bookCondition) {
+      onSaveBook({ ...book, ...{ price: currentPrice, condition: bookCondition } });
     }
   }
 
   return (
-    <Card sx={{ 
-      minWidth: 300, 
-      width: '100%', 
-      textAlign: 'left', 
-      mt:2}}>
-      <CardContent sx={{p:2}}>
-        {/* show price as input in form mode */}
-        <Typography variant="p" color="primary">Add more details:</Typography>
-        <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel htmlFor="outlined-adornment-amount">Price</InputLabel>
-          <OutlinedInput
-            id="outlined-adornment-amount"
-            startAdornment={<InputAdornment position="start">${book.currency}</InputAdornment>}
-            label="Amount"
-            value={currentPrice}
-            onChange={handlePriceChange}
-            onBlur={handlePriceBlur}
-          />
-          {priceError && <FormHelperText>Price is required</FormHelperText>}
-        </FormControl>
-        <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel id="demo-simple-select-label">Condition</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={bookContidion}
-            label="Book condition"
-            onChange={handleConditionChange}
-            required
-          >
-            <MenuItem value="Brand new">Brand new</MenuItem>
-            <MenuItem value="Very good">Very good</MenuItem>
-            <MenuItem value="Good">Good</MenuItem>
-            <MenuItem value="Readable">Readable</MenuItem>
-          </Select>
-          {conditionError && <FormHelperText>Condition is required</FormHelperText>}
-        </FormControl>
-      </CardContent>
-      <CardActions sx={{pl:2, pr:2}}>
-        <Button
-          variant="contained"
-          onClick={handleSaveBook}
-          target="_blank"
-          rel="noopener noreferrer"
+    <Card className="min-w-[300px] w-full text-left mt-4">
+      <Title size="sm" color="coral">Add more details:</Title>
+
+      <div className="mt-4" onBlur={handlePriceBlur}>
+        <Input
+          label="Price"
+          placeholder="0.00"
+          value={currentPrice ?? ''}
+          onChange={handlePriceChange}
+          hint={priceError ? 'Price is required' : `Amount in ${book.currency || 'USD'} ($)`}
+        />
+      </div>
+
+      <div className="mt-4">
+        <Label text="Condition" />
+        <select
+          aria-label="Book condition"
+          value={bookCondition}
+          onChange={(e) => setBookCondition(e.target.value)}
+          required
+          className="w-full mt-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-base"
         >
-          Sell Book
-        </Button>
-      </CardActions>
+          <option value="" disabled>Select an option</option>
+          {CONDITION_OPTIONS.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+        {conditionError && <p className="text-sm mt-1">Condition is required</p>}
+      </div>
+
+      <div className="mt-4">
+        <Button label="Sell Book" onClick={handleSaveBook} />
+      </div>
     </Card>
   )
 }

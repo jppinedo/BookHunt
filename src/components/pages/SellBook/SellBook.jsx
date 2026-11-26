@@ -1,9 +1,9 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { searchGoogleBooks } from '@services/GoogleAPI';
 import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { BookOpen as MenuBookIcon } from 'react-feather';
 import logo from '@assets/images/book_hunt_logo.png';
 import InfoBox from '@custom/Shared/InfoBox';
 
@@ -23,7 +23,7 @@ const SellBook = () => {
 
   return (
     <div>
-      <img src={logo} width="200px" style={{marginBottom: '2rem'}} />
+      <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
       {!books.length ? (
         <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking to sell." />
       ) : null}

@@ -1,17 +1,12 @@
 import React from "react";
-import { Typography, Paper } from "@mui/material";
+import { Card } from "@jppinedo/lienzo";
 
+/** NoMoreResults — was MUI Paper + Typography. Now a Lienzo Card + plain text. */
 const NoMoreResults = () => (
-  <div style={{width:'100%', display: 'flex', justifyContent: 'center'}} >
-    <Paper sx={{ 
-      margin: '0 auto' , 
-      maxWidth: 'fit-content',
-      backgroundColor: '#00132c57',
-      borderRadius: '1rem',
-      color: '#6b9dde'
-    }}>
-      <Typography variant="body2" sx={{ padding: '1rem 4rem' }}>No more results found.</Typography>
-    </Paper>
+  <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+    <Card padded={false} className="w-fit mx-auto">
+      <p className="m-0 px-16 py-4 text-sm">No more results found.</p>
+    </Card>
   </div>
 );
 

@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+
+# Storybook / webpack build output
+storybook-static/
+dist/
+build/
+out/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+.env*.local
+!.env.example
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Optional tooling caches
+.eslintcache
+.stylelintcache
+
+# Local-only (not published to the repo)
+.cursor/rules/no-agent-testing.mdc
+
+# Yarn 4
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Yarn only — do not commit an npm lockfile
+package-lock.json
+
+# Archives
+*.zip
+*.tgz
+
+# Vendored into BookHunt: the built dist ships with the package
+!dist/
+!dist/**

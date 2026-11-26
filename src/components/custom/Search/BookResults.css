@@ -1,30 +1,37 @@
 .book-card {
-  border: 1px solid #fff;
-}
-
-.book-card .book-card-description {
-  color: #666;
-  font-size: 12px;
+  /* D1: on the light paper background the card edge is Lienzo's warm
+     hairline (pio-grid), not white-on-blue. */
+  border: 1px solid #e5e0d8;
+  /* Clip children to the card's rounded corners; the cover itself is
+     rounded in markup (rounded-[10px]) so no square corner pokes out. */
+  overflow: hidden;
+  /* D2: one soft hover response for every result card — warm shadow
+     deepens, border warms to the coral accent, card lifts 2px. */
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .book-card:hover {
-  background-color: #daeaff;
-  cursor: pointer;
-  border: 1px solid #92c1ff;
+  border-color: rgb(var(--lz-pio-coral));
+  box-shadow: 0 12px 36px -8px rgba(31, 36, 33, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
 }
 
 .book-card:hover .book-card-title {
-  color: #00357b;
+  color: #b03434; /* pio-coral-dark */
 }
 
-@media (max-width: 460px) {
+/* Keyboard parity for the clickable card body (role="button"): a coral
+   inset outline, visible without shifting layout. */
+.book-card [role='button']:focus-visible {
+  outline: 2px solid rgb(var(--lz-pio-coral));
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .book-card {
-    display: block !important;
-    max-width: inherit !important;
+    transition: none;
   }
-  .book-card img.MuiCardMedia-root {
-    width: inherit;
-    height: inherit;
-    margin-bottom: 1rem;
+  .book-card:hover {
+    transform: none;
   }
 }

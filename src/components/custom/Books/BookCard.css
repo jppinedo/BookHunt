@@ -1,11 +1,40 @@
+/* Round the cover image to match the Lienzo Card's rounded corners and
+   clip anything that reaches the card edge — the square image corners
+   inside the rounded card looked broken. */
+.book-list-card,
+.book-single-card {
+    overflow: hidden;
+}
+
+.book-list-card img,
+.book-single-card img {
+    border-radius: 14px;
+}
+
 @media (max-width: 680px) {
     .book-single-card {
         display: block !important;
     }
+    /* Stack cover above text on narrow screens: in the horizontal row
+       the cover (up to 200px) squeezed the text into a ~110px column —
+       the "cards look too tight" problem at phone widths. */
+    .book-single-card > div,
+    .book-list-card > div {
+        flex-direction: column;
+    }
+    .book-single-card img,
+    .book-list-card img {
+        width: 100%;
+        max-width: 100% !important;
+        max-height: 230px;
+        object-fit: contain;
+        padding: 0.75rem 0.75rem 0 !important;
+        box-sizing: border-box;
+    }
 }
 
 @media (max-width: 420px) {
-    .book-single-card img.MuiCardMedia-root {
+    .book-single-card img {
         max-width: none;
         width: 100%;
         box-sizing: border-box;
@@ -13,10 +42,10 @@
 }
 
 @media (max-width: 460px) {
-    .book-list-card button.MuiButtonBase-root {
+    .book-list-card {
         display: block !important;
     }
-    .book-list-card img.MuiCardMedia-media {
+    .book-list-card img {
         height: initial;
     }
 }

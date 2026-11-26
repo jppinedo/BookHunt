@@ -1,46 +1,81 @@
 import React from 'react';
-import { Grid2, Card, CardMedia, CardContent, Typography, Box, Container } from '@mui/material';
+import { Card, Title } from '@jppinedo/lienzo';
 import { truncateText } from '@utils/search-utils.js';
 import './BookResults.css';
 
-const BookResults = ({ books, onClickItem }) => {
+/**
+ * BookResults — was MUI Container + Grid2 + Card/CardMedia/CardContent +
+ * Typography. Lienzo has no Grid (DS gap): layout is a plain Tailwind
+ * grid; each result is a Lienzo Card.
+ *
+ * Layout fix: results used to sit inside a Lienzo Box — a full-width
+ * cream slab that rendered as a huge empty panel before any search and
+ * added a meaningless second container around the cards. The grid now
+ * sits directly on the page background; bottom padding keeps the last
+ * row clear of the floating hub navigation.
+ *
+ * D2 polish: an optional result-count line ("N results for "query"")
+ * gives the grid a header; cards get one consistent interior (16px
+ * padding, 16px gap), a true 2:3 cover at a responsive size, muted
+ * token-colored metadata, and a 3-line clamped description — replacing
+ * the ad-hoc grays and the old phone rule that stretched covers to
+ * `width: inherit`.
+ */
+const BookResults = ({ books, onClickItem, query }) => {
+  if (!books.length) return null;
   return (
-    <Container>
-      <Grid2 container sx={{ pt: 3, maxWidth: '1600px', justifyContent: 'center' }} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-        {books.map((book) => (
-          <Card key={`${book.id}-${book.etag}`} sx={{ maxWidth: 348, display: 'flex', padding: 1 }} className='book-card' tabIndex={0} onClick={() => onClickItem(book)}>
-            <CardMedia
-                component="img"
-                sx={{ width: 130, height: 200 }}
-                image={book.thumbnail}
-                alt={book.title}
-            />
-            <Box sx={{ display: 'flex', flexDirection: 'column', textAlign:'left'}}>
-              <CardContent sx={{ flex: '0 1 auto', paddingTop: 0  }}>
-                <Typography component="div" variant="h6" sx={{lineHeight: 1.1}} className='book-card-title'>
-                  {book.title}
-                </Typography>
-                <Typography
-                  variant="subtitle1"
-                  component="div"
-                  sx={{ color: 'text.secondary' }}
-                >
-                  <strong>Author(s):</strong> {Array.isArray(book.authors) ? book.authors?.join(', ') : 'Unknown'}
-                </Typography>
-              </CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'left', pl: 2, pb: 1 }}>
-                <Typography className='book-card-description'>
-                  {truncateText(book.description, 200)}
-                </Typography>
-              </Box>
-            </Box>
-          </Card>
-        ))}
-      </Grid2>
-      <div style={{maxWidth: '1600px', height: '100px'}}></div>
-    </Container>
+    <div className="w-full px-3 pb-32">
+      <div className="max-w-[1100px] mx-auto pt-5">
+        {query ? (
+          <p className="text-left text-sm text-pio-text-muted px-1 pb-4 m-0">
+            <span className="font-semibold text-pio-text">
+              {books.length} {books.length === 1 ? 'result' : 'results'}
+            </span>
+            {' '}for <span className="text-pio-text">&ldquo;{query}&rdquo;</span>
+          </p>
+        ) : null}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 justify-items-center">
+          {books.map((book) => (
+            <Card
+              key={`${book.id}-${book.etag}`}
+              padded={false}
+              className='book-card w-full max-w-[348px] cursor-pointer'
+            >
+              <div
+                className="flex gap-4 p-4 text-left h-full"
+                tabIndex={0}
+                role="button"
+                onClick={() => onClickItem(book)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClickItem(book);
+                  }
+                }}
+              >
+                <img
+                  src={book.thumbnail}
+                  alt={book.title}
+                  className="w-[104px] h-[156px] sm:w-[120px] sm:h-[180px] object-cover shrink-0 rounded-[10px] bg-pio-bg-light"
+                />
+                <div className="flex flex-col min-w-0 py-0.5">
+                  <Title size="sm" className='book-card-title leading-snug line-clamp-2'>
+                    {book.title}
+                  </Title>
+                  <p className="text-[13px] text-pio-text-muted mt-1.5 line-clamp-1">
+                    by {Array.isArray(book.authors) && book.authors.length ? book.authors.join(', ') : 'Unknown author'}
+                  </p>
+                  <p className='text-[13px] leading-relaxed text-pio-text-muted mt-2 line-clamp-3'>
+                    {book.description ? truncateText(book.description, 200) : ''}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default BookResults;
-

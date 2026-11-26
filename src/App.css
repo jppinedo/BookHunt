@@ -1,12 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Volkhov:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+/* D1 typography: no Volkhov anywhere. Plus Jakarta Sans is the app font
+   (loaded in index.css); Playfair Display is reserved for page titles. */
 #root {
   text-align: center;
   margin: 0 auto;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  color: rgb(var(--lz-pio-text));
 }
 
-.site-title h1 {
-  margin: 0 0 50px;
-}
+/* The auth-page brand lockup (.site-title h1, Playfair wordmark with an
+   inline logo that Tailwind's block-img preflight stranded at the left
+   edge) is gone — Login/Register now use the shared AuthBrand flex
+   lockup (Plus Jakarta Sans, matching PageBrand). */
 .sign-in-area {
   background-color: white;
   position: relative;
@@ -14,7 +18,7 @@
   height: 700px;
   border-radius: 20px;
   color: #343434;
-  font-family: \"Volkhov\", sans-serif;
+  font-family: inherit;
   align-content: center;
 }
 .sign-in-area form h1{
@@ -32,10 +36,11 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
-  bottom: 0;
-  width: min(90%, 500px);
+  /* Float above the bottom edge instead of sitting flush against it;
+     the shadow lives on the pill bar itself (HubNav), not this wrapper. */
+  bottom: 14px;
+  width: min(92%, 460px);
   margin: 0 auto;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 .profile-background {
   background-color: white;
@@ -43,18 +48,40 @@
   max-width: 500px;
   min-height: 525px;
   border-radius: 20px;
-  color: #343434;
-  font-family: \"Volkhov\", sans-serif;
+  color: rgb(var(--lz-pio-text));
+  font-family: inherit;
+  /* Center the card horizontally: it used to sit flush left because a
+     max-width block does not center without auto margins. */
+  margin-left: auto;
+  margin-right: auto;
+  width: min(500px, calc(100% - 2rem));
+  /* On the new light background a plain white panel needs a warm
+     hairline + the Lienzo card shadow to read as a surface at all. */
+  border: 1px solid rgb(var(--lz-pio-grid));
+  box-shadow: 0 12px 36px -8px rgba(31, 36, 33, 0.06), 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+/* Page titles that sit directly on the page background. On the old blue
+   tile these were forced white with a shadow; on Lienzo's light paper
+   surface the D1 rule is the opposite: dark pio-text, Playfair Display,
+   no shadow — one title style on every page. */
+.page-heading h1,
+.page-heading h2,
+.page-heading h3 {
+  color: rgb(var(--lz-pio-text)) !important;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+}
+/* Body text rendered directly on the page background (empty states,
+   "not found" notes). Was white + shadowed for the blue tile; now the
+   standard dark text on paper. Class name kept — every page uses it. */
+.on-bg-text {
+  color: rgb(var(--lz-pio-text));
 }
 .divider {
   width: 500px;
   height: min(90%, 2px);
   background-color: #343434;
-}
-.email-section, .old-pass-section, .new-pass-section, .name-section {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 .profile-side-nav {
   background-color: white;
@@ -63,22 +90,16 @@
   height: auto;
   border-radius: 20px;
   color: #343434;
-  font-family: \"Volkhov\", sans-serif;
+  font-family: inherit;
   left: 27%;
 }
 @media (max-width: 600px) {
   #hubNav {
-    width: 95%;
-    padding: 8px;
+    width: 94%;
+    bottom: 10px;
   }
   .profile-side-nav {
     width: 95%;
     height: auto;
   }
 }
-
-
-
-
-
-

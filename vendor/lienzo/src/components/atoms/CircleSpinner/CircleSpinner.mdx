@@ -1,0 +1,64 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './CircleSpinner.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import CircleSpinner from '@atoms/CircleSpinner/CircleSpinner';
+
+<CircleSpinner colorClass="bg-pio-coral" size="6rem" thickness={1} />`;
+
+<ComponentDocsPage
+  title="CircleSpinner"
+  badge="0.1.0"
+  description="Orbiting-dot circular loading indicator. Size and thickness control the ring and moving dot; color uses a background utility class on the inner circle."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Decorative loading states where an orbiting dot fits the visual language.',
+      'Larger hero or panel loading moments.',
+      'Brand-colored wait affordances using pio background utilities.',
+      'Related: use Spinner for a classic rotating border ring.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'CircleSpinnerProps',
+    lead: 'Runtime props for CircleSpinner.',
+    rows: [
+      {
+        name: 'colorClass',
+        type: 'string',
+        defaultValue: "'bg-pio-coral'",
+        description: 'Background utility class for the orbiting dot.',
+      },
+      {
+        name: 'thickness',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Dot and ring thickness in rem units.',
+      },
+      {
+        name: 'size',
+        type: 'string',
+        defaultValue: "'6rem'",
+        description: 'Overall spinner diameter.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Indeterminate loading with the orbiting-dot treatment.',
+      'Larger spinners sized in rem for full-panel waits.',
+    ],
+    whenToAvoid: [
+      'A simple border ring spinner—use Spinner.',
+      'Tiny inline waits where Spinner’s default scale fits better.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'CircleSpinner.example.tsx',
+    language: 'tsx',
+  }}
+/>

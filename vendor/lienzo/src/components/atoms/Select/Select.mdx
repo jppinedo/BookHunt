@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Select.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Select from '@atoms/Select/Select';
+
+<Select
+  placeholder="Select an option"
+  options={[
+    { value: 'a', label: 'Option A' },
+    { value: 'b', label: 'Option B' },
+  ]}
+/>`;
+
+<ComponentDocsPage
+  title="Select"
+  badge="0.1.0"
+  description="Dropdown select control for choosing a single option from a list."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Choosing one value from a predefined list.',
+      'Form fields where options are known ahead of time.',
+      'Compact filters that open a dropdown of labels.',
+      'Placeholder text when no option is selected yet.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'SelectProps',
+    lead: 'Runtime props for Select.',
+    rows: [
+      {
+        name: 'options',
+        type: 'SelectOption[]',
+        description:
+          'List of `{ value, label }` options shown in the dropdown.',
+      },
+      {
+        name: 'placeholder',
+        type: 'string',
+        defaultValue: "'Select an option'",
+        description: 'Text shown when nothing is selected.',
+      },
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Select.example.tsx',
+    language: 'tsx',
+  }}
+/>

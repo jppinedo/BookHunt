@@ -1,0 +1,16 @@
+.spinner {
+  border-top-width: 16px;
+  border-top-style: solid;
+  border-right-width: 16px;
+  border-bottom-width: 16px;
+  border-left-width: 16px;
+  border-top: 16px solid; /* Color will be set inline */
+  color: transparent;
+  border-radius: 50%;
+  animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

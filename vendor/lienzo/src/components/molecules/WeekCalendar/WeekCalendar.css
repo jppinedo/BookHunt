@@ -1,0 +1,33 @@
+.week-calendar-event--muted {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    rgb(var(--lz-gray-300) / 0.18) 5px,
+    rgb(var(--lz-gray-300) / 0.18) 10px
+  );
+}
+
+[data-mode='dark'] .week-calendar-event--muted {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    rgb(var(--lz-gray-300) / 0.12) 5px,
+    rgb(var(--lz-gray-300) / 0.12) 10px
+  );
+}
+
+.week-calendar__gutter-spacer,
+.week-calendar__gutter {
+  box-shadow: 4px 0 12px -8px rgb(var(--lz-black) / 0.08);
+}
+
+[data-mode='dark'] .week-calendar__gutter-spacer,
+[data-mode='dark'] .week-calendar__gutter {
+  box-shadow: 4px 0 12px -8px rgb(var(--lz-black) / 0.35);
+}
+
+.week-calendar-day__grid {
+  touch-action: pan-y;
+}

@@ -5,20 +5,59 @@ import { useNavigate } from 'react-router';
 import SearchInput from '@custom/Search/SearchInput';
 import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { BookOpen as MenuBookIcon } from 'react-feather';
 import LoadingResults from '@custom/Search/LoadingResults';
 import logo from '@assets/images/book_hunt_logo.png';
 
+// This preview runs on a small built-in catalog (mock data, no live Google
+// Books key), so only these titles can match. They are offered as one-tap
+// example searches — and as the recovery path when a search finds nothing.
+const EXAMPLE_SEARCHES = [
+  'clean code',
+  'design patterns',
+  'refactoring',
+  'algorithms',
+  "don't make me think",
+];
+
+const ExampleSearches = ({ onPick }) => (
+  <div className="flex flex-wrap items-center justify-center gap-2 mt-5 px-2">
+    <span className="text-[13px] font-semibold text-pio-text-muted mr-0.5">Try:</span>
+    {EXAMPLE_SEARCHES.map((term) => (
+      <button
+        key={term}
+        type="button"
+        onClick={() => onPick(term)}
+        className="bg-white text-pio-text border border-pio-grid shadow-sm rounded-full px-3.5 py-1.5 text-[13.5px] font-medium cursor-pointer transition-colors hover:border-pio-coral hover:bg-pio-coral-pale/40 hover:text-pio-coral-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
+      >
+        {term}
+      </button>
+    ))}
+  </div>
+);
+
 const SearchPage = () => {
   const [books, setBooks] = useState([]);
+  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'done'
+  const [searchedQuery, setSearchedQuery] = useState('');
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('query');
 
   const navigate = useNavigate();
 
   const handleSearch = async (query) => {
-    const results = await searchGoogleBooks(query);
-    setBooks(results);
+    setStatus('loading');
+    try {
+      const results = await searchGoogleBooks(query);
+      setBooks(results);
+      setSearchedQuery(query);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setBooks([]);
+      setSearchedQuery(query);
+    } finally {
+      setStatus('done');
+    }
   };
 
   const handleItemClick = (book) => {
@@ -45,30 +84,70 @@ const SearchPage = () => {
   useEffect(() => {
     if(urlQuery?.length) {
       handleSearch(urlQuery);
+    } else {
+      setBooks([]);
+      setSearchedQuery('');
+      setStatus('idle');
     }
   }, [urlQuery])
 
+  const isLoading = status === 'loading';
+  const showNoResults = status === 'done' && !books.length && searchedQuery;
+  // Home state (nothing to show yet — idle, loading, or no matches):
+  // logo + search sit vertically centered in the viewport. Once results
+  // exist the page switches to normal top-aligned flow so the grid can
+  // grow downward. The min-height leaves room for the floating hub nav.
+  const isHomeState = !books.length;
+
   return (
-    <div>
-      <img src={logo} width="200px" style={{marginBottom: '2rem'}} />
-      {!books.length ? (
-        <InfoBox icon={MenuBookIcon} content="Search below for the book you are looking for." />
+    <div
+      className={isHomeState ? 'flex flex-col justify-center box-border' : undefined}
+      style={isHomeState ? { minHeight: 'calc(100dvh - 5.5rem)', paddingBottom: '4.5rem' } : undefined}
+    >
+      <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '0.75rem auto 0.5rem'}} />
+      {/* D2 hero: in the idle home state the logo gets a headline and a
+          one-line promise, so the centered hero reads as a composed
+          unit (logo → headline → subline → pill search → example
+          chips) on the 8pt rhythm instead of a logo floating over a
+          hint line. The InfoBox hint still serves the results and
+          no-results states below. */}
+      {status === 'idle' ? (
+        <div className="px-4">
+          <h1 className="font-playfair text-pio-text text-[30px] sm:text-4xl font-semibold leading-tight mt-2 mb-2.5">
+            Find your next book for less.
+          </h1>
+          <p className="text-pio-text-muted text-[15px] sm:text-base max-w-[520px] mx-auto mt-0 mb-7">
+            One search across campus listings and marketplace deals.
+          </p>
+        </div>
       ) : null}
-      
+
       <SearchInput onSearch={setQueryParam} inputValue={urlQuery || ''}/>
-      
-      {!books.length && urlQuery ? (
-        <LoadingResults sx={{mt: 3}} />
+
+      {status === 'idle' ? (
+        <ExampleSearches onPick={setQueryParam} />
+      ) : null}
+
+      {isLoading ? (
+        <LoadingResults className="mt-8" />
+      ) : showNoResults ? (
+        <>
+          <InfoBox
+            icon={MenuBookIcon}
+            content={`No matches for "${searchedQuery}" in this preview's built-in catalog. Try one of these instead:`}
+          />
+          <ExampleSearches onPick={setQueryParam} />
+        </>
       ) : (
         <>
         {books.length ? (
           <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
         ) : null}
-        
-        <BookResults books={books} onClickItem={handleItemClick} />
+
+        <BookResults books={books} onClickItem={handleItemClick} query={searchedQuery} />
         </>
       )}
-      
+
     </div>
   );
 };

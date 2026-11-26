@@ -1,0 +1,57 @@
+/**
+ * Variations gallery — Storybook Canvas / Recharts sizing.
+ *
+ * Brittle selectors (Storybook 8): .sbdocs-preview, .docs-story,
+ * ChildrenContainer (emotion hash), .innerZoomElementWrapper
+ *
+ * Default Canvas layout is `padded` → ChildrenContainer gets
+ * `padding: 30px 20px` plus a 10px transparent border on the story.
+ * The beige `variationCanvas` is the only surface that should pad.
+ */
+
+.component-docs-variation-canvas .sbdocs-preview {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+.component-docs-variation-canvas .sbdocs-preview > div {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  width: 100%;
+}
+
+/* Beat `html[data-mode] .docs-story` canvas fill from story-global.css */
+html[data-mode='light'] .component-docs-variation-canvas .docs-story,
+html[data-mode='dark'] .component-docs-variation-canvas .docs-story,
+.component-docs-variation-canvas .docs-story {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  width: 100%;
+}
+
+/* Storybook ChildrenContainer: default layout="padded" → 30px 20px */
+.component-docs-variation-canvas .docs-story > div {
+  padding: 0 !important;
+  /* Storybook ChildrenContainer defaults to overflow:auto — hide needless scrollbars. */
+  overflow: visible !important;
+}
+
+/* Transparent 10px border used by padded/centered layouts */
+.component-docs-variation-canvas .innerZoomElementWrapper > * {
+  border: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.component-docs-variation-canvas .docblock-code-toggle {
+  display: none;
+}

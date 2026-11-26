@@ -1,0 +1,191 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Title.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Title from '@atoms/Title/Title';
+
+<>
+  <Title size="sm" fontFamily="jakarta" uppercase dot dotTone="coral">
+    Overview
+  </Title>
+  <Title size="xxxl" fontFamily="jakarta" thikness="bold" gradient="amber-dawn">
+    Built to dazzle.
+  </Title>
+  <Title size="xl" fontFamily="playfair" thikness="bold" color="teal">
+    Accent heading
+  </Title>
+</>`;
+
+<ComponentDocsPage
+  title="Title"
+  badge="0.1.0"
+  description="Heading / title text. Size (`sm`–`xxxxl`), font family (`lexend`, `poppins`, `playfair`, `jakarta`), and thickness can be customized. Optional `gradient` fills the glyphs with a named horizontal gradient (solid color fallback). Optional `color` applies a pio accent. Set `uppercase` for tracked all-caps labels and `dot` (with optional `dotTone`) for a color mark beside the text. A Docs section header is often two Titles: an uppercase dotted eyebrow, then a display line."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Page and section headings across the product UI.',
+      'Large display lines with gradient or accent color for marketing and Docs heroes.',
+      'Docs eyebrows (uppercase + dot) paired with Playfair or Jakarta display titles.',
+      'Hierarchy via size mapping to semantic heading tags (h5–h1).',
+    ],
+  }}
+  variations={[
+    {
+      id: 'sizes',
+      label: 'Sizes',
+      canvas: <Canvas of={Stories.Sizes} layout="fullscreen" />,
+      badge: 'Pattern: Size scale',
+      description: 'Full size scale from compact labels (`sm`) to billboard display (`xxxxl`).',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "size='sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xxxl' | 'xxxxl'",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'gradients',
+      label: 'Gradients',
+      canvas: <Canvas of={Stories.Gradients} layout="fullscreen" />,
+      badge: 'Pattern: Gradient fill',
+      description:
+        'Named text fills: Background-inspired (Amber Dawn, Studio Teal, Charcoal Depth) and pio accent pairs (Coral Ember, Teal Mist, Deep Coral). Unsupported browsers get a solid fallback.',
+      meta: [
+        {
+          label: 'Component Props',
+          value:
+            "gradient='amber-dawn' | 'studio-teal' | 'charcoal-depth' | 'coral-ember' | 'teal-mist' | 'deep-coral'",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'colors',
+      label: 'Colors',
+      canvas: <Canvas of={Stories.Colors} layout="fullscreen" />,
+      badge: 'Pattern: Accent color',
+      description: 'Solid pio accent colors: coral, teal, amber, stone.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "color='coral' | 'teal' | 'amber' | 'stone'",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'fonts',
+      label: 'Fonts',
+      canvas: <Canvas of={Stories.Fonts} layout="fullscreen" />,
+      badge: 'Pattern: Font family',
+      description: 'Lexend, Poppins, Playfair Display, and Plus Jakarta Sans.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "fontFamily='lexend' | 'poppins' | 'playfair' | 'jakarta'",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'uppercase-dot',
+      label: 'Uppercase with Dot',
+      canvas: <Canvas of={Stories.UppercaseWithDot} layout="fullscreen" />,
+      badge: 'Pattern: Eyebrow',
+      description: 'Tracked all-caps eyebrows with coral, teal, or amber side dots.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "uppercase · dot · dotTone='coral' | 'teal' | 'amber'",
+          valueTone: 'prop',
+        },
+      ],
+    },
+    {
+      id: 'section-pair',
+      label: 'Section Pair',
+      canvas: <Canvas of={Stories.SectionPair} layout="fullscreen" />,
+      badge: 'Pattern: Docs header',
+      description: 'Eyebrow + display title pairing used in Docs section headers.',
+      meta: [
+        {
+          label: 'Best For',
+          value: 'Docs section headers, product overview blocks',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'TitleProps',
+    lead: 'Runtime props for Title.',
+    rows: [
+      {
+        name: 'children',
+        type: 'React.ReactNode',
+        description: 'Title text or nodes.',
+      },
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xxxl' | 'xxxxl'",
+        defaultValue: "'md'",
+        description:
+          'Visual size; maps to heading tags h5–h1. `xxxl` and `xxxxl` are display sizes (both use h1).',
+      },
+      {
+        name: 'thikness',
+        type: "'thin' | 'regular' | 'bold'",
+        defaultValue: "'regular'",
+        description: 'Font weight token (note the existing prop spelling).',
+      },
+      {
+        name: 'fontFamily',
+        type: "'lexend' | 'poppins' | 'playfair' | 'jakarta'",
+        defaultValue: "'poppins'",
+        description: 'Typeface for the title.',
+      },
+      {
+        name: 'gradient',
+        type: "'amber-dawn' | 'studio-teal' | 'charcoal-depth' | 'coral-ember' | 'teal-mist' | 'deep-coral'",
+        description:
+          'Optional named gradient text fill. Overrides `color` and default text color. Unsupported browsers get a solid fallback color.',
+      },
+      {
+        name: 'color',
+        type: "'coral' | 'teal' | 'amber' | 'stone'",
+        description:
+          'Optional pio accent text color. Ignored when `gradient` is set.',
+      },
+      {
+        name: 'uppercase',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Tracked all-caps label treatment.',
+      },
+      {
+        name: 'dot',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Shows a side color dot before the text.',
+      },
+      {
+        name: 'dotTone',
+        type: "'coral' | 'teal' | 'amber'",
+        defaultValue: "'coral'",
+        description: 'Dot color when `dot` is true.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough for spacing and layout.',
+      },
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Title.example.tsx',
+    language: 'tsx',
+  }}
+/>

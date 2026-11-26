@@ -1,0 +1,8 @@
+/* Lienzo — Tailwind CSS v4 entry for Storybook (CSS-first config). */
+@import 'tailwindcss';
+@import './theme.css';
+
+/* Files Tailwind scans for class names (src/ is auto-detected; .storybook is added explicitly). */
+@source '../.storybook';
+/* Classes that must always exist (was `safelist` in tailwind.config.js). */
+@source inline('dark:bg-dark-canvas bg-light-canvas');

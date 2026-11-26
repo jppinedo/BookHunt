@@ -1,0 +1,113 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Checkbox.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Checkbox from '@atoms/Checkbox/Checkbox';
+
+<Checkbox size="md" type="green" isChecked={false} onChange={(checked) => console.log(checked)} />`;
+
+<ComponentDocsPage
+  title="Checkbox"
+  badge="0.1.0"
+  description="Form checkbox control with Pio accent types (default gray, green, red, yellow) and small, medium, and large sizes. Unchecked uses pio-bg fill and pio-grid border; checked fills with the selected accent."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Multi-select options in forms and filters.',
+      'Independent yes/no choices that are not mutually exclusive.',
+      'Settings lists where several items can be on at once.',
+      'Related: use Switch for a single on/off toggle with a sliding affordance.',
+    ],
+  }}
+  variations={[
+    {
+      id: 'types',
+      label: 'Types',
+      canvas: <Canvas of={Stories.Types} layout="fullscreen" />,
+      badge: 'Pattern: Accent types',
+      description:
+        'Checked fill uses the selected type. default is gray; green, red, and yellow map to Pio teal-dark, coral, and amber.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "type='default' | 'green' | 'red' | 'yellow' · isChecked",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Semantic accents in forms, filters, and settings lists',
+        },
+      ],
+    },
+    {
+      id: 'sizes',
+      label: 'Sizes',
+      canvas: <Canvas of={Stories.Sizes} layout="fullscreen" />,
+      badge: 'Pattern: Size scale',
+      description:
+        'Small, medium, and large controls for dense lists or more prominent form rows.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: "size='sm' | 'md' | 'lg'",
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Matching checkbox scale to label and layout density',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'CheckboxProps',
+    lead: 'Runtime props for Checkbox.',
+    rows: [
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg'",
+        defaultValue: "'md'",
+        description: 'Visual size of the control.',
+      },
+      {
+        name: 'type',
+        type: "'default' | 'red' | 'green' | 'yellow'",
+        defaultValue: "'default'",
+        description: 'Checked accent. default is gray; chromatic types map to Pio coral, teal-dark, and amber.',
+      },
+      {
+        name: 'isChecked',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Controlled checked state.',
+      },
+      {
+        name: 'onChange',
+        type: '(checked: boolean) => void',
+        description: 'Called when the user toggles the checkbox.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Selecting zero or more items from a set.',
+      'Binary options that sit next to labels in a list or form row.',
+    ],
+    whenToAvoid: [
+      'A single binary preference with a switch affordance—use Switch.',
+      'Choosing one option from many—use Select or radio-style patterns.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Checkbox.example.tsx',
+    language: 'tsx',
+  }}
+/>

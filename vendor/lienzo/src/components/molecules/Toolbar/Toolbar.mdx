@@ -1,0 +1,78 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Toolbar.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Toolbar from '@molecules/Toolbar/Toolbar';
+
+<Toolbar
+  type="label"
+  menuPosition="bottom"
+  rounded="default"
+  items={[
+    { id: 'home', item: 'Home', onClick: () => {} },
+    { id: 'docs', item: 'Docs', onClick: () => {} },
+  ]}
+/>`;
+
+<ComponentDocsPage
+  title="Toolbar"
+  badge="0.1.0"
+  description="Horizontal toolbar of items (buttons or labels). Supports nested menus, rounded sizes, and menu position."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'App or panel chrome with a row of actions.',
+      'Label-style or button-style toolbar items via `type`.',
+      'Dropdowns attached to items using Menu (see Menu Docs).',
+      'Menus opening above or below the bar via `menuPosition`.',
+    ],
+  }}
+  variations={[]}
+  props={{
+    interfaceName: 'ToolbarProps',
+    lead: 'Runtime props for Toolbar.',
+    rows: [
+      {
+        name: 'items',
+        type: 'ToolbarItemType[]',
+        description:
+          'Toolbar entries (`item`, `onClick`, optional `id` and nested `menu`).',
+      },
+      {
+        name: 'menuPosition',
+        type: "'top' | 'bottom'",
+        defaultValue: "'bottom'",
+        description: 'Where nested menus open relative to the item.',
+      },
+      {
+        name: 'type',
+        type: "'button' | 'label'",
+        defaultValue: "'label'",
+        description: 'Visual treatment of toolbar items.',
+      },
+      {
+        name: 'rounded',
+        type: 'RoundedSizes',
+        defaultValue: "'default'",
+        description: 'Corner radius token for the toolbar.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'A horizontal strip of related actions or navigation labels.',
+      'Items that may open a Menu dropdown.',
+    ],
+    whenToAvoid: [
+      'Standalone dropdown lists without a toolbar row—use Menu directly.',
+      'Primary page CTAs—use Button.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Toolbar.example.tsx',
+    language: 'tsx',
+  }}
+/>

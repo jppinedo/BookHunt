@@ -1,0 +1,30 @@
+---
+description: Use and maintain project documentation; point to docs index and keep docs concise and state-only
+alwaysApply: true
+---
+
+# Documentation
+
+## When you need project context
+
+If you need to understand the project (architecture, components, design tokens, Storybook, libraries, assets), read **Documentation/index.md** first and open the linked doc that matches your task. Do not guess structure or conventions—use the docs.
+
+## When you change the project, update the docs
+
+Whenever you:
+
+- Add or change a **component** (atom or molecule): update [Documentation/component-structure.md](Documentation/component-structure.md) (list and one-line description). Create the file or add a subsection if it does not exist.
+- Add or change **colors / design tokens** (e.g. in `src/tailwind.css`): update [Documentation/design-tokens-colors.md](Documentation/design-tokens-colors.md).
+- Install or remove a **library** (dependency): update [Documentation/libraries.md](Documentation/libraries.md).
+- Change **Storybook** (addons, story locations, build): update [Documentation/storybook.md](Documentation/storybook.md).
+- Add or change **assets** under `src/assets/`: update [Documentation/assets.md](Documentation/assets.md).
+- Change **repo layout**, **path aliases**, or **src/** structure: update [Documentation/architecture.md](Documentation/architecture.md).
+- Change **setup**, **scripts**, or **troubleshooting**: update [Documentation/getting-started.md](Documentation/getting-started.md).
+
+If the right doc file does not exist, create it and add a short entry in [Documentation/index.md](Documentation/index.md).
+
+## How to write in the docs
+
+- **State only**: Describe the current capabilities and configuration of the item. Do not describe specific changes from the conversation or implementation details that are not useful for future developers.
+- **Concise**: Add only what other developers must know. No long explanations or chat-specific context.
+- **Neutral**: Write as reference (e.g. "Button supports types: default, red, green, yellow") not as a changelog or narrative.

@@ -1,0 +1,62 @@
+/**
+ * Lienzo color tokens as CSS color strings, for places that need a JS value
+ * (SVG gradients, charts). Source of truth: src/css/tokens.css.
+ */
+const channel = (name: string) => `rgb(var(--lz-${name}))`;
+const alpha = (name: string, opacity: number) => `rgb(var(--lz-${name}) / ${opacity})`;
+
+const colors = {
+  'gray-100': channel('gray-100'),
+  'gray-300': channel('gray-300'),
+  'gray-600': channel('gray-600'),
+  'gray-700': channel('gray-700'),
+  'gray-800': channel('gray-800'),
+  'gray-900': channel('gray-900'),
+  'gray-opacity-14': alpha('gray-300', 0.14),
+  'gray-opacity-20': alpha('gray-300', 0.2),
+  'gray-opacity-30': alpha('gray-300', 0.3),
+  white: channel('white'),
+  'white-opacity-14': alpha('white', 0.14),
+  black: channel('black'),
+  'black-opacity-14': alpha('black', 0.14),
+  'black-opacity-20': alpha('black', 0.2),
+  'blue-200': channel('blue-200'),
+  'blue-400': channel('blue-400'),
+  'blue-600': channel('blue-600'),
+  transparent: 'transparent',
+  'pio-bg': channel('pio-bg'),
+  'pio-bg-light': channel('pio-bg-light'),
+  'pio-bg-soft': channel('pio-bg-soft'),
+  'pio-bg-opacity-90': alpha('pio-bg-opacity-90', 0.9),
+  'pio-teal-dark': channel('pio-teal-dark'),
+  'pio-teal-dark-hover': channel('pio-teal-dark-hover'),
+  'pio-teal-dark-muted': channel('pio-teal-dark-muted'),
+  'pio-teal-dark-pale': channel('pio-teal-dark-pale'),
+  'pio-teal-dark-opacity-14': alpha('pio-teal-dark', 0.14),
+  'pio-teal-dark-opacity-20': alpha('pio-teal-dark', 0.2),
+  'pio-teal-black': channel('pio-teal-black'),
+  'pio-coral': channel('pio-coral'),
+  'pio-coral-hover': channel('pio-coral-hover'),
+  'pio-coral-dark': channel('pio-coral-dark'),
+  'pio-coral-muted': channel('pio-coral-muted'),
+  'pio-coral-pale': channel('pio-coral-pale'),
+  'pio-coral-opacity-14': alpha('pio-coral', 0.14),
+  'pio-coral-opacity-20': alpha('pio-coral', 0.2),
+  'pio-amber': channel('pio-amber'),
+  'pio-amber-hover': channel('pio-amber-hover'),
+  'pio-amber-dark': channel('pio-amber-dark'),
+  'pio-amber-muted': channel('pio-amber-muted'),
+  'pio-amber-pale': channel('pio-amber-pale'),
+  'pio-amber-opacity-14': alpha('pio-amber', 0.14),
+  'pio-amber-opacity-20': alpha('pio-amber', 0.2),
+  'pio-stone': channel('pio-stone'),
+  'pio-stone-dark': channel('pio-stone-dark'),
+  'pio-stone-pale': channel('pio-stone-pale'),
+  'pio-stone-opacity-14': alpha('pio-stone', 0.14),
+  'pio-text': channel('pio-text'),
+  'pio-text-muted': channel('pio-text-muted'),
+  'pio-grid': channel('pio-grid'),
+  'pio-border-subtle': channel('pio-border-subtle'),
+} as const;
+
+export default colors;

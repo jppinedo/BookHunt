@@ -1,0 +1,84 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Stories from './Phone.stories';
+import { ComponentDocsPage } from '@docs/ComponentDocsPage';
+
+<Meta of={Stories} />
+
+export const exampleCode = `import Phone from '@templates/Phone/Phone';
+
+<Phone time="9:41">
+  {/* App content */}
+</Phone>`;
+
+<ComponentDocsPage
+  title="Phone"
+  badge="0.1.0"
+  breadcrumb={['Templates', 'Phone']}
+  description="Device-frame template with status bar, Dynamic Island, scrollable content slot, and home indicator. Content-agnostic — pass UI via children."
+  stories={Stories}
+  useCases={{
+    cases: [
+      'Live preview of design-system components in a mobile viewport.',
+      'Welcome-page hero mock that slots real Lienzo atoms and molecules.',
+      'Storybook demos that need device chrome without owning app content.',
+      'Related: compose filled layouts as Pages (e.g. CanvasStudio, WelcomeHero).',
+    ],
+  }}
+  variations={[
+    {
+      id: 'empty-shell',
+      label: 'Empty shell',
+      canvas: <Canvas of={Stories.EmptyShell} layout="centered" />,
+      badge: 'Pattern: Content slot',
+      description: 'Frame only with a placeholder in the children region.',
+      meta: [
+        {
+          label: 'Component Props',
+          value: 'children · time',
+          valueTone: 'prop',
+        },
+        {
+          label: 'Best For',
+          value: 'Isolated chrome review before composing a Page',
+        },
+      ],
+    },
+  ]}
+  props={{
+    interfaceName: 'PhoneProps',
+    lead: 'Runtime props for Phone.',
+    rows: [
+      {
+        name: 'children',
+        type: 'React.ReactNode',
+        description: 'Screen content between the status bar and home indicator.',
+      },
+      {
+        name: 'time',
+        type: 'string',
+        defaultValue: "'9:41'",
+        description: 'Status-bar clock label.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Optional class passthrough on the outer frame.',
+      },
+    ],
+  }}
+  usage={{
+    whenToUse: [
+      'Mobile device chrome around any slotted content.',
+      'Design-system previews and marketing mockups that need a phone shell.',
+    ],
+    whenToAvoid: [
+      'Desktop layouts — use page-level containers instead.',
+      'Putting app chrome (nav, headers) inside the template; keep those in children or a Page.',
+    ],
+  }}
+  example={{
+    code: exampleCode,
+    filename: 'Phone.example.tsx',
+    language: 'tsx',
+  }}
+/>
