@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Input, Tabs, Title } from "@jppinedo/lienzo";
+import PasswordInput from '@custom/Shared/PasswordInput';
 import { AuthContext } from "@state/AuthContext";
 import { AppContext } from '@state/AppContext';
 import { getUserProfile, getListedBooks } from "@services/BookFirestore";
@@ -30,6 +31,12 @@ const ProfilePage = () => {
     const [listedBooks, setListedBooks] = useState([])
 
     const [deleteVisible, setDeleteVisible] = useState(false);
+    // U5: the delete confirmation carries its OWN password field. The
+    // old flow told the user to "type old password in text box" — the
+    // Change Password section's field, two scrolls up — so the confirm
+    // step is now self-contained (see ProfileSettings).
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deletePasswordError, setDeletePasswordError] = useState(false);
 
     // U1.1: the breadcrumb trail changes with the active tab (Profile /
     // My Listings). Lienzo Tabs is uncontrolled — it owns its active tab
@@ -129,10 +136,12 @@ const ProfilePage = () => {
     }
 
     // Mock: a real Supabase version deletes the profile row + auth user here.
+    // U5: validates the confirmation panel's own password field (the
+    // old flow validated the Change Password section's Old Password).
     async function deleteAccount(e) {
         e.preventDefault();
-        if (!oldPassword) {
-            setOldPasswordError(true);
+        if (!deletePassword) {
+            setDeletePasswordError(true);
             return;
         }
         try {
@@ -147,6 +156,10 @@ const ProfilePage = () => {
 
     function showDelete(option) {
         setDeleteVisible(option === true);
+        if (option !== true) {
+            setDeletePassword('');
+            setDeletePasswordError(false);
+        }
     }
 
     const handlePasswordInput = e => {
@@ -184,9 +197,19 @@ const ProfilePage = () => {
     // primitive (built when Lienzo Input hardcoded type="text") — three
     // implementations, three heights. Input now takes htmlType, so the
     // workaround is deleted and all four fields line up.
+    // U5: Name and Email used to render as readOnly Lienzo Inputs —
+    // pixel-identical to the editable fields, so they LOOKED editable
+    // and silently weren't (audit finding). They are now plain-text
+    // rows in a muted, flat box that reads as information, not a
+    // field, with a hint saying where they're managed. Nothing on
+    // this form saves them: the only save action is Change Password,
+    // which concerns the password fields alone.
     const readOnlyField = (label, value) => (
         <div className="mb-3 text-left">
-            <Input label={label} value={value} readOnly />
+            <span className="block text-gray-700 font-jakarta text-sm font-medium">{label}</span>
+            <div className="flex h-12 items-center rounded-lg bg-gray-opacity-14 px-3 font-jakarta text-[15px] text-gray-500">
+                {value || '—'}
+            </div>
         </div>
     );
 
@@ -194,6 +217,9 @@ const ProfilePage = () => {
         <div className={"info-area"} style={{padding: '2rem'}}>
             {readOnlyField("Name", fullName)}
             {readOnlyField("Email", user?.email || '')}
+            <p className="mb-3 text-left text-sm text-gray-500" style={{marginTop: '-0.25rem'}}>
+                Name and email are managed by your account sign-in and can't be changed here.
+            </p>
             <div className="mt-3 text-left">
                 <Input
                     label="Old Password"
@@ -220,14 +246,28 @@ const ProfilePage = () => {
             </div>
             <div>
                 {deleteVisible ?
-                    <>
-                        <h3 style={{marginTop: 10}}>This is permanent. Do you want to proceed? Please type old
-                            password in text box.</h3>
-                        <div className="flex justify-center gap-3">
-                            <Button label="Yes" type="red" onClick={(e) => deleteAccount(e)} />
-                            <Button label="No" type="red" onClick={() => showDelete(false)} />
+                    <div className="mt-2 rounded-lg border-2 border-pio-coral p-4">
+                        <h3 className="font-jakarta text-base font-semibold text-pio-text" style={{marginTop: 0}}>
+                            Delete your account permanently?
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                            This can't be undone. Confirm with your password to delete your account.
+                        </p>
+                        <div className="mt-3 text-left">
+                            <PasswordInput
+                                id="deleteConfirmPass"
+                                label="Password"
+                                autoComplete="current-password"
+                                value={deletePassword}
+                                onChange={(e) => { setDeletePassword(e.target.value); setDeletePasswordError(false); }}
+                                hint={deletePasswordError ? "Please type your password to confirm." : undefined}
+                            />
                         </div>
-                    </> : null}
+                        <div className="mt-4 flex justify-center gap-3">
+                            <Button label="Delete my account" type="red" onClick={(e) => deleteAccount(e)} />
+                            <Button label="Cancel" onClick={() => showDelete(false)} />
+                        </div>
+                    </div> : null}
             </div>
         </div>
     )

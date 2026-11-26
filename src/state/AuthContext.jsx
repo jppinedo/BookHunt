@@ -29,7 +29,8 @@ function friendlyAuthError(error) {
 
 /**
  * Auth provider — same context shape in both modes:
- * { user, setUser, signIn, signUp, signOut }, where user is
+ * { user, setUser, signIn, signUp, signOut, passwordRecovery,
+ *   requestPasswordReset, updatePassword }, where user is
  * { uid, id, email, displayName } (uid kept for Firebase-era callers).
  *
  * Phase E1 modes, chosen by configuration (see services/supabaseClient.js):
@@ -59,6 +60,11 @@ function mapSupabaseUser(supabaseUser) {
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(isSupabaseConfigured ? null : DEMO_USER);
+    // U5: true between Supabase's PASSWORD_RECOVERY event (the user
+    // landed from a reset-password email link) and the password update
+    // that completes the flow. RedirectHandler routes to the
+    // set-new-password screen while this is set.
+    const [passwordRecovery, setPasswordRecovery] = useState(false);
 
     // Supabase mode: restore any existing session, then follow auth changes.
     useEffect(() => {
@@ -70,7 +76,8 @@ export function AuthProvider({ children }) {
         });
 
         const { data: subscription } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
+            (event, session) => {
+                if (event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
                 setUser(mapSupabaseUser(session?.user ?? null));
             },
         );
@@ -143,12 +150,44 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
+    // U5: "Forgot password?" — Supabase Auth emails the reset link; the
+    // link lands back on the app (served from the origin root; routing
+    // is in-memory, and supabase-js reads the recovery tokens from the
+    // URL hash itself and fires PASSWORD_RECOVERY). Supabase answers
+    // the same way whether or not the email has an account, and the UI
+    // shows the same confirmation either way — no account-existence
+    // leak. Mock mode: no email exists to send; resolve so the UI
+    // shows the identical confirmation (demo parity).
+    const requestPasswordReset = async (email) => {
+        if (!isSupabaseConfigured) return;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/`,
+        });
+        if (error) throw friendlyAuthError(error);
+    };
+
+    // U5: completes the recovery flow (also the call a signed-in user
+    // would use). On success the recovery flag clears and the session
+    // is a normal signed-in session. Mock mode: resolve (no-op).
+    const updatePassword = async (newPassword) => {
+        if (isSupabaseConfigured) {
+            const { error } = await supabase.auth.updateUser({
+                password: newPassword,
+            });
+            if (error) throw friendlyAuthError(error);
+        }
+        setPasswordRecovery(false);
+    };
+
     const values = {
         user,
         setUser,
         signIn,
         signUp,
         signOut,
+        passwordRecovery,
+        requestPasswordReset,
+        updatePassword,
     };
 
     return (

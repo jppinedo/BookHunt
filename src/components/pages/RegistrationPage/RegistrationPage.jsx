@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from '@state/AuthContext';
 import AuthBrand from '@custom/Shared/AuthBrand';
+import AuthSwitch from '@custom/Shared/AuthSwitch';
+import PasswordInput from '@custom/Shared/PasswordInput';
 import './RegistrationPage.css';
 
 /**
@@ -103,6 +105,9 @@ const RegistrationPage = () => {
         <div className='register-wrapper'>
             <AuthBrand />
             <Card className="register-card">
+                <div className="w-full mb-5">
+                    <AuthSwitch active="register" />
+                </div>
                 <Title size="xl" fontFamily="playfair">Register</Title>
                 <p>Fill out the form to create an account</p>
                 <form id={"log-in"} method={"post"} style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
@@ -139,10 +144,9 @@ const RegistrationPage = () => {
                     </div>
                     <hr className="w-full border-gray-300" />
                     <div className="w-full text-left">
-                        <Input
+                        <PasswordInput
                             id="crPassword"
                             label="Password"
-                            htmlType="password"
                             autoComplete="new-password"
                             placeholder="At least 6 characters"
                             value={password}
@@ -151,10 +155,9 @@ const RegistrationPage = () => {
                         />
                     </div>
                     <div className="w-full text-left">
-                        <Input
+                        <PasswordInput
                             id="confirmPassword"
                             label="Confirm Password"
-                            htmlType="password"
                             autoComplete="new-password"
                             placeholder="Repeat your password"
                             value={confirmedPassword}
@@ -170,13 +173,6 @@ const RegistrationPage = () => {
                         />
                     </div>
                 </form>
-                <div className="login-section">
-                    <p>Already have an account?{" "}
-                        <button type="button" style={{ color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, font: "inherit" }} onClick={() => navigate("/login")}>
-                                Log in
-                        </button>
-                    </p>
-                </div>
             </Card>
         </div>
     );

@@ -22,6 +22,7 @@ import SellBook from '@pages/SellBook/SellBook';
 import NewBookPage from '@pages/NewBookPage/NewBookPage';
 import LoginPage from '@pages/LoginPage/LoginPage';
 import RegistrationPage from '@pages/RegistrationPage/RegistrationPage';
+import ResetPasswordPage from '@pages/ResetPasswordPage/ResetPasswordPage';
 import ProfilePage from '@pages/ProfilePage/ProfilePage';
 import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
 import RedirectHandler from "@state/RedirectHandler.jsx";
@@ -72,7 +73,7 @@ function AppShell() {
     setIsLoggedIn(!!user)
   }, [user]);
 
-  const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration";
+  const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration" && pathname !== "/reset-password";
   // U1.1: the brand header (logo + "Home") shows on EVERY logged-in
   // page — previously /results and /book/* had no header at all. The
   // only exception is /search, whose hero logo is the brand there (and
@@ -94,6 +95,7 @@ function AppShell() {
         <Route path="/sell" element={<Protected><SellBook /></Protected>} />
         <Route path="/new/:id" element={<Protected><NewBookPage /></Protected>} />
         <Route path="/registration" element={<RegistrationPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
         <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
