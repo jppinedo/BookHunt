@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import logo from '@images/BookHuntLogoSmall.png';
+import logo from '@assets/bookhunt-logo.svg';
 
 /**
  * AuthBrand — the brand lockup above the Login and Register cards.

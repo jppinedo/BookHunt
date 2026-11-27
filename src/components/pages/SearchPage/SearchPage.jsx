@@ -8,7 +8,7 @@ import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
 import { BookOpen as MenuBookIcon } from 'react-feather';
 import LoadingResults from '@custom/Search/LoadingResults';
-import logo from '@assets/images/book_hunt_logo.png';
+import logo from '@assets/bookhunt-logo.svg';
 
 // This preview runs on a small built-in catalog (mock data, no live Google
 // Books key), so only these titles can match. They are offered as one-tap
@@ -103,14 +103,28 @@ const SearchPage = () => {
           bar/headline under it.
           U11: on phones the 168px lockup ate a huge share of the
           screen, so the logo steps down to 100px under 640px (the
-          1.5rem margin below it is unchanged). */}
+          1.5rem margin below it is unchanged).
+          U13: the old hero PNG had the "Book Hunt" wordmark baked
+          into the image. The lockup is now the new SVG mark with the
+          wordmark as real HTML text under it (same Jakarta bold as
+          PageBrand/AuthBrand), sized so the whole lockup keeps
+          roughly the old footprint and the same step-down under
+          640px. The reset click covers the whole lockup. */}
       <button
         type="button"
         onClick={() => { resetSearch(); navigate('/search', { replace: true }); }}
         aria-label="Book Hunt — home"
         className="block mx-auto bg-transparent border-0 p-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pio-coral"
       >
-        <img src={logo} alt="Book Hunt" className="w-[100px] sm:w-[168px] h-auto" style={{display: 'block', margin: '1rem auto 1.5rem'}} />
+        <span className="flex flex-col items-center">
+          <img src={logo} alt="" className="w-[56px] sm:w-[92px] h-auto" style={{display: 'block', margin: '1rem auto 0'}} />
+          <span
+            className="font-jakarta font-bold text-pio-text tracking-tight leading-none text-[22px] sm:text-4xl mt-1.5 sm:mt-2"
+            style={{marginBottom: '1.5rem'}}
+          >
+            Book Hunt
+          </span>
+        </span>
       </button>
       {/* D2 hero: in the idle home state the logo gets a headline and a
           one-line promise, so the centered hero reads as a composed

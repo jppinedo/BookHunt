@@ -8,7 +8,7 @@ import './App.css';
 // RedirectHandler sends the demo user to /search, and no button ever
 // touches the real address bar.
 import {MemoryRouter as Router, Routes, Route, useLocation, useNavigate} from 'react-router-dom';
-import logoSmall from '@assets/images/BookHuntLogoSmall.png';
+import logoSmall from '@assets/bookhunt-logo.svg';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
 import { SearchContext } from '@state/SearchContext';

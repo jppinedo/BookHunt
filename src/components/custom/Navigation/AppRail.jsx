@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bookmark, List, Tag, User, LogOut } from 'react-feather';
-import logoSmall from '@assets/images/BookHuntLogoSmall.png';
+import logoSmall from '@assets/bookhunt-logo.svg';
 import { AuthContext } from "@state/AuthContext";
 import { SearchContext } from '@state/SearchContext';
 

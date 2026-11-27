@@ -2,12 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- No favicon file here on purpose: referencing BookHuntLogoSmall.png
-         from this HTML forced Vite to emit it as a file, which defeated
-         the data-URI inlining of the same image in the JS bundle. The
-         published preview shell (artifact index.html) declares its own
-         favicon against its own copy of the file. -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- Favicon: the brand mark, served as a static file from public/.
+         (The old PNG logo was never referenced here — pointing this
+         HTML at it forced Vite to emit it as a file, which defeated
+         the data-URI inlining of the same image in the JS bundle.
+         The SVG mark is only inlined from its src/assets copy; this
+         public/ copy exists just for the favicon. The published
+         preview shell (artifact index.html) declares its own favicon
+         against its own copy of the file.) -->
+    <link rel="icon" type="image/svg+xml" href="/bookhunt-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Hunt</title>
   </head>

@@ -9,17 +9,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    // Inline both logos (into the JS) as data URIs. An audit capture
+    // Inline the logo (into the JS) as a data URI. An audit capture
     // resolved the logo <img> against the origin root instead of the
     // artifact directory, so it was blocked as a broken image even
     // though the file exists. A data URI has no URL to resolve, so
-    // these images cannot 404 or be mis-resolved. All other assets
+    // the image cannot 404 or be mis-resolved. All other assets
     // keep the default limit. (The background tile used to be inlined
     // here too; D1 retired it — the app background is now Lienzo's
     // light paper surface, no image at all.)
     assetsInlineLimit: (filePath) =>
-      filePath.includes('book_hunt_logo') ||
-      filePath.includes('BookHuntLogoSmall')
+      filePath.includes('bookhunt-logo')
         ? true
         : undefined,
   },
