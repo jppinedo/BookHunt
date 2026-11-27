@@ -126,3 +126,77 @@ body {
 .toast-enter {
   animation: toast-in 0.25s ease-out;
 }
+
+/* U10.1 — AppRail hover motion. U10's rail items carried a visible
+   micro-label under each icon AND a CSS hover tooltip AND the native
+   title tooltip — Juan's screenshot showed the same label three times
+   at once. The labels are gone (icons only, 24px glyphs in 48px
+   targets); the CSS tooltip is the single pointer label and the
+   aria-label the single assistive one. In place of U10's faint static
+   hover tint, the hover state is now animated, in two independent
+   layers so the transforms never fight:
+   - the pill is a ::before layer whose coral tint (the app coral at
+     16% opacity) fades in while scaling 0.9 → 1, ~180ms ease-out;
+   - the glyph (.rail-icon) scales to 1.12 on the same easing and its
+     color shifts to full coral.
+   The ACTIVE item keeps its solid coral pill (its ::before never
+   appears, so hover can never be mistaken for active) and hover only
+   grows its glyph. A press compresses the glyph to 0.96. Reduced
+   motion disables the transforms entirely. */
+.rail-item {
+  position: relative;
+}
+
+.rail-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: rgb(var(--lz-pio-coral) / 0.16);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.rail-item:not(.is-active):hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.rail-icon {
+  position: relative;
+  display: inline-flex;
+  transition:
+    transform 180ms ease-out,
+    color 180ms ease-out;
+}
+
+.rail-item:not(.is-active):hover .rail-icon {
+  transform: scale(1.12);
+  color: rgb(var(--lz-pio-coral));
+}
+
+.rail-item.is-active:hover .rail-icon {
+  transform: scale(1.12);
+}
+
+/* Last so it wins the specificity tie against the hover rules while
+   a press is held mid-hover. */
+.rail-item:hover:active .rail-icon {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-item::before,
+  .rail-icon {
+    transition: none;
+  }
+
+  .rail-item::before,
+  .rail-item:hover .rail-icon,
+  .rail-item:active .rail-icon {
+    transform: none;
+  }
+}
