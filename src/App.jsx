@@ -14,6 +14,7 @@ import { AuthContext } from "@state/AuthContext";
 import { SearchContext } from '@state/SearchContext';
 import MenuNav from '@custom/Navigation/MenuNav';
 import HubNav from '@custom/Navigation/HubNav';
+import AppRail from '@custom/Navigation/AppRail';
 import ErrorModal from '@custom/Error/ErrorModal';
 import SearchPage from '@pages/SearchPage/SearchPage';
 import BookList from '@pages/BookList/BookList';
@@ -53,7 +54,8 @@ function PageBrand() {
   const navigate = useNavigate();
   const { resetSearch } = useContext(SearchContext);
   return (
-    <div className="page-shell pt-3 mb-2">
+    // U10: hidden at lg — the AppRail's logo is the brand on desktop.
+    <div className="page-shell pt-3 mb-2 lg:hidden">
       <button
         type="button"
         onClick={() => { resetSearch(); navigate('/search'); }}
@@ -89,6 +91,15 @@ function AppShell() {
 
   return (
     <>
+      {/* U10: the side rail renders only at lg (its own classes), and
+          the content wrapper takes a matching left padding at lg so
+          .page-shell centers in the space beside the rail instead of
+          sliding under it. The fixed overlays (toasts, modals) are
+          unaffected — they position against the viewport, and the
+          wrapper has no transform/filter to trap them. Below lg the
+          padding is absent and everything renders exactly as before. */}
+      {showNav && <AppRail />}
+      <div className={showNav ? 'lg:pl-[72px]' : undefined}>
       {showNav && <MenuNav />}
       {showBrand && <PageBrand />}
       <RedirectHandler /> {/* Handles site load up for logged in or not logged in */}
@@ -115,6 +126,7 @@ function AppShell() {
           visible on the destination screen. */}
       <Toasts />
       <ErrorModal showError={isError} error={error} onClose={onCloseError}/>
+      </div>
     </>
   )
 }

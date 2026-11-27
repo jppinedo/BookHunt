@@ -111,7 +111,10 @@ const MenuNav = () => {
         // the button lands exactly where it always did. The strip is
         // pointer-events-none except on the wrapper itself, so it never
         // blocks taps on the PageBrand header beneath it.
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-50">
+        // U10: hidden at lg — the AppRail carries Sell Book, My
+        // Listings and Logout on desktop, so the hamburger retires
+        // there. Below lg it renders exactly as before.
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-50 lg:hidden">
           <div className="page-shell">
             <div ref={wrapperRef} className="pointer-events-auto relative ml-auto flex w-fit flex-col items-end gap-2 pt-3 -mr-1">
             <button

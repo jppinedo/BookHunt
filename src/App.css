@@ -93,6 +93,14 @@
   font-family: inherit;
   left: 27%;
 }
+/* U10: at lg the AppRail replaces the bottom bar. This must be a CSS
+   rule, not a Tailwind class on the element: #hubNav's own ID rule
+   above sets display:flex and would outrank a display utility. */
+@media (min-width: 1024px) {
+  #hubNav {
+    display: none;
+  }
+}
 @media (max-width: 600px) {
   #hubNav {
     width: 94%;
