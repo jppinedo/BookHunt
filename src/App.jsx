@@ -8,7 +8,7 @@ import './App.css';
 // RedirectHandler sends the demo user to /search, and no button ever
 // touches the real address bar.
 import {MemoryRouter as Router, Routes, Route, useLocation, useNavigate} from 'react-router-dom';
-import logoSmall from '@assets/bookhunt-logo.svg';
+import BrandLockup from '@custom/Shared/BrandLockup';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
 import { SearchContext } from '@state/SearchContext';
@@ -49,22 +49,21 @@ import { Protected } from "@/Protected";
  * on the clean home view, empty bar and no results, NOT the U1
  * preserved session. The wrapper also gains margin below so the
  * header never crowds the content under it.
+ * U15 (Juan's review): the lockup is now the shared BrandLockup —
+ * the compact horizontal mark + wordmark — HORIZONTALLY CENTERED at
+ * the top of the shell, and it renders at EVERY width: U10 had
+ * retired it on desktop in favour of the rail's logo, but Juan wants
+ * the logo always present, rail or no rail. Below lg the ☰ MenuNav
+ * still sits at the shell's top-right edge; the lockup is
+ * content-sized and centered, so the two never meet (at ~390px the
+ * lockup spans the middle ~160px, the menu the right ~48px).
  */
 function PageBrand() {
   const navigate = useNavigate();
   const { resetSearch } = useContext(SearchContext);
   return (
-    // U10: hidden at lg — the AppRail's logo is the brand on desktop.
-    <div className="page-shell pt-3 mb-2 lg:hidden">
-      <button
-        type="button"
-        onClick={() => { resetSearch(); navigate('/search'); }}
-        aria-label="Book Hunt — home"
-        className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer px-2.5 py-1.5 -ml-2.5 rounded-full transition-colors hover:bg-pio-coral-pale/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
-      >
-        <img src={logoSmall} alt="" style={{ width: '38px', height: '38px', display: 'block' }} />
-        <span className="text-pio-text text-lg font-bold font-jakarta">Book Hunt</span>
-      </button>
+    <div className="page-shell pt-3 mb-2 flex justify-center">
+      <BrandLockup onClick={() => { resetSearch(); navigate('/search'); }} />
     </div>
   );
 }
@@ -86,7 +85,10 @@ function AppShell() {
   // U1.1: the brand header (logo + "Book Hunt") shows on EVERY
   // logged-in page — previously /results and /book/* had no header at
   // all. The only exception is /search, whose hero logo is the brand
-  // there (and is itself a Home button; see SearchPage).
+  // there (and is itself a Home button; see SearchPage). U15: in the
+  // /search RESULTS view the hero steps aside and SearchPage renders
+  // the same small centered BrandLockup itself, so the rule — logo
+  // always on top — holds in every state of every page.
   const showBrand = showNav && pathname !== "/search";
 
   return (

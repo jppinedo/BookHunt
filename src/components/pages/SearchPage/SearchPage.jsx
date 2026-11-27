@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 import { SearchContext } from '@state/SearchContext';
 import SearchInput from '@custom/Search/SearchInput';
+import CompactSearch from '@custom/Search/CompactSearch';
+import BrandLockup from '@custom/Shared/BrandLockup';
 import BreadcrumbNav from '@custom/Navigation/BreadcrumbNav';
 import BookResults from '@custom/Search/BookResults';
 import InfoBox from '@custom/Shared/InfoBox';
@@ -82,6 +84,11 @@ const SearchPage = () => {
 
   const isLoading = status === 'loading';
   const showNoResults = status === 'done' && !books.length && searchedQuery;
+  // U15: the RESULTS view — a completed search with books to show —
+  // gets its own chrome (small centered brand, compact search in the
+  // breadcrumb bar, title row). Every other state (idle home,
+  // loading, no matches) keeps the hero treatment below.
+  const hasResults = status === 'done' && books.length > 0;
   // Home state (nothing to show yet — idle, loading, or no matches):
   // logo + search sit vertically centered in the viewport. Once results
   // exist the page switches to normal top-aligned flow so the grid can
@@ -109,7 +116,17 @@ const SearchPage = () => {
           wordmark as real HTML text under it (same Jakarta bold as
           PageBrand/AuthBrand), sized so the whole lockup keeps
           roughly the old footprint and the same step-down under
-          640px. The reset click covers the whole lockup. */}
+          640px. The reset click covers the whole lockup.
+          U15: the hero lockup is the HOME state's brand only. Once
+          results exist, the results view below renders the small
+          centered BrandLockup instead (Juan: the logo is always on
+          top, in the compact lockup everywhere except the clean
+          home), with the same reset click. */}
+      {hasResults ? (
+        <div className="flex justify-center px-4 pt-3 mb-1">
+          <BrandLockup onClick={() => { resetSearch(); navigate('/search', { replace: true }); }} />
+        </div>
+      ) : (
       <button
         type="button"
         onClick={() => { resetSearch(); navigate('/search', { replace: true }); }}
@@ -126,12 +143,14 @@ const SearchPage = () => {
           </span>
         </span>
       </button>
+      )}
       {/* D2 hero: in the idle home state the logo gets a headline and a
           one-line promise, so the centered hero reads as a composed
           unit (logo → headline → subline → pill search → example
           chips) on the 8pt rhythm instead of a logo floating over a
-          hint line. The InfoBox hint still serves the results and
-          no-results states below. */}
+          hint line. (The old InfoBox hint line retired in U15 — the
+          results title row says the same thing better; the no-matches
+          InfoBox below remains.) */}
       {status === 'idle' ? (
         <div className="px-4">
           <h1 className="font-playfair text-pio-text text-[28px] sm:text-4xl font-semibold leading-tight mt-2 mb-2.5">
@@ -144,28 +163,28 @@ const SearchPage = () => {
       ) : null}
 
       {/* U7: the X resets to the clean home view (session wiped, bare
-          /search), same as the logo and the Home crumb. */}
-      <SearchInput
-        onSearch={setQueryParam}
-        onClear={() => { resetSearch(); navigate('/search', { replace: true }); }}
-        inputValue={urlQuery || searchedQuery || ''}
-      />
-
-      {/* U1.2 order (Juan's screenshot review): search input → hint →
-          breadcrumb bar → results grid. The hint sits directly below
-          the search input; the breadcrumb bar below the hint. All three
-          blocks live in the shared .page-shell so their edges align
-          with the grid's. */}
-      {books.length ? (
-        <div className="page-shell">
-          <InfoBox icon={MenuBookIcon} content="Click on a book to start finding deals!" />
-        </div>
+          /search), same as the logo and the Home crumb.
+          U15: the big pill belongs to the home/loading/no-matches
+          states. The results view drops it (and the old "Click on a
+          book…" hint line with it) — re-searching there happens in
+          the compact pill inside the breadcrumb bar below. */}
+      {!hasResults ? (
+        <SearchInput
+          onSearch={setQueryParam}
+          onClear={() => { resetSearch(); navigate('/search', { replace: true }); }}
+          inputValue={urlQuery || searchedQuery || ''}
+        />
       ) : null}
 
       {/* U1.1: once a search session exists, the breadcrumb bar carries
           the same navigation as every inner page (Home / Results).
           U1.2: the result count moved INTO the bar's right end — it
-          used to be a separate line above the grid. */}
+          used to be a separate line above the grid.
+          U15 (Juan's Stitch reference): in the results view the bar's
+          right end now holds the COMPACT SEARCH instead, and the
+          count moved out to the title row under the bar. On mobile
+          the bar hides (U11.1) and the `end` slot renders as its own
+          full-width row — the compact search stretches across it. */}
       {status !== 'idle' ? (
         <div className="page-shell">
           <BreadcrumbNav
@@ -174,15 +193,37 @@ const SearchPage = () => {
               { label: 'Results', current: true },
             ]}
             fallback="/search"
-            end={status === 'done' && books.length ? (
-              <>
-                <span className="font-semibold text-pio-text">
-                  {books.length} {books.length === 1 ? 'result' : 'results'}
-                </span>
-                &nbsp;for &ldquo;{searchedQuery}&rdquo;
-              </>
+            end={hasResults ? (
+              <CompactSearch
+                onSearch={setQueryParam}
+                onClear={() => { resetSearch(); navigate('/search', { replace: true }); }}
+                inputValue={urlQuery || searchedQuery || ''}
+              />
             ) : null}
           />
+        </div>
+      ) : null}
+
+      {/* U15: the results title row, from Juan's Stitch reference —
+          a coral BookOpen icon + Playfair instruction on the left,
+          the muted result count for the current query on the right,
+          and a SUBTLE hairline under the row (the reference's line,
+          kept barely visible: the card-grid border tone at 60%) so
+          the header reads as one aligned unit above the grid. */}
+      {hasResults ? (
+        <div className="page-shell">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 mt-2 pb-3 border-b border-pio-grid/60">
+            <h2 className="flex items-center gap-2 font-playfair text-[22px] sm:text-2xl font-semibold text-pio-text m-0">
+              <MenuBookIcon size={20} aria-hidden="true" className="text-pio-coral shrink-0" />
+              Select an edition to compare deals
+            </h2>
+            <p className="text-[13px] text-pio-text-muted m-0">
+              <span className="font-semibold text-pio-text">
+                {books.length} {books.length === 1 ? 'result' : 'results'}
+              </span>
+              &nbsp;for &ldquo;{searchedQuery}&rdquo;
+            </p>
+          </div>
         </div>
       ) : null}
 

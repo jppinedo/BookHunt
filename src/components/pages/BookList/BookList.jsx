@@ -8,6 +8,7 @@ import { searchEbay } from "@services/EbayAPI";
 import { searchBookInDB } from "@services/BookFirestore";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { formatEbayBook } from '@utils/search-utils';
+import { MapPin, Tag } from 'react-feather';
 import { Spinner } from "@jppinedo/lienzo";
 import BookCard from "@custom/Books/BookCard";
 import LoadingResults from "@custom/Search/LoadingResults";
@@ -158,13 +159,21 @@ const BookList = () => {
   );
   // U8: the count is optional — Campus passes it (its set is fully
   // loaded, so the number is a true total); eBay doesn't (see below).
-  const sectionHeading = (label, count) => (
-    <h2 className="font-playfair text-[22px] font-semibold text-pio-text text-left mb-4">
-      {label}
-      {count !== undefined && (
-        <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
-      )}
-    </h2>
+  // U15: the headings take the search results page's new header
+  // treatment (Juan's Stitch reference, adapted — he designs this
+  // page properly later): a small coral icon before the Playfair
+  // title (MapPin for Campus, Tag for eBay) and the same subtle
+  // hairline under the row (the card-grid border tone at 60%).
+  const sectionHeading = (label, count, Icon) => (
+    <div className="flex items-center gap-2 border-b border-pio-grid/60 pb-3 mb-5">
+      <Icon size={19} aria-hidden="true" className="text-pio-coral shrink-0" />
+      <h2 className="font-playfair text-[22px] font-semibold text-pio-text text-left m-0">
+        {label}
+        {count !== undefined && (
+          <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
+        )}
+      </h2>
+    </div>
   );
   const emptyNote = (text) => (
     <p className="text-sm text-pio-text-muted text-left my-0">{text}</p>
@@ -199,7 +208,7 @@ const BookList = () => {
       )}
 
       <section className="mb-9">
-        {sectionHeading('Campus listings', campusListings.length)}
+        {sectionHeading('Campus listings', campusListings.length, MapPin)}
         {campusListings.length ? (
           <div className="card-grid">{campusListings.map(renderCard)}</div>
         ) : (
@@ -214,7 +223,7 @@ const BookList = () => {
             shouldn't be a count of ebay results since they load
             dynamically." Campus keeps its count: that set arrives
             complete from the database. */}
-        {sectionHeading('eBay deals')}
+        {sectionHeading('eBay deals', undefined, Tag)}
         {ebayListings.length ? (
           <InfiniteScroll
             dataLength={ebayListings.length}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Title } from '@jppinedo/lienzo';
+import { ArrowRight } from 'react-feather';
 import { truncateText } from '@utils/search-utils.js';
 import BookCover from '@custom/Books/BookCover';
 import './BookResults.css';
@@ -39,6 +40,14 @@ import './BookResults.css';
  * U8: this list's private Tailwind grid classes are gone — it uses
  * the shared .card-grid rule (index.css) like every other item list,
  * so column counts can never drift apart again.
+ *
+ * U15 (Juan's Stitch reference): each result card gains an explicit
+ * call to action — coral "Find deals" + an arrow, pinned to the
+ * bottom-right of the text column (mt-auto, so it sits on the card's
+ * baseline however tall the row stretches). The arrow nudges right
+ * on card hover (the Card carries Tailwind's `group`). It's a visual
+ * affordance only: the whole card already clicks through to the
+ * deals page, and the CTA lives inside that same click target.
  */
 const BookResults = ({ books, onClickItem }) => {
   if (!books.length) return null;
@@ -50,7 +59,7 @@ const BookResults = ({ books, onClickItem }) => {
             <Card
               key={`${book.id}-${book.etag}`}
               padded={false}
-              className='book-card w-full h-full cursor-pointer'
+              className='book-card group w-full h-full cursor-pointer'
             >
               <div
                 className="flex gap-4 p-4 text-left h-full"
@@ -69,7 +78,7 @@ const BookResults = ({ books, onClickItem }) => {
                   title={book.title}
                   className="w-[104px] h-[156px] sm:w-[120px] sm:h-[180px] object-cover shrink-0 rounded-[10px] bg-pio-bg-light"
                 />
-                <div className="flex flex-col min-w-0 py-0.5">
+                <div className="flex flex-col flex-1 min-w-0 py-0.5">
                   <Title size="sm" className='book-card-title leading-snug line-clamp-2'>
                     {book.title}
                   </Title>
@@ -90,6 +99,13 @@ const BookResults = ({ books, onClickItem }) => {
                   <p className='text-[13px] leading-relaxed text-pio-text-muted mt-2 line-clamp-3'>
                     {book.description ? truncateText(book.description, 200) : ''}
                   </p>
+                  {/* U15: the "Find deals" CTA (see header comment). */}
+                  <div className="mt-auto flex justify-end pt-2">
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-pio-coral">
+                      Find deals
+                      <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </Card>
