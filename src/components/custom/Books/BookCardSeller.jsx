@@ -32,10 +32,11 @@ const BookCardSeller = ({ book, type, onCardClick, isSingle, isNew }) => {
           await deleteListedBook(user, book.id);
           // U4: confirm the delete with a toast (it renders at shell
           // level, so it survives this navigation) and land on the
-          // Book Listings tab the listing was managed from — U2's
-          // deep-link state — instead of the bare Profile tab.
+          // My Listings page the listing was managed from (U9: its
+          // own route — it was the Profile Book Listings tab, reached
+          // via U2's deep-link state, until this step).
           showToast('Listing deleted');
-          navigate("/profile", { state: { tab: 'listings' } });
+          navigate("/my-listings");
       } catch (error) {
         onShowError(error);
       }

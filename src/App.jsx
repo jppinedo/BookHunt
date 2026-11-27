@@ -25,6 +25,7 @@ import LoginPage from '@pages/LoginPage/LoginPage';
 import RegistrationPage from '@pages/RegistrationPage/RegistrationPage';
 import ResetPasswordPage from '@pages/ResetPasswordPage/ResetPasswordPage';
 import ProfilePage from '@pages/ProfilePage/ProfilePage';
+import MyListingsPage from '@pages/MyListingsPage/MyListingsPage';
 import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
 import RedirectHandler from "@state/RedirectHandler.jsx";
 import { Toasts } from '@state/ToastContext';
@@ -103,6 +104,7 @@ function AppShell() {
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
+        <Route path="/my-listings" element={<Protected><MyListingsPage /></Protected>} />
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
         <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
       </Routes>

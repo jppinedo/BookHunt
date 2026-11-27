@@ -65,7 +65,7 @@ const NewBookPage = () => {
           <div className="mt-6 flex flex-col items-center gap-3">
             <Button
               label="View my listings"
-              onClick={() => navigate('/profile', { state: { tab: 'listings' } })}
+              onClick={() => navigate('/my-listings')}
             />
             <Button
               label="Back to search"

@@ -19,8 +19,9 @@ import { Search, Bookmark, User } from 'react-feather';
  * (the app's icon set — Search in SearchInput, Bookmark in BookCard)
  * above its label, and the active tab is DERIVED from the route:
  * search, results, and the deals/detail screens belong to Book
- * Search; the seller's own listing editor (/bookConfig, reached from
- * Profile → Book Listings) belongs to Profile; /sell and its second
+ * Search; the seller's own listing editor (/bookConfig) and the
+ * My Listings page (/my-listings, U9) belong to Profile; /sell and
+ * its second
  * step /new/:id belong to no tab (the breadcrumb orients there).
  */
 const PAGES = [
@@ -36,7 +37,7 @@ const tabForPath = (pathname) => {
     if (pathname === "/saved") {
         return "/saved";
     }
-    if (pathname === "/profile" || pathname.startsWith("/bookConfig/")) {
+    if (pathname === "/profile" || pathname === "/my-listings" || pathname.startsWith("/bookConfig/")) {
         return "/profile";
     }
     return null;

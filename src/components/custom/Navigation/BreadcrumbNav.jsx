@@ -22,7 +22,8 @@ import { ChevronLeft, ChevronRight } from 'react-feather';
  * - Intermediate crumbs are links (coral, Lienzo's interactive color);
  *   the last crumb is the current page — plain semibold text with
  *   aria-current, never a link. A crumb may carry an onClick instead of
- *   a `to` (Profile uses this to switch its own tabs).
+ *   a `to` (Profile used this to switch its own tabs until U9 split
+ *   My Listings into its own page; the mechanism stays available).
  * - Long titles truncate with ellipsis so the bar always stays on one
  *   line; every target is ≥44px tall, per the app's touch rules.
  *

@@ -76,7 +76,7 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
       try {
           await deleteListedBook(user, book.id);
           showToast('Listing deleted');
-          navigate('/profile', { state: { tab: 'listings' } });
+          navigate('/my-listings');
       } catch (error) {
           onShowError(error);
       }

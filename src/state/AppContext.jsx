@@ -6,13 +6,11 @@ export const AppProvider = ({ children }) => {
   const [currentBook, setCurrentBook] = useState(null);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState(null);
-  // U2: which Profile tab is showing ('profile' | 'listings'). This
-  // lives outside ProfilePage because the header menu needs it too —
-  // its "My Listings" item deep-links to the Book Listings tab and is
-  // marked active while that tab is on screen. (Lienzo Tabs is
-  // uncontrolled, so ProfilePage reports switches up here instead of
-  // the tab state being owned by the page alone.)
-  const [profileTab, setProfileTab] = useState('profile');
+  // U9: the U2 profileTab state is gone — it tracked which Profile
+  // tab was showing so the header menu could deep-link/mark the Book
+  // Listings tab. My Listings is its own route now (/my-listings),
+  // so the menu derives its active mark from the pathname like every
+  // other item, and nothing needs the shared tab state.
 
   const onCloseError = () => {
     setError(null);
@@ -29,8 +27,6 @@ export const AppProvider = ({ children }) => {
     value={{ 
       currentBook,
       setCurrentBook,
-      profileTab,
-      setProfileTab,
       error,
       isError,
       onCloseError, 

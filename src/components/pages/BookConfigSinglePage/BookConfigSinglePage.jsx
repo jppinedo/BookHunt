@@ -103,7 +103,7 @@ const BookConfigSinglePage = () => {
         condition: editCondition,
       });
       showToast('Listing updated');
-      navigate('/profile', { state: { tab: 'listings' } });
+      navigate('/my-listings');
     } catch (error) {
       console.error('Error updating listing: ', error);
       setEditError("Couldn't save your changes. Check your connection and try again.");

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from '@jppinedo/lienzo';
 import { Menu as MenuIcon, Tag, List, LogOut } from 'react-feather';
 import { AuthContext } from "@state/AuthContext";
-import { AppContext } from "@state/AppContext";
 
 /**
  * MenuNav — was MUI AppBar + IconButton + Menu/MenuItem anchored to the
@@ -28,9 +27,10 @@ import { AppContext } from "@state/AppContext";
  *   through Lienzo Label's icon prop, and the item for the screen
  *   you're on is marked with a coral icon + semibold label (Lienzo
  *   Menu items have no active state — DS gap).
- * - "My Listings" navigates to /profile with location state
- *   { tab: 'listings' }; ProfilePage reads it and switches tabs (see
- *   there). Its active mark reads the shared profileTab in AppContext.
+ * - "My Listings" used to navigate to /profile with location state
+ *   { tab: 'listings' } (ProfilePage read it and switched tabs). U9:
+ *   My Listings is its own page — the item navigates straight to
+ *   /my-listings and its active mark is pathname-derived, like Sell's.
  * - Close behaviour is handled HERE, not via Lienzo Menu's
  *   onClickOutside: that listener only knows the menu panel, so a
  *   mousedown on the trigger counted as "outside" and closed the menu
@@ -44,7 +44,6 @@ const MenuNav = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { signOut } = useContext(AuthContext);
-    const { profileTab } = useContext(AppContext);
     const wrapperRef = useRef(null);
     const triggerRef = useRef(null);
 
@@ -89,7 +88,7 @@ const MenuNav = () => {
     }
 
     const onSell = pathname === "/sell" || pathname.startsWith("/new/");
-    const onListings = pathname === "/profile" && profileTab === 'listings';
+    const onListings = pathname === "/my-listings";
 
     // Lienzo Label: the icon span's own colour is a pale gray for the
     // default type, so the feather icon carries its own text colour
@@ -139,7 +138,7 @@ const MenuNav = () => {
                             label: itemLabel("My Listings", List, onListings),
                             onClick: () => {
                                 setOpen(false);
-                                navigate("/profile", { state: { tab: 'listings' } });
+                                navigate("/my-listings");
                             },
                         },
                         {
