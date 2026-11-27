@@ -5,7 +5,7 @@ import { AppContext } from '@state/AppContext';
 import { useToast } from '@state/ToastContext';
 import { isBookSaved, toggleSavedBook, deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
-import { Bookmark, Star } from 'react-feather';
+import { Bookmark, Minus, Plus, Star } from 'react-feather';
 import BookCover from './BookCover';
 import './BookCard.css';
 
@@ -109,6 +109,9 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
   );
 
   const [cardSaved, setCardSaved] = useState(false);
+  // U12.1: the Book details facts list can run to ~19 rows — collapsed
+  // to the first 3 behind a See more toggle by default.
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   useEffect(() => {
       if (!user || !book) return;
@@ -169,6 +172,14 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
   const feedbackScoreText = showDetailExtras ? compactCount(book.sellerFeedbackScore) : null;
   const deliveryLine = showDetailExtras ? deliveryText(book.deliveryWindow) : null;
   const detailAspects = showDetailExtras && Array.isArray(book.aspects) ? book.aspects : [];
+  // U12.1: eBay sometimes returns a rating object with average 0.0 and
+  // no reviews — that's no rating at all, so the stars block must not
+  // render unless at least one person actually rated it above zero.
+  const hasRating = Boolean(
+    showDetailExtras && book.rating &&
+    Number(book.rating.count) >= 1 && Number(book.rating.average) > 0
+  );
+  const visibleAspects = detailsExpanded ? detailAspects : detailAspects.slice(0, 3);
 
   let shippingLine = null;
   let importLine = null;
@@ -222,8 +233,10 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
               <p className="my-1">Authors: {book.authors.join(', ')}</p>
             ) : null}
             {/* U12: eBay catalog product rating — only when eBay matched
-                the listing to a catalog product (often absent). */}
-            {showDetailExtras && book.rating && (
+                the listing to a catalog product (often absent).
+                U12.1: hasRating also excludes the empty 0.0/no-reviews
+                rating object eBay sometimes returns. */}
+            {hasRating && (
               <RatingStars rating={book.rating} />
             )}
             {(type === 'view' || type === 'grid') && (
@@ -276,13 +289,26 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
               <div className="mt-3 pt-3 border-t border-pio-grid">
                 <p className="text-sm font-semibold mt-0 mb-2">Book details</p>
                 <dl className="my-0">
-                  {detailAspects.map((aspect, i) => (
+                  {visibleAspects.map((aspect, i) => (
                     <div key={`${aspect.name}-${i}`} className="flex text-sm py-0.5">
                       <dt className="text-pio-text-muted w-[110px] shrink-0">{aspect.name}</dt>
                       <dd className="flex-1 min-w-0 m-0">{aspect.value}</dd>
                     </div>
                   ))}
                 </dl>
+                {/* U12.1: with more than 3 facts, the rest hide behind
+                    this toggle — no toggle at all when there are ≤3. */}
+                {detailAspects.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setDetailsExpanded((open) => !open)}
+                    aria-expanded={detailsExpanded}
+                    className="flex items-center gap-1 mt-2 p-0 bg-transparent border-0 cursor-pointer text-sm font-medium text-pio-coral"
+                  >
+                    {detailsExpanded ? <Minus size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
+                    {detailsExpanded ? 'See less' : 'See more'}
+                  </button>
+                )}
               </div>
             )}
           </div>
