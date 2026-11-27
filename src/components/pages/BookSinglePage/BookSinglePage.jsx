@@ -54,7 +54,7 @@ const BookSinglePage = () => {
   }
   if (!currentBook) {
     return (
-      <div className="page-shell-narrow mt-6 mb-36">
+      <div className="page-shell mt-6 mb-36">
         <BreadcrumbNav
           crumbs={[
             { label: 'Home', to: '/search', onClick: resetSearch },
@@ -68,13 +68,17 @@ const BookSinglePage = () => {
       </div>
     );
   }
+  // U14: the detail view moved from .page-shell-narrow to the wide
+  // .page-shell — the Stitch two-column layout (cover + facts left,
+  // deal card right) needs the room; the breadcrumb spans the same
+  // shell, so edges still align.
   // U1.1 trail: Home / Results / <book title> / Deal — the title crumb
   // jumps straight back to this book's deals list. U7: the Home crumb
   // resets the session (clean home view); Results and the title crumb
   // keep landing on the preserved session/deals.
   const dealsUrl = lastDealsUrl || `/search?query=${encodeURIComponent(currentBook.title || '')}`;
   return (
-    <div className="page-shell-narrow mt-6 mb-36">
+    <div className="page-shell mt-6 mb-36">
       <BreadcrumbNav
         crumbs={[
           { label: 'Home', to: '/search', onClick: resetSearch },

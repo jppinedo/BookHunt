@@ -5,7 +5,7 @@ import { AppContext } from '@state/AppContext';
 import { useToast } from '@state/ToastContext';
 import { isBookSaved, toggleSavedBook, deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
-import { Bookmark, Minus, Plus, Star } from 'react-feather';
+import { Bookmark, CheckCircle, ExternalLink, MapPin, Minus, Plus, Star, Truck } from 'react-feather';
 import BookCover from './BookCover';
 import './BookCard.css';
 
@@ -205,6 +205,202 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
   const hasShippingBlock = Boolean(
     shippingLine || importLine || totalLine || deliveryLine || (showDetailExtras && book.shipsFrom)
   );
+
+  // U14: the DETAIL view is restructured to Juan's Stitch two-column
+  // editorial layout — no new data, the U12/U12.1 blocks above are
+  // simply re-homed. DOM order is deal → cover → details so mobile
+  // (single column) reaches the title, price and actions first; at lg
+  // the grid places the cover card top-left (5/12), the facts card
+  // under it, and the deal card on the right (7/12, spanning both
+  // rows). The grid/list rendering below is untouched.
+  if (isSingle) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
+        {/* DEAL CARD — condition + seller, headline, rating,
+            description, price box, actions. */}
+        <Card
+          padded={false}
+          className="book-detail-card w-full lg:col-start-6 lg:col-span-7 lg:row-start-1 lg:row-span-2"
+        >
+          <div className="p-5 sm:p-6 flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {book.condition && (
+                  <Badge label={book.condition} tone="teal" />
+                )}
+                {showDetailExtras && book.topRatedSeller && (
+                  <Badge label="Top Rated" tone="amber" />
+                )}
+              </div>
+              {(type === 'view' || type === 'grid') && (
+                <p className="flex items-center gap-1.5 text-sm text-pio-text-muted m-0">
+                  {showDetailExtras && book.sellerFeedbackPercentage && (
+                    <CheckCircle size={15} className="text-pio-teal-dark shrink-0" aria-hidden="true" />
+                  )}
+                  <span>
+                    Sold by{' '}
+                    <span className="text-pio-text font-medium">
+                      {book.sellerName} ({book.sellerType})
+                    </span>
+                    {showDetailExtras && book.sellerFeedbackPercentage && (
+                      <>
+                        {` · ${book.sellerFeedbackPercentage}% positive`}
+                        {feedbackScoreText ? ` (${feedbackScoreText} feedback)` : ''}
+                      </>
+                    )}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Title size="xxl" fontFamily="playfair" className="page-title leading-tight">
+                {book.title}
+              </Title>
+              {book.authors?.length ? (
+                <p className="mt-1.5 mb-0 text-pio-text-muted">by {book.authors.join(', ')}</p>
+              ) : null}
+              {hasRating && (
+                <RatingStars rating={book.rating} />
+              )}
+            </div>
+
+            {book.description?.length ? (
+              <p className="text-sm text-pio-text-muted m-0">{book.description}</p>
+            ) : null}
+
+            {type !== 'form' && (
+              <div className="bg-pio-bg border border-pio-grid rounded-2xl p-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <div className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="text-2xl font-semibold tabular-nums">
+                      {`$${book.price} ${book.currency}`}
+                    </span>
+                    {shippingLine && (
+                      <span className="text-sm text-pio-text-muted">{shippingLine}</span>
+                    )}
+                  </div>
+                  {totalLine && (
+                    <span className="font-semibold text-pio-coral">{totalLine}</span>
+                  )}
+                  {importLine && (
+                    <span className="text-sm text-pio-text-muted">{importLine}</span>
+                  )}
+                </div>
+                {(deliveryLine || (showDetailExtras && book.shipsFrom)) && (
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-1 mt-3 pt-3 border-t border-pio-grid text-sm text-pio-text-muted">
+                    {deliveryLine && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Truck size={15} className="text-pio-teal-dark shrink-0" aria-hidden="true" />
+                        {deliveryLine}
+                      </span>
+                    )}
+                    {showDetailExtras && book.shipsFrom && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin size={15} className="text-pio-teal-dark shrink-0" aria-hidden="true" />
+                        Ships from {book.shipsFrom}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(type !== 'grid' && !isClickable) && (
+              <div className="flex flex-wrap items-center gap-3">
+                {type === 'view' && book.sellerType === 'eBay' && (
+                  <button
+                    type="button"
+                    onClick={() => window.open(book.URL, '_blank', 'noopener,noreferrer')}
+                    className="flex-1 min-w-[200px] h-[46px] px-6 rounded-full bg-pio-coral text-white text-[15px] font-semibold border-0 cursor-pointer inline-flex items-center justify-center gap-2 transition-colors hover:bg-pio-coral-hover active:bg-pio-coral-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral-dark"
+                  >
+                    View on eBay
+                    <ExternalLink size={16} aria-hidden="true" />
+                  </button>
+                )}
+                {type === 'view' && book.sellerType === 'user' && !isOwnListing && (
+                  <Button
+                    label="Contact seller"
+                    onClick={() => { window.location.href = `mailto:${book.sellerEmail}`; }}
+                  />
+                )}
+                {type === 'view' && isOwnListing && (
+                  <>
+                    <span className="text-sm font-semibold text-pio-coral">This is your listing</span>
+                    <Button
+                      label="Edit"
+                      onClick={() => navigate(`/bookConfig/user/${book.id}`)}
+                    />
+                    <Button
+                      label="Delete"
+                      type="red"
+                      onClick={() => { deleteOwnListing() }}
+                    />
+                  </>
+                )}
+                <button
+                  type="button"
+                  aria-label={cardSaved ? "Unsave book" : "Save book"}
+                  aria-pressed={cardSaved}
+                  onClick={() => saveCard()}
+                  className={`inline-flex items-center gap-2 h-[46px] px-5 rounded-full text-[15px] font-semibold cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral ${cardSaved
+                    ? 'bg-pio-coral-pale/40 border border-pio-coral text-pio-coral-dark'
+                    : 'bg-white border border-pio-grid text-pio-text hover:bg-pio-bg-light'}`}
+                >
+                  <Bookmark size={16} fill={cardSaved ? 'currentColor' : 'none'} aria-hidden="true" />
+                  {cardSaved ? 'Saved' : 'Save'}
+                </button>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* COVER CARD — the cover fills a 3:4 frame. */}
+        <Card
+          padded={false}
+          className="book-detail-card w-full p-4 lg:col-start-1 lg:col-span-5 lg:row-start-1"
+        >
+          <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-pio-bg-light border border-pio-grid">
+            <BookCover
+              src={book.thumbnail}
+              title={book.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </Card>
+
+        {/* BOOK DETAILS CARD — the U12/U12.1 facts list in its own
+            card under the cover (eBay aspects only, as before). */}
+        {showDetailExtras && detailAspects.length > 0 && (
+          <Card
+            padded={false}
+            className="book-detail-card w-full p-5 sm:p-6 lg:col-start-1 lg:col-span-5 lg:row-start-2"
+          >
+            <p className="text-sm font-semibold mt-0 mb-2">Book details</p>
+            <dl className="my-0">
+              {visibleAspects.map((aspect, i) => (
+                <div key={`${aspect.name}-${i}`} className="flex text-sm py-0.5">
+                  <dt className="text-pio-text-muted w-[110px] shrink-0">{aspect.name}</dt>
+                  <dd className="flex-1 min-w-0 m-0">{aspect.value}</dd>
+                </div>
+              ))}
+            </dl>
+            {detailAspects.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setDetailsExpanded((open) => !open)}
+                aria-expanded={detailsExpanded}
+                className="flex items-center gap-1 mt-2 p-0 bg-transparent border-0 cursor-pointer text-sm font-medium text-pio-coral"
+              >
+                {detailsExpanded ? <Minus size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
+                {detailsExpanded ? 'See less' : 'See more'}
+              </button>
+            )}
+          </Card>
+        )}
+      </div>
+    );
+  }
 
   return (
     <Card
