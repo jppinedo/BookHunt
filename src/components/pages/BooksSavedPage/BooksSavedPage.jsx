@@ -41,7 +41,7 @@ const BooksSavedPage = () => {
     return (
         <div className="page-shell">
             <div className="page-heading">
-                <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6">Saved Books</Title>
+                <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6 page-title">Saved Books</Title>
             </div>
 
             {/* U1.1: breadcrumb bar below the page title (Home / Saved Books). */}

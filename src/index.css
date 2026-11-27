@@ -200,3 +200,19 @@ body {
     transform: none;
   }
 }
+
+/* U11 — mobile page-title step-down. The wide pages title themselves
+   with Lienzo's Title at size xxl (text-3xl, 30px), which is oversized
+   on a phone. Pages tag their title with .page-title and under 640px
+   it steps down to 24px; at 640px and up the Title's own size stands.
+   This rule is deliberately unlayered: Tailwind 4 puts its utilities
+   in @layer utilities, and unlayered author CSS wins over layered
+   CSS, so this reliably overrides the text-3xl utility the Title
+   renders — the same reason the raw <h1> pages could instead just
+   swap their base class to text-2xl with sm:text-3xl on top. */
+@media (max-width: 639px) {
+  .page-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}

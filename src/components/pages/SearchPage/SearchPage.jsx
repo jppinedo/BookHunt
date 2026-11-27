@@ -100,14 +100,17 @@ const SearchPage = () => {
           search session (and drops any ?query=) instead of landing on
           the preserved results. The logo also gets real margin below
           it (0.5rem → 1.5rem): it sat almost on top of the search
-          bar/headline under it. */}
+          bar/headline under it.
+          U11: on phones the 168px lockup ate a huge share of the
+          screen, so the logo steps down to 100px under 640px (the
+          1.5rem margin below it is unchanged). */}
       <button
         type="button"
         onClick={() => { resetSearch(); navigate('/search', { replace: true }); }}
         aria-label="Book Hunt — home"
         className="block mx-auto bg-transparent border-0 p-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pio-coral"
       >
-        <img src={logo} alt="Book Hunt" style={{display: 'block', width: '168px', height: 'auto', margin: '1rem auto 1.5rem'}} />
+        <img src={logo} alt="Book Hunt" className="w-[100px] sm:w-[168px] h-auto" style={{display: 'block', margin: '1rem auto 1.5rem'}} />
       </button>
       {/* D2 hero: in the idle home state the logo gets a headline and a
           one-line promise, so the centered hero reads as a composed
@@ -117,7 +120,7 @@ const SearchPage = () => {
           no-results states below. */}
       {status === 'idle' ? (
         <div className="px-4">
-          <h1 className="font-playfair text-pio-text text-[30px] sm:text-4xl font-semibold leading-tight mt-2 mb-2.5">
+          <h1 className="font-playfair text-pio-text text-[28px] sm:text-4xl font-semibold leading-tight mt-2 mb-2.5">
             Find your next book for less.
           </h1>
           <p className="text-pio-text-muted text-[15px] sm:text-base max-w-[520px] mx-auto mt-0 mb-7">

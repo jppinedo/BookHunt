@@ -187,7 +187,7 @@ const BookList = () => {
           named the book or its author outside the breadcrumb. */}
       {(title || author) && (
         <header className="mb-6 text-left">
-          <h1 className="font-playfair text-[26px] sm:text-3xl font-semibold leading-tight text-pio-text my-0">
+          <h1 className="font-playfair text-2xl sm:text-3xl font-semibold leading-tight text-pio-text my-0">
             {title}
           </h1>
           {(author || year) && (

@@ -58,7 +58,7 @@ const MyListingsPage = () => {
     return (
         <div className="page-shell">
             <div className="page-heading">
-                <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6">My Listings</Title>
+                <Title size="xxl" thikness="bold" fontFamily="playfair" className="my-6 page-title">My Listings</Title>
             </div>
 
             <BreadcrumbNav

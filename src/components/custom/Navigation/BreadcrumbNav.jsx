@@ -43,6 +43,16 @@ import { ChevronLeft, ChevronRight } from 'react-feather';
  * larger size than the crumbs, so it read as a stray link, not a
  * button. It is now a pill at the SAME text-sm size as the crumbs, with
  * a coral border and a light coral tint that deepens on hover.
+ *
+ * U11: the full bar doesn't fit a phone — Juan's screenshot showed the
+ * trail truncating to single letters ("H › F") with the result count
+ * jammed against it. Under 640px the bar therefore shows only the Back
+ * pill and the CURRENT crumb (intermediate crumbs are hidden — Back,
+ * the logo and the bottom nav already cover those jumps on mobile),
+ * and the `end` slot wraps onto its own line directly below the bar,
+ * right-aligned, via flex-wrap + a full-width basis on the slot. At
+ * 640px and up nothing changes: full trail, end slot inside the bar.
+ * The props/API are unchanged, so every page inherits the treatment.
  */
 const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '', end = null }) => {
   const navigate = useNavigate();
@@ -67,7 +77,7 @@ const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '', end 
       return (
         <span
           aria-current="page"
-          className="inline-flex items-center min-h-[44px] px-1 font-jakarta text-sm font-semibold text-pio-text min-w-0 max-w-[46vw] sm:max-w-[300px]"
+          className="inline-flex items-center min-h-[44px] px-1 font-jakarta text-sm font-semibold text-pio-text min-w-0 max-w-[62vw] sm:max-w-[300px]"
         >
           {label}
         </span>
@@ -103,7 +113,7 @@ const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '', end 
   };
 
   return (
-    <nav aria-label="Breadcrumb" className={`flex items-center gap-1 font-jakarta ${className}`}>
+    <nav aria-label="Breadcrumb" className={`flex flex-wrap items-center gap-1 font-jakarta ${className}`}>
       <button
         type="button"
         onClick={handleBack}
@@ -115,18 +125,27 @@ const BreadcrumbNav = ({ crumbs = [], fallback = '/search', className = '', end 
       </button>
       {crumbs.length > 0 && (
         <ol className="flex items-center m-0 p-0 list-none min-w-0">
-          {crumbs.map((crumb, index) => (
-            <li key={`${crumb.label}-${index}`} className="flex items-center min-w-0">
-              {index > 0 && (
-                <ChevronRight size={14} aria-hidden="true" className="text-pio-text-muted shrink-0 mx-0.5" />
-              )}
-              {renderCrumb(crumb, index)}
-            </li>
-          ))}
+          {crumbs.map((crumb, index) => {
+            // U11: under 640px only the current crumb survives — the
+            // intermediate <li>s hide, and so does the separator in
+            // front of the current crumb (it would dangle after Back).
+            const isCurrentCrumb = crumb.current || index === crumbs.length - 1;
+            return (
+              <li
+                key={`${crumb.label}-${index}`}
+                className={isCurrentCrumb ? 'flex items-center min-w-0' : 'hidden sm:flex items-center min-w-0'}
+              >
+                {index > 0 && (
+                  <ChevronRight size={14} aria-hidden="true" className="text-pio-text-muted shrink-0 mx-0.5 hidden sm:block" />
+                )}
+                {renderCrumb(crumb, index)}
+              </li>
+            );
+          })}
         </ol>
       )}
       {end ? (
-        <span className="ml-auto shrink-0 pl-3 inline-flex items-center min-h-[44px] font-jakarta text-xs sm:text-[13px] text-pio-text-muted whitespace-nowrap">
+        <span className="ml-auto shrink-0 pl-3 inline-flex items-center min-h-[44px] font-jakarta text-xs sm:text-[13px] text-pio-text-muted whitespace-nowrap max-sm:basis-full max-sm:justify-end max-sm:pl-0">
           {end}
         </span>
       ) : null}
