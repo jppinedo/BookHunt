@@ -93,21 +93,67 @@ export function dedupeGoogleBooks(books) {
   return kept;
 }
 
+// --- U12: eBay detail enrichment ---------------------------------------------
+// The getItem payload carries seller feedback, shipping cost/dates, ships-from
+// location, item specifics and a catalog product rating that the old transform
+// dropped (see EBAY-DETAIL-FIELDS.md — verified live). Carry them through as
+// normalized, nullable fields; every consumer must treat them as optional —
+// any of them can be absent (mock items have none of them).
+const formatShipsFrom = (loc) => {
+  if (!loc) return null;
+  const city = String(loc.city || '').trim();
+  const region = String(loc.stateOrProvince || '').trim();
+  const country = String(loc.country || '').trim();
+  // Compact: "Minneapolis, MN" / "Newton Abbot, GB".
+  return [city, region || country].filter(Boolean).join(', ') || null;
+};
+
 // eBay single item to BookHunt Book
 export function transformEbayItem(ebayItem) {
+  const shipOption = ebayItem.shippingOptions?.[0];
+  const shipCost = shipOption?.shippingCost;
+  const importCharges = shipOption?.importCharges;
+  const ratingAverage = parseFloat(ebayItem.primaryProductReviewRating?.averageRating);
+  // Aspect names/values are seller-supplied and inconsistent — keep them
+  // generic (name/value pairs, in order), dropping empties.
+  const aspects = (ebayItem.localizedAspects || [])
+    .map((aspect) => ({
+      name: String(aspect?.name || '').trim(),
+      value: (Array.isArray(aspect?.value) ? aspect.value.join(', ') : String(aspect?.value ?? '')).trim(),
+    }))
+    .filter((aspect) => aspect.name && aspect.value);
+
   return {
-    id: ebayItem.itemId, 
+    id: ebayItem.itemId,
     title: stripHtml(ebayItem.title),
     thumbnail: ebayItem.image?.imageUrl || '',
-    images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [], 
-    condition: ebayItem.condition, 
+    images: ebayItem.additionalImages?.map((img) => img.imageUrl) || [],
+    condition: ebayItem.condition,
     description: stripHtml(ebayItem.shortDescription || ''),
-    sellerType: 'eBay', 
-    URL: ebayItem.itemWebUrl, 
-    sellerName: ebayItem.seller?.username || '', 
-    sellerEmail: null, 
-    price: ebayItem.price?.value || '0.00', 
-    currency: ebayItem.price?.currency || 'USD', 
+    sellerType: 'eBay',
+    URL: ebayItem.itemWebUrl,
+    sellerName: ebayItem.seller?.username || '',
+    sellerEmail: null,
+    price: ebayItem.price?.value || '0.00',
+    currency: ebayItem.price?.currency || 'USD',
+    // U12 enrichment (all nullable — render only when present):
+    sellerFeedbackPercentage: ebayItem.seller?.feedbackPercentage ?? null,
+    sellerFeedbackScore: ebayItem.seller?.feedbackScore ?? null,
+    topRatedSeller: Boolean(ebayItem.topRatedBuyingExperience),
+    shipsFrom: formatShipsFrom(ebayItem.itemLocation),
+    shippingCost: shipCost && shipCost.value != null
+      ? { value: shipCost.value, currency: shipCost.currency || ebayItem.price?.currency || 'USD' }
+      : null,
+    importCharges: importCharges && parseFloat(importCharges.value) > 0
+      ? { value: importCharges.value, currency: importCharges.currency || 'USD' }
+      : null,
+    deliveryWindow: shipOption?.minEstimatedDeliveryDate || shipOption?.maxEstimatedDeliveryDate
+      ? { min: shipOption.minEstimatedDeliveryDate || null, max: shipOption.maxEstimatedDeliveryDate || null }
+      : null,
+    aspects,
+    rating: Number.isFinite(ratingAverage)
+      ? { average: ratingAverage, count: ebayItem.primaryProductReviewRating?.reviewCount ?? null }
+      : null,
   };
 }
 
