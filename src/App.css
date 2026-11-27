@@ -111,3 +111,18 @@
     height: auto;
   }
 }
+/* U10.2: on small phones the bottom bar read oversized and cramped.
+   Below 640px it narrows (92vw, capped at 360px) and the feather
+   glyphs shrink to 18px; the tighter paddings and 11px labels live
+   in HubNav.jsx as sub-sm: Tailwind classes. This block must follow
+   the max-width:600px block above so its same-specificity width wins
+   there too; the bottom offset and pill shape are unchanged. */
+@media (max-width: 639px) {
+  #hubNav {
+    width: min(92vw, 360px);
+  }
+  #hubNav nav svg {
+    width: 18px;
+    height: 18px;
+  }
+}
