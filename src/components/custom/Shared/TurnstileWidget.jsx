@@ -3,35 +3,58 @@ import React, {
     useEffect,
     useImperativeHandle,
     useRef,
+    useState,
 } from "react";
 import { TURNSTILE_SITE_KEY, isTurnstileEnabled } from "@utils/turnstile";
 
 /**
- * TurnstileWidget — U28: a Cloudflare Turnstile widget in Managed
- * mode, rendered explicitly. Managed is invisible for the vast
- * majority of humans (Cloudflare decides from browser signals);
- * when it does need interaction it draws its own checkbox box in
- * place, so the component is just a container div.
+ * TurnstileWidget — Cloudflare Turnstile, the token source for
+ * Supabase's built-in CAPTCHA protection.
  *
- * The API script (api.js?render=explicit) is loaded ONCE per page
- * through a module-level promise, however many widgets mount over
- * the app's life. Each mount renders a fresh widget into its
- * container and removes it on unmount.
+ * U28 rendered a Managed widget on mount and let it resolve in
+ * the background — which left Cloudflare's box sitting visibly
+ * under the Login button at all times. Juan called it ugly, and
+ * he was right.
  *
- * Token lifecycle: tokens are SINGLE-USE and expire after ~5
- * minutes, so the parent owns the current token via onToken —
- * called with the token on success and with null on expire/error —
- * and asks for a fresh challenge through the exposed reset()
- * (imperative handle) after any auth attempt that consumed or
- * rejected one. onToken is read through a ref so a parent
- * re-render never re-renders the widget itself.
+ * U29 — invisible at rest, executed at submit time. The widget is
+ * rendered with execution: "execute" and appearance:
+ * "interaction-only", and NOTHING is loaded or rendered on mount:
+ * the API script, the widget and the challenge all stay dormant
+ * until the parent calls the imperative execute() at submit time
+ * (Supabase verifies the token AS PART of the auth request, so
+ * the token has to exist before signIn/signUp/reset is called —
+ * execute-then-auth is the only possible order). For the vast
+ * majority of humans the challenge passes invisibly and execute()
+ * simply resolves with the token; only traffic Cloudflare flags
+ * ever sees the interactive box, which then appears in place —
+ * the container leaves its zero-size absolute parking spot via
+ * the before-interactive callback and returns when the challenge
+ * settles.
  *
- * Renders nothing when no site key is configured (see
- * @utils/turnstile) — callers can mount it unconditionally.
+ * Imperative API:
+ *   execute() → Promise<string|null>. Resolves with the token on
+ *     success; resolves null on error, expiry, timeout (15s) or
+ *     when no site key is configured — it never rejects, so
+ *     callers branch on the value. A call while a challenge is
+ *     already in flight returns the in-flight promise. Tokens are
+ *     single-use, so a widget that already produced one is reset
+ *     before being executed again.
+ *   reset() → drops any in-flight execute() (resolves it null)
+ *     and returns the widget to its ready state, for the
+ *     captcha-rejection recovery paths in the auth pages.
+ *
+ * Renders an inert zero-size container when no site key is
+ * configured (see @utils/turnstile) — callers can mount it
+ * unconditionally, and execute() resolves null immediately.
  */
 
 const API_URL =
     "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+// U29: an execute() that produces no token within 15s is treated
+// as failed (blocked script, stalled challenge) so no auth flow
+// can wait on Cloudflare forever.
+const EXECUTE_TIMEOUT_MS = 15000;
 
 // Singleton loader: one <script> per page, shared by every widget.
 let apiPromise = null;
@@ -68,69 +91,172 @@ function loadTurnstileApi() {
     return apiPromise;
 }
 
-const TurnstileWidget = forwardRef(function TurnstileWidget(
-    { onToken },
-    ref,
-) {
+const TurnstileWidget = forwardRef(function TurnstileWidget(_, ref) {
     const containerRef = useRef(null);
     const widgetIdRef = useRef(null);
-    const onTokenRef = useRef(onToken);
-    onTokenRef.current = onToken;
+    const turnstileRef = useRef(null);
+    // The in-flight execute(): { promise, resolve, timer }.
+    const pendingRef = useRef(null);
+    // True once the widget has run a challenge since the last
+    // reset — a spent widget must be reset before executing again.
+    const executedRef = useRef(false);
+    // True only while Cloudflare is showing an interactive
+    // challenge; the container is parked at zero size otherwise.
+    const [interactive, setInteractive] = useState(false);
+
+    const settlePending = (value) => {
+        if (pendingRef.current) {
+            const { resolve, timer } = pendingRef.current;
+            pendingRef.current = null;
+            if (timer) {
+                clearTimeout(timer);
+            }
+            resolve(value);
+        }
+    };
+
+    // Explicit render, deferred until the first execute() so the
+    // page pays nothing — and shows nothing — before submit time.
+    const renderWidget = (turnstile) => {
+        if (widgetIdRef.current != null || !containerRef.current) {
+            return widgetIdRef.current;
+        }
+        widgetIdRef.current = turnstile.render(containerRef.current, {
+            sitekey: TURNSTILE_SITE_KEY,
+            execution: "execute",
+            appearance: "interaction-only",
+            callback: (token) => {
+                executedRef.current = true;
+                setInteractive(false);
+                settlePending(token);
+            },
+            "error-callback": () => {
+                executedRef.current = true;
+                setInteractive(false);
+                settlePending(null);
+            },
+            "expired-callback": () => {
+                setInteractive(false);
+                settlePending(null);
+            },
+            "timeout-callback": () => {
+                executedRef.current = true;
+                setInteractive(false);
+                settlePending(null);
+            },
+            "unsupported-callback": () => {
+                setInteractive(false);
+                settlePending(null);
+            },
+            // The only moments the container takes up layout space:
+            // Cloudflare is about to show its interactive box.
+            "before-interactive-callback": () => setInteractive(true),
+            "after-interactive-callback": () => setInteractive(false),
+        });
+        return widgetIdRef.current;
+    };
+
+    const resetWidget = () => {
+        if (turnstileRef.current && widgetIdRef.current != null) {
+            try {
+                turnstileRef.current.reset(widgetIdRef.current);
+            } catch {
+                // A widget mid-teardown can refuse; the next
+                // execute re-renders or reuses it as-is.
+            }
+        }
+        executedRef.current = false;
+    };
 
     useImperativeHandle(ref, () => ({
-        // Fresh challenge after a consumed/rejected token. Also
-        // reports null immediately, so the parent drops the stale
-        // token instead of offering it to the next auth call.
-        reset() {
-            onTokenRef.current?.(null);
-            if (
-                typeof window !== "undefined" &&
-                window.turnstile &&
-                widgetIdRef.current != null
-            ) {
-                try {
-                    window.turnstile.reset(widgetIdRef.current);
-                } catch {
-                    // A widget mid-teardown can refuse; the next
-                    // mount renders a fresh one anyway.
-                }
+        execute() {
+            if (!isTurnstileEnabled) {
+                return Promise.resolve(null);
             }
-        },
-    }), []);
-
-    useEffect(() => {
-        if (!isTurnstileEnabled) return undefined;
-        let cancelled = false;
-        loadTurnstileApi()
-            .then((turnstile) => {
-                if (cancelled || !containerRef.current) return;
-                widgetIdRef.current = turnstile.render(containerRef.current, {
-                    sitekey: TURNSTILE_SITE_KEY,
-                    callback: (token) => onTokenRef.current?.(token),
-                    "expired-callback": () => onTokenRef.current?.(null),
-                    "error-callback": () => onTokenRef.current?.(null),
-                });
-            })
-            .catch(() => onTokenRef.current?.(null));
-        return () => {
-            cancelled = true;
-            if (
-                typeof window !== "undefined" &&
-                window.turnstile &&
-                widgetIdRef.current != null
-            ) {
+            if (pendingRef.current) {
+                return pendingRef.current.promise;
+            }
+            let resolveFn;
+            const promise = new Promise((resolve) => {
+                resolveFn = resolve;
+            });
+            const timer = setTimeout(() => {
+                // No token in time: fail the wait and clear any
+                // challenge box that might be on screen, so the
+                // caller's recovery starts from a clean widget.
+                settlePending(null);
+                setInteractive(false);
+                resetWidget();
+            }, EXECUTE_TIMEOUT_MS);
+            pendingRef.current = { promise, resolve: resolveFn, timer };
+            (async () => {
                 try {
-                    window.turnstile.remove(widgetIdRef.current);
+                    const turnstile = await loadTurnstileApi();
+                    turnstileRef.current = turnstile;
+                    if (!pendingRef.current) {
+                        return; // settled while loading (reset/unmount)
+                    }
+                    const widgetId = renderWidget(turnstile);
+                    if (widgetId == null) {
+                        settlePending(null);
+                        return;
+                    }
+                    if (executedRef.current) {
+                        // Tokens are single-use: a widget that
+                        // already produced one starts over.
+                        resetWidget();
+                    }
+                    turnstile.execute(widgetId);
+                } catch {
+                    settlePending(null);
+                }
+            })();
+            return promise;
+        },
+        reset() {
+            settlePending(null);
+            setInteractive(false);
+            resetWidget();
+        },
+    }));
+
+    // Unmount: never leave an execute() promise hanging, and
+    // remove the widget if one was ever rendered.
+    useEffect(
+        () => () => {
+            settlePending(null);
+            if (turnstileRef.current && widgetIdRef.current != null) {
+                try {
+                    turnstileRef.current.remove(widgetIdRef.current);
                 } catch {
                     // Already gone — nothing to clean up.
                 }
                 widgetIdRef.current = null;
             }
-        };
-    }, []);
+        },
+        [],
+    );
 
     if (!isTurnstileEnabled) return null;
-    return <div ref={containerRef} />;
+    return (
+        <div
+            ref={containerRef}
+            aria-hidden={!interactive}
+            // Parked out of flow at zero size while idle, so the
+            // widget leaves no gap in any layout; it only takes up
+            // space if an interactive challenge actually appears.
+            style={
+                interactive
+                    ? undefined
+                    : {
+                          position: "absolute",
+                          width: 0,
+                          height: 0,
+                          overflow: "hidden",
+                      }
+            }
+        />
+    );
 });
 
 export default TurnstileWidget;

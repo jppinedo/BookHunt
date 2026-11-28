@@ -16,6 +16,11 @@
  * once protection is on server-side, Supabase rejects signUp,
  * signInWithPassword and resetPasswordForEmail calls that lack a
  * valid token.
+ *
+ * U29: tokens are no longer harvested from a background widget —
+ * TurnstileWidget stays invisible at rest and is executed at
+ * submit time (see its comment), so every auth call obtains its
+ * token via widget.execute() immediately before firing.
  */
 export const TURNSTILE_SITE_KEY = (
     import.meta.env.VITE_TURNSTILE_SITE_KEY || ""
