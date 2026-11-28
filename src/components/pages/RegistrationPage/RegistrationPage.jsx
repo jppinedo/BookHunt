@@ -31,6 +31,11 @@ import './RegistrationPage.css';
  * form (U4), since Lienzo's Button has no disabled state. It replaces
  * the old per-field password hints, including the "Passwords do not
  * match" error, so each rule has exactly one live indicator.
+ *
+ * U22.1: the gate also requires first name, last name (both trimmed
+ * non-empty) and an email passing the same regex validateEmail uses
+ * at submit time — the button used to light up on password rules
+ * alone while the identity fields were still empty.
  */
 const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -57,12 +62,22 @@ const RegistrationPage = () => {
     ];
     const passwordRulesPass = passwordRules.every((rule) => rule.met);
 
+    // U22.1: the submit only unlocks once the identity fields are in
+    // too — names trimmed non-empty and the email passing the exact
+    // regex validateEmail enforces at submit time (one shared rule,
+    // so the live gate can never disagree with submit validation).
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
+    const formReady = firstName.trim() !== ''
+        && lastName.trim() !== ''
+        && EMAIL_REGEX.test(email)
+        && passwordRulesPass;
+
     async function handleSignUp(e){
         e.preventDefault();
-        // U22: the submit is gated on the password rules (the button
+        // U22/U22.1: the submit is gated on the full form (the button
         // wrapper also blocks pointer events — this guard is the
         // backstop, same as the sell form's canSubmit check).
-        if (!passwordRulesPass) {
+        if (!formReady) {
             return
         }
         setFirstNameError(false);
@@ -80,8 +95,7 @@ const RegistrationPage = () => {
     }
 
     function validateEmail() {
-        const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
-        if (emailRegex.test(email)) {
+        if (EMAIL_REGEX.test(email)) {
             return true
         }
         else {
@@ -186,13 +200,14 @@ const RegistrationPage = () => {
                         ))}
                     </ul>
                     <div className="w-full mt-2">
-                        {/* U22: Lienzo's Button has no disabled state, so
-                            the gate is the sell form's U4 pattern — a
-                            wrapper that drops pointer events and fades
-                            until every password rule passes. */}
+                        {/* U22/U22.1: Lienzo's Button has no disabled
+                            state, so the gate is the sell form's U4
+                            pattern — a wrapper that drops pointer
+                            events and fades until the whole form is
+                            ready (names, valid email, password rules). */}
                         <div
-                            className={`[&>button]:w-full ${passwordRulesPass ? '' : 'pointer-events-none opacity-50'}`}
-                            aria-disabled={!passwordRulesPass}
+                            className={`[&>button]:w-full ${formReady ? '' : 'pointer-events-none opacity-50'}`}
+                            aria-disabled={!formReady}
                         >
                             <Button
                                 label="Create account"
