@@ -1,6 +1,6 @@
 import React, { useState, useContext, useRef } from 'react'
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Input, Title } from "@jppinedo/lienzo";
+import { Button, Card, Input, Spinner, Title } from "@jppinedo/lienzo";
 import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
@@ -9,6 +9,7 @@ import { AppContext } from '@state/AppContext';
 import { AuthContext } from '@state/AuthContext';
 import { storePasswordCredential } from '@utils/credential-store';
 import { isTurnstileEnabled, isCaptchaError } from '@utils/turnstile';
+import { markJustLoggedIn } from '@utils/welcome-toast';
 
 /**
  * LoginPage — was MUI Button/TextField/Typography/Card + Firebase
@@ -69,6 +70,18 @@ import { isTurnstileEnabled, isCaptchaError } from '@utils/turnstile';
  * only then calls signIn / requestPasswordReset with the fresh
  * token, because Supabase verifies the token as part of the auth
  * request itself. A submit already in flight ignores repeats.
+ *
+ * U30 (Juan's review): the busy treatment above was too quiet —
+ * the faded button read as "nothing is happening" while the
+ * Turnstile round-trip + sign-in ran. While a submit is in
+ * flight the button now carries the Lienzo Spinner (the same DS
+ * spinner as the registration submitting step, in white so it
+ * reads on the deep-teal button) beside a "Logging in…" /
+ * "Sending…" label, and the old opacity fade is gone. And a
+ * successful sign-in no longer lands on home in silence:
+ * handleLogin marks the one-shot flag in @utils/welcome-toast,
+ * and SearchPage turns it into a single "Welcome to Book Hunt,
+ * {first name}" toast on arrival.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -132,11 +145,17 @@ const LoginPage = () => {
         setBusy(true);
         try {
             const token = await obtainTurnstileToken();
-            await signIn(email, password, token || undefined);
+            const signedInUser = await signIn(email, password, token || undefined);
             // U25: refresh what the browser's password manager
             // holds for this account (fire-and-forget, silent on
             // browsers without the Credential Management API).
             storePasswordCredential({ id: email, password });
+            // U30: arm the one-shot welcome toast — SearchPage
+            // consumes the flag on arrival and greets the user by
+            // first name (nameless fallback when the account has
+            // none). Only this Login-page path sets it: session
+            // restores and registration never do.
+            markJustLoggedIn(signedInUser?.firstName);
             navigate("/search");
         } catch (error) {
             console.log(error);
@@ -170,6 +189,12 @@ const LoginPage = () => {
             setBusy(false);
         }
     }
+
+    // U30: the in-button busy spinner shared by both submit
+    // buttons — the Lienzo Spinner at label height, white so it
+    // reads on the deep-teal button. The Button's icon slot keeps
+    // it inside the button, left of the label.
+    const busySpinner = <Spinner size="18px" thickness="3px" colorClass="border-white" />;
 
     const textLinkStyle = { color: "#e05a5a", fontWeight: 600, cursor: "pointer", background: "none", border: "none", padding: 0, font: "inherit" };
     // U5.1: Juan's review — "Forgot password?" read too large next to
@@ -215,12 +240,20 @@ const LoginPage = () => {
                                     Forgot password?
                                 </button>
                             </div>
-                            <div className={`mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none opacity-50' : ''}`} aria-disabled={busy}>
+                            {/* U30: while the submit runs, the button
+                                itself says so — Spinner + "Logging in…"
+                                inside it — and the wrapper's
+                                pointer-events-none is the disable
+                                (Lienzo Button has no disabled prop).
+                                The U29 opacity fade is gone: the
+                                in-button treatment replaces it. */}
+                            <div className={`mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none' : ''}`} aria-disabled={busy}>
                                 <Button
-                                    label="Login"
+                                    label={busy ? "Logging in…" : "Login"}
                                     ariaLabel="Login"
                                     type="green"
                                     size="xl"
+                                    icon={busy ? busySpinner : undefined}
                                     onClick={(e) => {handleLogin(e)}}
                                 />
                             </div>
@@ -252,12 +285,16 @@ const LoginPage = () => {
                                 onChange={(e) => {setEmail(e.target.value)}}
                             />
                         </div>
-                        <div className={`mt-4 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none opacity-50' : ''}`} aria-disabled={busy}>
+                        {/* U30: same in-button busy treatment as
+                            the Login button — this submit has the
+                            identical Turnstile + request dead air. */}
+                        <div className={`mt-4 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none' : ''}`} aria-disabled={busy}>
                             <Button
-                                label="Send reset link"
+                                label={busy ? "Sending…" : "Send reset link"}
                                 ariaLabel="Send reset link"
                                 type="green"
                                 size="xl"
+                                icon={busy ? busySpinner : undefined}
                                 onClick={(e) => {handleResetRequest(e)}}
                             />
                         </div>

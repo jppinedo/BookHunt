@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 import { SearchContext } from '@state/SearchContext';
+import { ToastContext } from '@state/ToastContext';
+import { consumeJustLoggedIn } from '@utils/welcome-toast';
 import SearchInput from '@custom/Search/SearchInput';
 import CompactSearch from '@custom/Search/CompactSearch';
 import BrandLockup from '@custom/Shared/BrandLockup';
@@ -44,8 +46,30 @@ const SearchPage = () => {
   // SearchContext at App level, not by this page — the page unmounts when
   // the user drills into a book, and the session must survive that.
   const { books, status, searchedQuery, runSearch, resetSearch } = useContext(SearchContext);
+  const { showToast } = useContext(ToastContext);
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('query');
+
+  // U30: the welcome toast. A Login-page sign-in arms a one-shot
+  // flag (see @utils/welcome-toast); this mount effect consumes
+  // it — the flag is removed as it's read, so the greeting fires
+  // exactly once per login: never on a session restore (the flag
+  // was never set), never on a refresh or a later trip home (it's
+  // already gone), and never after registration (that flow ends
+  // on its own success screen and sets nothing).
+  useEffect(() => {
+    const justLoggedIn = consumeJustLoggedIn();
+    if (justLoggedIn) {
+      showToast(
+        justLoggedIn.firstName
+          ? `Welcome to Book Hunt, ${justLoggedIn.firstName}`
+          : 'Welcome to Book Hunt',
+      );
+    }
+    // Mount-only by design: the flag is one-shot, so re-running
+    // on later renders could only ever find nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const navigate = useNavigate();
 
