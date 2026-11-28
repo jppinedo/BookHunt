@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useRef} from "react";
 import { Button, Card, Input, Title } from "@jppinedo/lienzo";
 import { Check, X } from "react-feather";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { AuthContext } from '@state/AuthContext';
 import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
+import ShelveCaptcha from '@custom/Shared/ShelveCaptcha';
 import './RegistrationPage.css';
 
 /**
@@ -36,6 +37,15 @@ import './RegistrationPage.css';
  * non-empty) and an email passing the same regex validateEmail uses
  * at submit time — the button used to light up on password rules
  * alone while the identity fields were still empty.
+ *
+ * U23: a "Shelve the Book" drag captcha (see ShelveCaptcha) joins
+ * the gate — email confirmation is off, so the form needs a human
+ * check that isn't a stock captcha widget. Two cheap bot traps ride
+ * along: a honeypot "website" field no human ever sees (any value
+ * at submit = silent bail, no error shown), and a mount timestamp —
+ * a solve reported less than a second after mount is inhuman and
+ * ignored. A failed server sign-up keeps the captcha solved; the
+ * user never redoes it for a server error.
  */
 const RegistrationPage = () => {
     const navigate = useNavigate();
@@ -52,6 +62,23 @@ const RegistrationPage = () => {
     const [lastNameError, setLastNameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
 
+    // U23: captcha state, the honeypot value, and the mount time the
+    // too-fast-solve check is measured against (the captcha mounts
+    // with the page, so the page's mount time is the captcha's).
+    const [captchaSolved, setCaptchaSolved] = useState(false);
+    const [website, setWebsite] = useState('');
+    const captchaMountRef = useRef(Date.now());
+
+    // U23: a solve landing less than a second after mount can't be a
+    // human drag — ignore it (the widget still shows solved; its
+    // Reset re-arms it honestly). Unsolves (Reset) always apply.
+    const handleCaptchaSolve = (solved) => {
+        if (solved && Date.now() - captchaMountRef.current < 1000) {
+            return;
+        }
+        setCaptchaSolved(solved);
+    };
+
     // U22: the three password rules, re-evaluated on every render so
     // the checklist under the confirmation field is always live. An
     // empty confirmation never counts as a match.
@@ -66,17 +93,25 @@ const RegistrationPage = () => {
     // too — names trimmed non-empty and the email passing the exact
     // regex validateEmail enforces at submit time (one shared rule,
     // so the live gate can never disagree with submit validation).
+    // U23: the captcha must be solved as well.
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
     const formReady = firstName.trim() !== ''
         && lastName.trim() !== ''
         && EMAIL_REGEX.test(email)
-        && passwordRulesPass;
+        && passwordRulesPass
+        && captchaSolved;
 
     async function handleSignUp(e){
         e.preventDefault();
-        // U22/U22.1: the submit is gated on the full form (the button
-        // wrapper also blocks pointer events — this guard is the
-        // backstop, same as the sell form's canSubmit check).
+        // U23 honeypot: the hidden "website" field is never visible
+        // to or filled by a human. Any value means a bot — bail
+        // silently, exactly as if nothing happened.
+        if (website) {
+            return
+        }
+        // U22/U22.1/U23: the submit is gated on the full form (the
+        // button wrapper also blocks pointer events — this guard is
+        // the backstop, same as the sell form's canSubmit check).
         if (!formReady) {
             return
         }
@@ -133,6 +168,26 @@ const RegistrationPage = () => {
                 <Title size="xl" fontFamily="playfair">Register</Title>
                 <p>Fill out the form to create an account</p>
                 <form id={"log-in"} method={"post"} style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                    {/* U23 honeypot: off-screen, untabbable, hidden
+                        from assistive tech. Humans never see it; form-
+                        filling bots do. Any value at submit silently
+                        cancels the sign-up (see handleSignUp). */}
+                    <div
+                        aria-hidden="true"
+                        style={{position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden'}}
+                    >
+                        <label>
+                            Website
+                            <input
+                                type="text"
+                                name="website"
+                                tabIndex={-1}
+                                autoComplete="off"
+                                value={website}
+                                onChange={(e) => {setWebsite(e.target.value)}}
+                            />
+                        </label>
+                    </div>
                     <div className="w-full text-left">
                         <Input
                             label="First Name"
@@ -199,12 +254,16 @@ const RegistrationPage = () => {
                             </li>
                         ))}
                     </ul>
+                    {/* U23: the Shelve the Book captcha — the last
+                        gate before the submit unlocks. */}
+                    <ShelveCaptcha onSolve={handleCaptchaSolve} />
                     <div className="w-full mt-2">
-                        {/* U22/U22.1: Lienzo's Button has no disabled
+                        {/* U22/U22.1/U23: Lienzo's Button has no disabled
                             state, so the gate is the sell form's U4
                             pattern — a wrapper that drops pointer
                             events and fades until the whole form is
-                            ready (names, valid email, password rules). */}
+                            ready (names, valid email, password rules,
+                            solved captcha). */}
                         <div
                             className={`[&>button]:w-full ${formReady ? '' : 'pointer-events-none opacity-50'}`}
                             aria-disabled={!formReady}
