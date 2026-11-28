@@ -55,6 +55,11 @@ function mapSupabaseUser(supabaseUser) {
         id: supabaseUser.id,
         email: supabaseUser.email || "",
         displayName: displayName || supabaseUser.email || "",
+        // U30: the first name on its own, for the post-login welcome
+        // toast ("Welcome to Book Hunt, {first name}"). Sourced from
+        // the same user_metadata first_name signUp stores; '' when
+        // the account predates it or never set one.
+        firstName: meta.first_name || "",
     };
 }
 

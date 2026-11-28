@@ -219,6 +219,7 @@ export const DEMO_USER = {
   id: 'demo-user-1',
   email: 'demo@bookhunt.local',
   displayName: 'Demo Reader',
+  firstName: 'Demo', // U30: parity with the Supabase mapped user (welcome toast)
 };
 
 export const mockProfile = {
