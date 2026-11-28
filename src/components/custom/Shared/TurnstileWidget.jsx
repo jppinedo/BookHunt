@@ -33,7 +33,9 @@ import { TURNSTILE_SITE_KEY, isTurnstileEnabled } from "@utils/turnstile";
  *
  * Imperative API:
  *   execute() → Promise<string|null>. Resolves with the token on
- *     success; resolves null on error, expiry, timeout (15s) or
+ *     success; resolves null on error, expiry, timeout (15s on
+ *     the invisible path, extended to 120s once an interactive
+ *     challenge is on screen — U34) or
  *     when no site key is configured — it never rejects, so
  *     callers branch on the value. A call while a challenge is
  *     already in flight returns the in-flight promise. Tokens are
@@ -55,6 +57,15 @@ const API_URL =
 // as failed (blocked script, stalled challenge) so no auth flow
 // can wait on Cloudflare forever.
 const EXECUTE_TIMEOUT_MS = 15000;
+
+// U34: that 15s cap is for the invisible path only. Once
+// Cloudflare shows its interactive checkbox, a human is in the
+// loop — noticing the box, reading it and clicking takes longer
+// than 15s, and the old cap killed the login mid-challenge
+// ("Verification didn't go through" while the box was still on
+// screen). before-interactive re-arms the wait at 120s;
+// Cloudflare's own callbacks settle it sooner in practice.
+const INTERACTIVE_TIMEOUT_MS = 120000;
 
 // Singleton loader: one <script> per page, shared by every widget.
 let apiPromise = null;
@@ -154,7 +165,12 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(_, ref) {
             },
             // The only moments the container takes up layout space:
             // Cloudflare is about to show its interactive box.
-            "before-interactive-callback": () => setInteractive(true),
+            "before-interactive-callback": () => {
+                setInteractive(true);
+                // U34: a human is now in the loop — give them the
+                // long allowance instead of the 15s invisible cap.
+                armPendingTimer(INTERACTIVE_TIMEOUT_MS);
+            },
             "after-interactive-callback": () => setInteractive(false),
         });
         return widgetIdRef.current;
@@ -172,6 +188,27 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(_, ref) {
         executedRef.current = false;
     };
 
+    // (Re)arms the in-flight execute()'s give-up timer. The
+    // invisible path gets EXECUTE_TIMEOUT_MS; once an interactive
+    // challenge is on screen, before-interactive re-arms it with
+    // INTERACTIVE_TIMEOUT_MS so the wait can outlast the human.
+    const armPendingTimer = (ms) => {
+        if (!pendingRef.current) {
+            return;
+        }
+        if (pendingRef.current.timer) {
+            clearTimeout(pendingRef.current.timer);
+        }
+        pendingRef.current.timer = setTimeout(() => {
+            // No token in time: fail the wait and clear any
+            // challenge box that might be on screen, so the
+            // caller's recovery starts from a clean widget.
+            settlePending(null);
+            setInteractive(false);
+            resetWidget();
+        }, ms);
+    };
+
     useImperativeHandle(ref, () => ({
         execute() {
             if (!isTurnstileEnabled) {
@@ -184,15 +221,8 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(_, ref) {
             const promise = new Promise((resolve) => {
                 resolveFn = resolve;
             });
-            const timer = setTimeout(() => {
-                // No token in time: fail the wait and clear any
-                // challenge box that might be on screen, so the
-                // caller's recovery starts from a clean widget.
-                settlePending(null);
-                setInteractive(false);
-                resetWidget();
-            }, EXECUTE_TIMEOUT_MS);
-            pendingRef.current = { promise, resolve: resolveFn, timer };
+            pendingRef.current = { promise, resolve: resolveFn, timer: null };
+            armPendingTimer(EXECUTE_TIMEOUT_MS);
             (async () => {
                 try {
                     const turnstile = await loadTurnstileApi();
