@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { DEMO_USER, upsertMockProfile } from "@services/mockData.js";
+import { DEMO_USER, upsertMockProfile, deleteMockProfile } from "@services/mockData.js";
 import { supabase, isSupabaseConfigured } from "@services/supabaseClient.js";
 import { createUserProfile } from "@services/BookFirestore.js";
 
@@ -30,7 +30,8 @@ function friendlyAuthError(error) {
 /**
  * Auth provider — same context shape in both modes:
  * { user, setUser, signIn, signUp, signOut, passwordRecovery,
- *   requestPasswordReset, updatePassword }, where user is
+ *   requestPasswordReset, updatePassword, changePassword,
+ *   deleteAccount }, where user is
  * { uid, id, email, displayName } (uid kept for Firebase-era callers).
  *
  * Phase E1 modes, chosen by configuration (see services/supabaseClient.js):
@@ -194,6 +195,36 @@ export function AuthProvider({ children }) {
         setPasswordRecovery(false);
     };
 
+    // U31: the Profile page's Change Password, as a named operation.
+    // Same underlying call as updatePassword (supabase.auth
+    // .updateUser({ password })); the caller (ProfilePage) verifies
+    // the OLD password by re-authenticating before invoking this.
+    // Mock mode: no credential store exists — resolve (local
+    // success), exactly like updatePassword's mock path.
+    const changePassword = async (newPassword) => {
+        await updatePassword(newPassword);
+    };
+
+    // U31: REAL account deletion. supabase-js has no client-side
+    // self-delete, so Supabase mode calls the delete_current_user()
+    // Postgres function (SECURITY DEFINER, deletes the caller's own
+    // auth.users row where id = auth.uid(); the schema's cascades
+    // wipe profiles/listings/saved_books with it — see
+    // supabase/delete-account.sql; Juan runs that SQL once, and
+    // until he does this rpc errors and the caller must NOT pretend
+    // success). The caller verifies the password first and signs
+    // out after. Mock mode: clear the demo user's mock footprint
+    // and sign out locally.
+    const deleteAccount = async () => {
+        if (!isSupabaseConfigured) {
+            if (user) deleteMockProfile(user.uid);
+            setUser(null);
+            return;
+        }
+        const { error } = await supabase.rpc("delete_current_user");
+        if (error) throw friendlyAuthError(error);
+    };
+
     const values = {
         user,
         setUser,
@@ -203,6 +234,8 @@ export function AuthProvider({ children }) {
         passwordRecovery,
         requestPasswordReset,
         updatePassword,
+        changePassword,
+        deleteAccount,
     };
 
     return (

@@ -272,3 +272,15 @@ export function upsertMockProfile(profile) {
   mockDB.profiles.set(profile.id, profile);
   return profile;
 }
+
+// U31: mock-mode account deletion — drop the profile and every
+// listing it owned (tracked by id in profile.booksListed, the mock
+// schema's ownership link), mirroring the real schema's cascades.
+export function deleteMockProfile(userId) {
+  const profile = mockDB.profiles.get(userId);
+  if (profile) {
+    const ownedIds = new Set(profile.booksListed || []);
+    mockDB.listings = mockDB.listings.filter((listing) => !ownedIds.has(listing.id));
+  }
+  mockDB.profiles.delete(userId);
+}
