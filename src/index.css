@@ -35,3 +35,205 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* U1.2 — ONE shared content container for the whole app.
+   Juan's screenshot verdict on U1.1: the breadcrumb bar and the results
+   list used different widths/padding (the bar sat in a 1200px/px-4
+   wrapper, the grid in a 1100px wrapper inside px-3), so their edges
+   never lined up. Every page block — brand header, search bar block,
+   hint line, breadcrumb bar, results grid, page content — now sits in
+   .page-shell (or .page-shell-narrow for the single-book views), so
+   horizontal edges align at every resolution by construction, not by
+   per-page numbers that can drift apart again.
+   - .page-shell:         max-width 1200px, 16px inline padding.
+   - .page-shell-narrow:  max-width 768px (Tailwind's max-w-3xl, the
+     width the single-book views already used), same 16px padding. */
+.page-shell {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  box-sizing: border-box;
+}
+
+.page-shell-narrow {
+  width: 100%;
+  max-width: 768px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  box-sizing: border-box;
+}
+
+/* U7 — ONE shared grid for the wide deal/listing cards (BookList's
+   campus + eBay sections, Saved Books, My Listings). The lists used to
+   be flex rows with justify-content: center and cards that
+   shrink-wrapped to their content (BookCard's inner content capped at
+   560px), so the visible list was a centered, narrower block floating
+   inside the same .page-shell the breadcrumb spans edge-to-edge —
+   Juan: "the breadcrumb bar is always wider than the items list" and
+   "list items are aligned to center; should be left". A real grid
+   fixes all three complaints at once: cells fill the shell's content
+   box from the left edge, every card is width:100% of its cell, and
+   the default stretch alignment makes every card in a row the height
+   of that row's tallest card (the cards carry h-full to complete the
+   chain).
+   U8 — the same rule now also drives the search results list
+   (BookResults used to carry its own Tailwind grid classes), and the
+   columns are standardized everywhere: 1 under 640px, 2 from 640px,
+   3 from 1024px. Juan: the deals lists showed 2 columns where search
+   showed 3 — "we need to standardize the items list". Each card is a
+   size container so BookCard.css can adapt a card's inner layout to
+   its CELL width (narrower cover, then stacked) instead of the
+   viewport — a 3-up cell inside the narrow Profile card is much
+   narrower than a 3-up cell in the wide shell. */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card-grid > * {
+  container-type: inline-size;
+}
+
+/* U4 — toast entrance (ToastContext). Toasts rise slightly and fade in;
+   dismissal is instant (the toast unmounts), which reads fine at this
+   size and keeps the implementation a single class. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-enter {
+  animation: toast-in 0.25s ease-out;
+}
+
+/* U10.1 — AppRail hover motion. U10's rail items carried a visible
+   micro-label under each icon AND a CSS hover tooltip AND the native
+   title tooltip — Juan's screenshot showed the same label three times
+   at once. The labels are gone (icons only, 24px glyphs in 48px
+   targets); the CSS tooltip is the single pointer label and the
+   aria-label the single assistive one. In place of U10's faint static
+   hover tint, the hover state is now animated, in two independent
+   layers so the transforms never fight:
+   - the pill is a ::before layer whose coral tint (the app coral at
+     16% opacity) fades in while scaling 0.9 → 1, ~180ms ease-out;
+   - the glyph (.rail-icon) scales to 1.12 on the same easing and its
+     color shifts to full coral.
+   The ACTIVE item keeps its solid coral pill (its ::before never
+   appears, so hover can never be mistaken for active) and hover only
+   grows its glyph. A press compresses the glyph to 0.96. Reduced
+   motion disables the transforms entirely. */
+.rail-item {
+  position: relative;
+}
+
+.rail-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: rgb(var(--lz-pio-coral) / 0.16);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.rail-item:not(.is-active):hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.rail-icon {
+  position: relative;
+  display: inline-flex;
+  transition:
+    transform 180ms ease-out,
+    color 180ms ease-out;
+}
+
+.rail-item:not(.is-active):hover .rail-icon {
+  transform: scale(1.12);
+  color: rgb(var(--lz-pio-coral));
+}
+
+.rail-item.is-active:hover .rail-icon {
+  transform: scale(1.12);
+}
+
+/* Last so it wins the specificity tie against the hover rules while
+   a press is held mid-hover. */
+.rail-item:hover:active .rail-icon {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-item::before,
+  .rail-icon {
+    transition: none;
+  }
+
+  .rail-item::before,
+  .rail-item:hover .rail-icon,
+  .rail-item:active .rail-icon {
+    transform: none;
+  }
+}
+
+/* U11 — mobile page-title step-down. The wide pages title themselves
+   with Lienzo's Title at size xxl (text-3xl, 30px), which is oversized
+   on a phone. Pages tag their title with .page-title and under 640px
+   it steps down to 24px; at 640px and up the Title's own size stands.
+   This rule is deliberately unlayered: Tailwind 4 puts its utilities
+   in @layer utilities, and unlayered author CSS wins over layered
+   CSS, so this reliably overrides the text-3xl utility the Title
+   renders — the same reason the raw <h1> pages could instead just
+   swap their base class to text-2xl with sm:text-3xl on top. */
+@media (max-width: 639px) {
+  .page-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+/* U20 — the search HOME state's viewport fit. U19 sized this hero
+   with a min-height calc() that subtracted the app footer's measured
+   height (footer in normal flow after the hero box). U20's sticky
+   footer made that arithmetic unnecessary: the app shell (App.jsx)
+   is now a flex column with min-height 100dvh, the routed <main>
+   grows (flex-1), and this hero root — a direct child of that main —
+   grows with it (flex: 1 1 auto), so it always fills exactly the
+   space above the footer, whatever the footer's height is. The
+   element's own justify-center then centers the logo + search in
+   that space, and the home page totals exactly 100dvh: hero
+   centered, footer at the bottom, no scroll. The padding-bottom is
+   the hero's long-standing breathing room: it lifts the centered
+   content a touch so the floating HubNav pill never crowds the
+   example chips (box-border is on the element, so the padding is
+   inside the flexed height). If the footer's styles change, NOTHING
+   here needs redoing — the flex layout absorbs it. */
+.search-home-state {
+  flex: 1 1 auto;
+  padding-bottom: 4.5rem;
+}

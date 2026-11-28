@@ -9,7 +9,7 @@ import BookAddForm from "./BookAddForm";
  */
 const BookSingle = ({ type, book }) => {
   return (
-    <div className="max-w-3xl mx-auto w-full px-3 pb-32">
+    <div className="page-shell-narrow pb-32">
       <BookCard book={book} type={type} />
       {/* show form items if adding new book */}
       {type === 'form' && (

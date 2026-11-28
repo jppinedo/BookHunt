@@ -6,6 +6,39 @@
     overflow: hidden;
 }
 
+/* U16 — ONE card hover for every item list (Juan: the first-search
+   cards and the deals cards "should look and behave in the same
+   way"). These rules mirror BookResults.css's .book-card hover
+   exactly: the border warms to coral, the warm shadow deepens, the
+   card lifts 2px, and the title shifts to coral-dark. They replace
+   the deals cards' old hover — a flat light-green wash
+   (hover:bg-pio-teal-dark-opacity-14 on the inner div, now removed
+   from BookCard.jsx) that made the two lists feel like different
+   apps. Scoped to --link (clickable list cards) so the non-linked
+   single rendering never pretends to be a target. */
+.book-list-card--link {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.book-list-card--link:hover {
+    border-color: rgb(var(--lz-pio-coral));
+    box-shadow: 0 12px 36px -8px rgba(31, 36, 33, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+}
+
+.book-list-card--link:hover .book-list-card-title {
+    color: #b03434; /* pio-coral-dark */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .book-list-card--link {
+        transition: none;
+    }
+    .book-list-card--link:hover {
+        transform: none;
+    }
+}
+
 .book-list-card img,
 .book-single-card img {
     border-radius: 14px;
@@ -47,5 +80,36 @@
     }
     .book-list-card img {
         height: initial;
+    }
+}
+
+/* U8 — inside the shared .card-grid each card is a size container
+   (index.css), so these rules respond to the card's CELL width, not
+   the viewport. The standardized 3-column grid makes cells ~370px in
+   the wide shell — and much narrower inside the Profile card — where
+   the cover's 200px inline cap would squeeze the text column. First
+   the cover shrinks; below ~280px the card stacks cover-over-text,
+   the same pattern as the phone rule above. The !important beats the
+   cover's inline max-width style, as in the rules above. */
+@container (max-width: 380px) {
+    .book-list-card img,
+    .book-single-card img {
+        max-width: 110px !important;
+    }
+}
+
+@container (max-width: 280px) {
+    .book-list-card > div,
+    .book-single-card > div {
+        flex-direction: column;
+    }
+    .book-list-card img,
+    .book-single-card img {
+        width: 100%;
+        max-width: 100% !important;
+        max-height: 200px;
+        object-fit: contain;
+        padding: 0.75rem 0.75rem 0 !important;
+        box-sizing: border-box;
     }
 }

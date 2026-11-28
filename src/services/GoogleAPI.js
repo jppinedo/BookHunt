@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isBookCode, cleanQuery, formatGoogleBook } from '../utils/search-utils';
+import { isBookCode, cleanQuery, formatGoogleBook, dedupeGoogleBooks } from '../utils/search-utils';
 import { mockGoogleVolumes } from './mockData.js';
 
 // NOTE (typo, kept for compatibility): the original code read the Google
@@ -63,7 +63,11 @@ export async function getGoogleBookById(volumeId) {
 }
 
 export async function searchGoogleBooks(query) {
-  if (!hasKey) return mockSearch(query);
+  // U3: every path (live, no-key mock, error fallback) goes through
+  // dedupeGoogleBooks — the same book comes back ~6× per search as
+  // near-identical edition rows. The result count SearchPage shows in
+  // the breadcrumb bar is this list's length, i.e. post-dedupe.
+  if (!hasKey) return dedupeGoogleBooks(mockSearch(query));
   const isISBN = isBookCode(query);
   try {
     const response = await axios.get(GOOGLE_BASE_URL, {
@@ -74,10 +78,10 @@ export async function searchGoogleBooks(query) {
         key: API_KEY,
       },
     });
-    if (!response.data.items?.length) return mockSearch(query);
-    return response.data.items.map((item) => formatGoogleBook(item));
+    if (!response.data.items?.length) return dedupeGoogleBooks(mockSearch(query));
+    return dedupeGoogleBooks(response.data.items.map((item) => formatGoogleBook(item)));
   } catch (error) {
     console.error('Error fetching books, falling back to mock data:', error);
-    return mockSearch(query);
+    return dedupeGoogleBooks(mockSearch(query));
   }
 }

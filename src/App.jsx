@@ -8,11 +8,14 @@ import './App.css';
 // RedirectHandler sends the demo user to /search, and no button ever
 // touches the real address bar.
 import {MemoryRouter as Router, Routes, Route, useLocation, useNavigate} from 'react-router-dom';
-import logoSmall from '@assets/images/BookHuntLogoSmall.png';
+import BrandLockup from '@custom/Shared/BrandLockup';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
+import { SearchContext } from '@state/SearchContext';
+import Footer from '@custom/Shared/Footer';
 import MenuNav from '@custom/Navigation/MenuNav';
 import HubNav from '@custom/Navigation/HubNav';
+import AppRail from '@custom/Navigation/AppRail';
 import ErrorModal from '@custom/Error/ErrorModal';
 import SearchPage from '@pages/SearchPage/SearchPage';
 import BookList from '@pages/BookList/BookList';
@@ -22,30 +25,47 @@ import SellBook from '@pages/SellBook/SellBook';
 import NewBookPage from '@pages/NewBookPage/NewBookPage';
 import LoginPage from '@pages/LoginPage/LoginPage';
 import RegistrationPage from '@pages/RegistrationPage/RegistrationPage';
+import ResetPasswordPage from '@pages/ResetPasswordPage/ResetPasswordPage';
 import ProfilePage from '@pages/ProfilePage/ProfilePage';
+import MyListingsPage from '@pages/MyListingsPage/MyListingsPage';
 import BooksSavedPage from "@pages/BooksSavedPage/BooksSavedPage";
 import RedirectHandler from "@state/RedirectHandler.jsx";
+import { Toasts } from '@state/ToastContext';
 import { Protected } from "@/Protected";
 
 /**
- * PageBrand — small logo at the top-left for internal pages that are NOT
- * part of the book search flow (Saved Books, Profile, listing management).
- * The search-flow pages keep the large centered logo instead. Clicking it
- * returns to Book Search.
+ * PageBrand — the brand button in the header of every logged-in page.
+ * U1 gave it a visible label beside the logo, a matching aria-label,
+ * and hover/focus treatment so it reads as tappable (the audit found
+ * the old bare logo + wordmark didn't read as a button at all). U1.1:
+ * Juan's rule is that the logo is ALWAYS visible and ALWAYS links
+ * home — the deals and listing-detail screens had no header at all,
+ * so PageBrand now renders on every logged-in route. The one
+ * exception is /search itself: that page's large centered hero logo
+ * is its brand lockup, and SearchPage makes it a Home button too, so
+ * the rule holds there without stacking two logos.
+ * U7 (Juan's review): the label reads "Book Hunt" — the wordmark, on
+ * every page — never "Home"; and the click is a true homecoming: it
+ * resets the search session (SearchContext.resetSearch) so it lands
+ * on the clean home view, empty bar and no results, NOT the U1
+ * preserved session. The wrapper also gains margin below so the
+ * header never crowds the content under it.
+ * U15 (Juan's review): the lockup is now the shared BrandLockup —
+ * the compact horizontal mark + wordmark — and it renders at EVERY
+ * width: U10 had retired it on desktop in favour of the rail's
+ * logo, but Juan wants the logo always present, rail or no rail.
+ * U16 (Juan's review of U15): no longer centered — the lockup sits
+ * at the LEFT edge of the .page-shell, in line with the content
+ * under it (and a step bigger; see BrandLockup). Below lg the ☰
+ * MenuNav still sits at the shell's top-right edge, well clear of
+ * the lockup at the left.
  */
 function PageBrand() {
   const navigate = useNavigate();
+  const { resetSearch } = useContext(SearchContext);
   return (
-    <div className="w-full max-w-[1200px] mx-auto px-4 pt-3 box-border">
-      <button
-        type="button"
-        onClick={() => navigate('/search')}
-        aria-label="Book Hunt — back to Book Search"
-        className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-1"
-      >
-        <img src={logoSmall} alt="" style={{ width: '38px', height: '38px', display: 'block' }} />
-        <span className="text-pio-text text-lg font-bold font-jakarta">Book Hunt</span>
-      </button>
+    <div className="page-shell pt-3 mb-2 flex">
+      <BrandLockup onClick={() => { resetSearch(); navigate('/search'); }} />
     </div>
   );
 }
@@ -63,22 +83,41 @@ function AppShell() {
     setIsLoggedIn(!!user)
   }, [user]);
 
-  const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration";
-  // Small top-left logo on internal pages outside the search flow. The
-  // search flow (/search, /results, /book/*, /sell) keeps its own header.
-  const showBrand = showNav && (
-    pathname === "/saved" ||
-    pathname === "/profile" ||
-    pathname.startsWith("/new") ||
-    pathname.startsWith("/bookConfig")
-  );
+  const showNav = isLoggedIn && pathname !== "/login" && pathname !== "/registration" && pathname !== "/reset-password";
+  // U1.1: the brand header (logo + "Book Hunt") shows on EVERY
+  // logged-in page — previously /results and /book/* had no header at
+  // all. The only exception is /search, whose hero logo is the brand
+  // there (and is itself a Home button; see SearchPage). U15: in the
+  // /search RESULTS view the hero steps aside and SearchPage renders
+  // the same small BrandLockup itself, so the rule — logo
+  // always on top — holds in every state of every page.
+  const showBrand = showNav && pathname !== "/search";
 
   return (
     <>
+      {/* U10: the side rail renders only at lg (its own classes), and
+          the content wrapper takes a matching left padding at lg so
+          .page-shell centers in the space beside the rail instead of
+          sliding under it. The fixed overlays (toasts, modals) are
+          unaffected — they position against the viewport, and the
+          wrapper has no transform/filter to trap them. Below lg the
+          padding is absent and everything renders exactly as before. */}
+      {showNav && <AppRail />}
+      {/* U20: the shell is a flex column at least one viewport tall —
+          the classic sticky footer. The routed region (<main>) grows
+          to fill whatever the brand header and footer don't use, so
+          on short pages (Sell a Book is just a search input) the
+          footer rests at the BOTTOM of the viewport instead of
+          hugging the content near the top; on long pages it simply
+          follows the content as before. The fixed/absolute overlays
+          (MenuNav, HubNav, toasts, ErrorModal) don't participate in
+          the flex layout and are unaffected. */}
+      <div className={`flex min-h-dvh flex-col${showNav ? ' lg:pl-[72px]' : ''}`}>
       {showNav && <MenuNav />}
       {showBrand && <PageBrand />}
       <RedirectHandler /> {/* Handles site load up for logged in or not logged in */}
 
+      <main className="flex flex-1 flex-col">
       <Routes>
         <Route path="/search" element={<Protected><SearchPage /></Protected>} />
         <Route path="/login" element={<LoginPage />} />
@@ -88,13 +127,26 @@ function AppShell() {
         <Route path="/sell" element={<Protected><SellBook /></Protected>} />
         <Route path="/new/:id" element={<Protected><NewBookPage /></Protected>} />
         <Route path="/registration" element={<RegistrationPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
+        <Route path="/my-listings" element={<Protected><MyListingsPage /></Protected>} />
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
         <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
       </Routes>
+      </main>
+
+      {/* U17: the footer is unconditional — it closes the auth pages
+          too, where showNav is false. It sits inside this wrapper, so
+          the lg rail offset above applies to it as well. */}
+      <Footer />
 
       {showNav && <HubNav />}
+      {/* U4: toast stack — rendered at shell level so a toast fired
+          just before a navigation (e.g. "Listing deleted") is still
+          visible on the destination screen. */}
+      <Toasts />
       <ErrorModal showError={isError} error={error} onClose={onCloseError}/>
+      </div>
     </>
   )
 }

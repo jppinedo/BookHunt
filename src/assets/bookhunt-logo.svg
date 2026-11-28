@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- Upright architectural hardcover book (no heavy cartoon outline) -->
+  <!-- Page block at bottom -->
+  <path d="M28 92H88C91.3137 92 94 94.6863 94 98V102C94 105.314 91.3137 108 88 108H32C26.4772 108 22 103.523 22 98V92H28Z" fill="#FAF8F5" stroke="#1F2421" stroke-width="2.75"/>
+  <!-- Main teal cover -->
+  <rect x="22" y="18" width="72" height="78" rx="6" fill="#2F6D68" stroke="#1F2421" stroke-width="2.75"/>
+  <!-- Crisp coral spine -->
+  <path d="M22 24C22 20.6863 24.6863 18 28 18H35V96H28C24.6863 96 22 93.3137 22 90V24Z" fill="#FF6B57" stroke="#1F2421" stroke-width="2.75"/>
+  <!-- Subtle gold corner bookmark -->
+  <path d="M78 18H88C91.3137 18 94 20.6863 94 24V34L78 18Z" fill="#EAA838"/>
+  <!-- Bookmark ribbon -->
+  <path d="M40 96V116L46.5 111L53 116V96H40Z" fill="#FF6B57" stroke="#1F2421" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Precision Magnifying Glass -->
+  <g>
+    <line x1="81" y1="77" x2="104" y2="100" stroke="#1F2421" stroke-width="8" stroke-linecap="round"/>
+    <line x1="81" y1="77" x2="104" y2="100" stroke="#EAA838" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="65" cy="59" r="22" fill="#FAF8F5" stroke="#1F2421" stroke-width="3"/>
+    <circle cx="65" cy="59" r="15" fill="#3A7D76" stroke="#1F2421" stroke-width="2"/>
+    <path d="M56 54C57.5 50.5 61 48 65 48" stroke="#FAF8F5" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

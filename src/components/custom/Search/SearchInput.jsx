@@ -29,6 +29,7 @@ import { Search as SearchIcon, X as ClearIcon } from 'react-feather';
  */
 const SearchInput = ({
     onSearch,
+    onClear,
     inputValue,
     className
 }) => {
@@ -45,9 +46,18 @@ const SearchInput = ({
     onSearch(query);
   };
 
+  // U7: when the page passes onClear, the X is a full reset to the
+  // clean home view (Juan: clicking X should land on home with no
+  // results, from any page with this bar) — the page owns that
+  // navigation + session wipe. Without onClear it stays the original
+  // local text clear.
   const handleClear = () => {
     setQuery('');
-    inputRef.current?.focus();
+    if (onClear) {
+      onClear();
+    } else {
+      inputRef.current?.focus();
+    }
   };
 
   return (
