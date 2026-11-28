@@ -1,12 +1,14 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef } from 'react'
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, Title } from "@jppinedo/lienzo";
 import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
+import TurnstileWidget from '@custom/Shared/TurnstileWidget';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from '@state/AuthContext';
 import { storePasswordCredential } from '@utils/credential-store';
+import { isTurnstileEnabled, isCaptchaError } from '@utils/turnstile';
 
 /**
  * LoginPage — was MUI Button/TextField/Typography/Card + Firebase
@@ -46,6 +48,17 @@ import { storePasswordCredential } from '@utils/credential-store';
  * and a successful sign-in also stores the credential explicitly
  * via the Credential Management API (see @utils/credential-store),
  * which reinforces future autofill.
+ *
+ * U28: a Cloudflare Turnstile widget (only when
+ * VITE_TURNSTILE_SITE_KEY is configured — see @utils/turnstile)
+ * sits under each form, Managed/invisible, and its token rides
+ * along on signIn and on the password-reset request, because
+ * Supabase rejects tokenless calls once CAPTCHA protection is
+ * enabled server-side. Tokens are single-use, so the token clears
+ * on every view switch and attempt; a captcha rejection resets
+ * the widget for a fresh token and swaps in a friendly retry
+ * message — every other error (wrong password included) displays
+ * exactly as before.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -56,10 +69,40 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // U28: the current Turnstile token (ref — rendering never
+    // depends on it) and the mounted widget. Only one view shows
+    // at a time, so one ref serves both widgets. Tokens are
+    // single-use: switchView drops the stored token whenever the
+    // view changes, and the fresh widget reports its own.
+    const turnstileTokenRef = useRef(null);
+    const turnstileWidgetRef = useRef(null);
+
+    const handleTurnstileToken = (token) => {
+        turnstileTokenRef.current = token;
+    };
+
+    const switchView = (next) => {
+        turnstileTokenRef.current = null;
+        setView(next);
+    };
+
+    // U28: a captcha rejection gets the widget reset (fresh token
+    // on the way) plus a friendly retry message; returns true when
+    // it handled the error so callers skip their normal path.
+    const handleCaptchaFailure = (error) => {
+        if (!isTurnstileEnabled || !isCaptchaError(error)) {
+            return false;
+        }
+        turnstileTokenRef.current = null;
+        turnstileWidgetRef.current?.reset();
+        onShowError(new Error("Verification didn't go through — please try once more."));
+        return true;
+    };
+
     async function handleLogin(e){
         e.preventDefault();
         try {
-            await signIn(email, password);
+            await signIn(email, password, turnstileTokenRef.current || undefined);
             // U25: refresh what the browser's password manager
             // holds for this account (fire-and-forget, silent on
             // browsers without the Credential Management API).
@@ -67,18 +110,22 @@ const LoginPage = () => {
             navigate("/search");
         } catch (error) {
             console.log(error);
-            onShowError(error);
+            if (!handleCaptchaFailure(error)) {
+                onShowError(error);
+            }
         }
     }
 
     async function handleResetRequest(e){
         e.preventDefault();
         try {
-            await requestPasswordReset(email);
-            setView('sent');
+            await requestPasswordReset(email, turnstileTokenRef.current || undefined);
+            switchView('sent');
         } catch (error) {
             console.log(error);
-            onShowError(error);
+            if (!handleCaptchaFailure(error)) {
+                onShowError(error);
+            }
         }
     }
 
@@ -122,7 +169,7 @@ const LoginPage = () => {
                                 />
                             </div>
                             <div className="mt-2 max-w-[340px] mx-auto text-right">
-                                <button type="button" style={forgotLinkStyle} onClick={() => setView('forgot')}>
+                                <button type="button" style={forgotLinkStyle} onClick={() => switchView('forgot')}>
                                     Forgot password?
                                 </button>
                             </div>
@@ -135,6 +182,17 @@ const LoginPage = () => {
                                     onClick={(e) => {handleLogin(e)}}
                                 />
                             </div>
+                            {/* U28: Turnstile under the form —
+                                Managed mode is normally invisible
+                                (zero height); if Cloudflare asks
+                                for interaction its box appears
+                                here. Nothing renders when no site
+                                key is configured. */}
+                            {isTurnstileEnabled && (
+                                <div className="mt-3 max-w-[340px] mx-auto flex justify-center">
+                                    <TurnstileWidget ref={turnstileWidgetRef} onToken={handleTurnstileToken} />
+                                </div>
+                            )}
                         </form>
                     </>
                 )}
@@ -161,8 +219,16 @@ const LoginPage = () => {
                                 onClick={(e) => {handleResetRequest(e)}}
                             />
                         </div>
+                        {/* U28: the reset-email call needs a token
+                            too once protection is on — same widget,
+                            same treatment as the login form. */}
+                        {isTurnstileEnabled && (
+                            <div className="mt-3 max-w-[340px] mx-auto flex justify-center">
+                                <TurnstileWidget ref={turnstileWidgetRef} onToken={handleTurnstileToken} />
+                            </div>
+                        )}
                         <div className="mt-3 mb-2 max-w-[340px] mx-auto">
-                            <button type="button" style={textLinkStyle} onClick={() => setView('login')}>
+                            <button type="button" style={textLinkStyle} onClick={() => switchView('login')}>
                                 Back to login
                             </button>
                         </div>
@@ -181,7 +247,7 @@ const LoginPage = () => {
                                 ariaLabel="Back to login"
                                 type="green"
                                 size="xl"
-                                onClick={() => setView('login')}
+                                onClick={() => switchView('login')}
                             />
                         </div>
                     </>

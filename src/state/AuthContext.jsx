@@ -88,7 +88,14 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    const signIn = async (email, password) => {
+    // U28: signIn / signUp / requestPasswordReset each accept an
+    // optional Turnstile captchaToken and forward it to Supabase
+    // (options: { captchaToken }) only when one is supplied — with
+    // no token the calls are exactly the pre-U28 ones. Mock mode
+    // ignores the token entirely. Once CAPTCHA protection is
+    // enabled in the Supabase dashboard, calls WITHOUT a valid
+    // token are rejected server-side.
+    const signIn = async (email, password, captchaToken) => {
         if (!isSupabaseConfigured) {
             const signedIn = { ...DEMO_USER, email: email || DEMO_USER.email };
             setUser(signedIn);
@@ -97,6 +104,7 @@ export function AuthProvider({ children }) {
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
+            ...(captchaToken ? { options: { captchaToken } } : {}),
         });
         if (error) throw friendlyAuthError(error);
         const mapped = mapSupabaseUser(data.user);
@@ -104,7 +112,7 @@ export function AuthProvider({ children }) {
         return mapped;
     };
 
-    const signUp = async (email, { firstName = '', lastName = '', password } = {}) => {
+    const signUp = async (email, { firstName = '', lastName = '', password, captchaToken } = {}) => {
         if (!isSupabaseConfigured) {
             const newUser = { ...DEMO_USER, email: email || DEMO_USER.email };
             upsertMockProfile({
@@ -123,6 +131,7 @@ export function AuthProvider({ children }) {
             password,
             options: {
                 data: { first_name: firstName, last_name: lastName },
+                ...(captchaToken ? { captchaToken } : {}),
             },
         });
         if (error) throw friendlyAuthError(error);
@@ -158,10 +167,11 @@ export function AuthProvider({ children }) {
     // shows the same confirmation either way — no account-existence
     // leak. Mock mode: no email exists to send; resolve so the UI
     // shows the identical confirmation (demo parity).
-    const requestPasswordReset = async (email) => {
+    const requestPasswordReset = async (email, captchaToken) => {
         if (!isSupabaseConfigured) return;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/`,
+            ...(captchaToken ? { captchaToken } : {}),
         });
         if (error) throw friendlyAuthError(error);
     };
