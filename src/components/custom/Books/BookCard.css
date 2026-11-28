@@ -6,6 +6,39 @@
     overflow: hidden;
 }
 
+/* U16 — ONE card hover for every item list (Juan: the first-search
+   cards and the deals cards "should look and behave in the same
+   way"). These rules mirror BookResults.css's .book-card hover
+   exactly: the border warms to coral, the warm shadow deepens, the
+   card lifts 2px, and the title shifts to coral-dark. They replace
+   the deals cards' old hover — a flat light-green wash
+   (hover:bg-pio-teal-dark-opacity-14 on the inner div, now removed
+   from BookCard.jsx) that made the two lists feel like different
+   apps. Scoped to --link (clickable list cards) so the non-linked
+   single rendering never pretends to be a target. */
+.book-list-card--link {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.book-list-card--link:hover {
+    border-color: rgb(var(--lz-pio-coral));
+    box-shadow: 0 12px 36px -8px rgba(31, 36, 33, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+}
+
+.book-list-card--link:hover .book-list-card-title {
+    color: #b03434; /* pio-coral-dark */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .book-list-card--link {
+        transition: none;
+    }
+    .book-list-card--link:hover {
+        transform: none;
+    }
+}
+
 .book-list-card img,
 .book-single-card img {
     border-radius: 14px;

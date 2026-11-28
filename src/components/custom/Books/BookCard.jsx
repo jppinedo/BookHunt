@@ -5,7 +5,7 @@ import { AppContext } from '@state/AppContext';
 import { useToast } from '@state/ToastContext';
 import { isBookSaved, toggleSavedBook, deleteListedBook } from "@services/BookFirestore";
 import { Badge, Button, Card, Title } from '@jppinedo/lienzo';
-import { Bookmark, CheckCircle, ExternalLink, MapPin, Minus, Plus, Star, Truck } from 'react-feather';
+import { ArrowRight, Bookmark, CheckCircle, ExternalLink, MapPin, Minus, Plus, Star, Truck } from 'react-feather';
 import BookCover from './BookCover';
 import './BookCard.css';
 
@@ -402,13 +402,18 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
     );
   }
 
+  // U16: list cards share the first-search cards' shell and hover
+  // (see BookCard.css): the clickable modifier class carries the
+  // lift + coral border + title color shift, and `group` drives the
+  // footer CTA's arrow nudge. The old hover — a flat light-green
+  // wash (pio-teal-dark at 14%) on the inner div — is gone.
   return (
     <Card
       padded={false}
-      className={`${isSingle ? 'book-single-card' : 'book-list-card'} w-full h-full`}
+      className={`${isSingle ? 'book-single-card' : 'book-list-card'} ${!isSingle && isClickable ? 'book-list-card--link' : ''} group w-full h-full`}
     >
       <div
-        className={`flex text-left w-full h-full ${isSingle ? '' : 'p-3'} ${isClickable ? 'cursor-pointer hover:bg-pio-teal-dark-opacity-14' : ''}`}
+        className={`flex text-left w-full h-full ${isSingle ? '' : 'p-3'} ${isClickable ? 'cursor-pointer' : ''}`}
         onClick={isClickable ? handleCardClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
@@ -422,7 +427,7 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
         />
         <div className="flex flex-col flex-1 min-w-0">
           <div className="p-3">
-            <Title size="md" className="leading-tight mb-2">
+            <Title size="md" className="book-list-card-title leading-tight mb-2">
               {book.title}
             </Title>
             {book.authors?.length ? (
@@ -449,7 +454,10 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
                     {feedbackScoreText ? ` (${feedbackScoreText} feedback)` : ''}
                   </p>
                 )}
-                {book.condition && (
+                {/* U16: in list mode (grid) the condition pill moves
+                    to the card footer, under the separator line —
+                    see the footer block below. */}
+                {book.condition && type !== 'grid' && (
                   <Badge label={book.condition} tone="teal" className="mt-1" />
                 )}
                 {showDetailExtras && book.topRatedSeller && (
@@ -460,7 +468,9 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
             {(isSingle && book.description?.length) && (
               <p className="text-sm my-2">{book.description}</p>
             )}
-            {type !== 'form' && (
+            {/* U16: in list mode (grid) the price moves to the
+                footer row beside the condition pill. */}
+            {type !== 'form' && type !== 'grid' && (
               <Title size="sm" color="coral" className="mt-2">
                 {`$${book.price} ${book.currency}`}
               </Title>
@@ -508,6 +518,47 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
               </div>
             )}
           </div>
+          {/* U16: the LIST-mode footer (deals page + Books Saved,
+              which share this grid rendering). Juan's reference puts
+              the condition and price below a thin separator, with
+              actions under them — kept understated: the hairline is
+              the grid tone at 60% (the U15 header line), the badge
+              is the same small Lienzo pill, the price a plain
+              semibold line, not a Title. mt-auto pins the footer to
+              the card's bottom edge so the U8 equal-height rows line
+              their footers up. The actions row carries only the
+              "View deal" CTA: list cards have never had a save
+              action (the bookmark lives on the detail view, above),
+              so none is invented here. The CTA mirrors the search
+              cards' "Find deals" (coral, arrow nudging on hover) and
+              runs the same navigation as the card click;
+              stopPropagation keeps it to exactly one navigation. */}
+          {type === 'grid' && (
+            <div className="mt-auto px-3 pb-3">
+              <div className="flex items-center justify-between gap-2 border-t border-pio-grid/60 pt-2.5 min-h-[30px]">
+                {book.condition ? (
+                  <Badge label={book.condition} tone="teal" />
+                ) : (
+                  <span />
+                )}
+                {book.price !== undefined && book.price !== null && (
+                  <span className="text-sm font-semibold tabular-nums text-pio-coral-dark">
+                    {`$${book.price} ${book.currency}`}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-end mt-2">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleCardClick(); }}
+                  className="inline-flex items-center gap-1 bg-transparent border-0 p-0 cursor-pointer text-sm font-semibold text-pio-coral transition-colors hover:text-pio-coral-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
+                >
+                  View deal
+                  <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1" />
+                </button>
+              </div>
+            </div>
+          )}
           {(type !== 'grid' && !isClickable) && (
             <div className="flex items-center gap-2 px-3 pb-3">
               {type === 'view' && book.sellerType === 'eBay' && (

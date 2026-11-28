@@ -22,18 +22,24 @@ import BrandLockup from '@custom/Shared/BrandLockup';
  * Search.
  *
  * U15: the lockup itself is now the shared BrandLockup — the same
- * compact horizontal mark + wordmark, centered, that tops every
- * logged-in page — so the auth screens carry the identical brand.
- * Only the generous top/bottom spacing around it is auth-specific
- * (the cards sit lower on the page than app content). The click also
- * takes the U7 homecoming now (resetSearch before navigating), like
- * every other instance of the lockup.
+ * compact horizontal mark + wordmark that tops every logged-in
+ * page — so the auth screens carry the identical brand. Only the
+ * generous top/bottom spacing around it is auth-specific (the
+ * cards sit lower on the page than app content). The click also
+ * takes the U7 homecoming now (resetSearch before navigating),
+ * like every other instance of the lockup.
+ *
+ * U16: like PageBrand, the lockup is LEFT-aligned now — the
+ * wrapper takes the exact box of the auth card under it (Login /
+ * Reset: max-w-[24em] centered; Register passes `wide` for its
+ * 26rem card), so the mark sits flush with the card's left edge
+ * instead of floating centered above it.
  */
-const AuthBrand = () => {
+const AuthBrand = ({ wide = false }) => {
     const navigate = useNavigate();
     const { resetSearch } = useContext(SearchContext);
     return (
-        <div className="flex justify-center px-4 mt-12 mb-10">
+        <div className={`flex mt-12 mb-10 mx-auto ${wide ? 'max-w-[26rem] w-[calc(100%-2rem)]' : 'max-w-[24em] w-full'}`}>
             <BrandLockup
                 ariaLabel="Home — Book Search"
                 onClick={() => { resetSearch(); navigate('/search'); }}

@@ -103,7 +103,9 @@ const RegistrationPage = () => {
 
     return (
         <div className='register-wrapper'>
-            <AuthBrand />
+            {/* U16: `wide` — AuthBrand's wrapper matches this page's
+                26rem card box so the lockup aligns to its left edge. */}
+            <AuthBrand wide />
             <Card className="register-card">
                 <div className="w-full mb-5">
                     <AuthSwitch active="register" />

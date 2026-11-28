@@ -12,7 +12,7 @@ import { MapPin, Tag } from 'react-feather';
 import { Spinner } from "@jppinedo/lienzo";
 import BookCard from "@custom/Books/BookCard";
 import LoadingResults from "@custom/Search/LoadingResults";
-import SearchInput from "@custom/Search/SearchInput";
+import CompactSearch from "@custom/Search/CompactSearch";
 
 /** BookList — MUI Container/Backdrop/CircularProgress replaced by a Tailwind
  *  container div and a Lienzo Spinner overlay (Backdrop is a Phase 2 gap;
@@ -164,15 +164,22 @@ const BookList = () => {
   // page properly later): a small coral icon before the Playfair
   // title (MapPin for Campus, Tag for eBay) and the same subtle
   // hairline under the row (the card-grid border tone at 60%).
+  // U16 (Juan's review): the titles drop a step (22px → 20px), and
+  // the Campus count leaves the title text for a small soft pill
+  // beside it — pale teal from the palette, dot + "{n} deals", like
+  // his reference. eBay still gets NO count of any kind (U8).
   const sectionHeading = (label, count, Icon) => (
     <div className="flex items-center gap-2 border-b border-pio-grid/60 pb-3 mb-5">
-      <Icon size={19} aria-hidden="true" className="text-pio-coral shrink-0" />
-      <h2 className="font-playfair text-[22px] font-semibold text-pio-text text-left m-0">
+      <Icon size={18} aria-hidden="true" className="text-pio-coral shrink-0" />
+      <h2 className="font-playfair text-xl font-semibold text-pio-text text-left m-0">
         {label}
-        {count !== undefined && (
-          <span className="text-pio-text-muted text-base font-normal"> · {count}</span>
-        )}
       </h2>
+      {count !== undefined && (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-pio-teal-dark-pale px-2.5 py-[3px] font-jakarta text-xs font-semibold text-pio-teal-dark">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-pio-teal-dark shrink-0" />
+          {count} {count === 1 ? 'deal' : 'deals'}
+        </span>
+      )}
     </div>
   );
   const emptyNote = (text) => (
@@ -182,21 +189,37 @@ const BookList = () => {
   return (
 
     <div className="page-shell pt-4">
-      {/* U7: the X in this search bar is a reset to the clean home
-          view (same as the Home crumb), not just a text clear. */}
-      <SearchInput
-        onSearch={handleSearch}
-        onClear={() => { resetSearch(); navigate('/search'); }}
-        inputValue={title}
-        className="mb-1"
+      {/* U16: the hero-sized SearchInput is gone from this page —
+          the U15 CompactSearch takes the breadcrumb bar's `end`
+          slot instead, exactly as on the results page (Juan's
+          reference shows the same small field here). Submit starts
+          a new search and lands on the results view (handleSearch
+          navigates to /search?query=…); the X keeps the U7 reset
+          to the clean home view, same as the Home crumb. On mobile
+          the bar hides (U11.1) and the slot renders as its own
+          full-width row, as on the results page. */}
+      <BreadcrumbNav
+        crumbs={crumbs}
+        fallback={backFallback}
+        className="mb-3"
+        end={(
+          <CompactSearch
+            onSearch={handleSearch}
+            onClear={() => { resetSearch(); navigate('/search'); }}
+            inputValue={title}
+          />
+        )}
       />
-      <BreadcrumbNav crumbs={crumbs} fallback={backFallback} className="mb-3" />
 
       {/* U3: a compact book header — the audit found this screen never
-          named the book or its author outside the breadcrumb. */}
+          named the book or its author outside the breadcrumb.
+          U16: the title drops to a flat 24px (was 24/30px — Juan:
+          too big). The space at the header row's right stays EMPTY:
+          it is reserved for the future filter/sort controls, so no
+          tagline or count goes there. */}
       {(title || author) && (
         <header className="mb-6 text-left">
-          <h1 className="font-playfair text-2xl sm:text-3xl font-semibold leading-tight text-pio-text my-0">
+          <h1 className="font-playfair text-2xl font-semibold leading-tight text-pio-text my-0">
             {title}
           </h1>
           {(author || year) && (

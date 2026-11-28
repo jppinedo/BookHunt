@@ -119,11 +119,12 @@ const SearchPage = () => {
           640px. The reset click covers the whole lockup.
           U15: the hero lockup is the HOME state's brand only. Once
           results exist, the results view below renders the small
-          centered BrandLockup instead (Juan: the logo is always on
-          top, in the compact lockup everywhere except the clean
-          home), with the same reset click. */}
+          BrandLockup instead (Juan: the logo is always on top, in
+          the compact lockup everywhere except the clean home), with
+          the same reset click. U16: that lockup is left-aligned in
+          the shell now, like PageBrand everywhere else. */}
       {hasResults ? (
-        <div className="flex justify-center px-4 pt-3 mb-1">
+        <div className="page-shell flex pt-3 mb-1">
           <BrandLockup onClick={() => { resetSearch(); navigate('/search', { replace: true }); }} />
         </div>
       ) : (

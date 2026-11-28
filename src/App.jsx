@@ -50,19 +50,20 @@ import { Protected } from "@/Protected";
  * preserved session. The wrapper also gains margin below so the
  * header never crowds the content under it.
  * U15 (Juan's review): the lockup is now the shared BrandLockup —
- * the compact horizontal mark + wordmark — HORIZONTALLY CENTERED at
- * the top of the shell, and it renders at EVERY width: U10 had
- * retired it on desktop in favour of the rail's logo, but Juan wants
- * the logo always present, rail or no rail. Below lg the ☰ MenuNav
- * still sits at the shell's top-right edge; the lockup is
- * content-sized and centered, so the two never meet (at ~390px the
- * lockup spans the middle ~160px, the menu the right ~48px).
+ * the compact horizontal mark + wordmark — and it renders at EVERY
+ * width: U10 had retired it on desktop in favour of the rail's
+ * logo, but Juan wants the logo always present, rail or no rail.
+ * U16 (Juan's review of U15): no longer centered — the lockup sits
+ * at the LEFT edge of the .page-shell, in line with the content
+ * under it (and a step bigger; see BrandLockup). Below lg the ☰
+ * MenuNav still sits at the shell's top-right edge, well clear of
+ * the lockup at the left.
  */
 function PageBrand() {
   const navigate = useNavigate();
   const { resetSearch } = useContext(SearchContext);
   return (
-    <div className="page-shell pt-3 mb-2 flex justify-center">
+    <div className="page-shell pt-3 mb-2 flex">
       <BrandLockup onClick={() => { resetSearch(); navigate('/search'); }} />
     </div>
   );
@@ -87,7 +88,7 @@ function AppShell() {
   // all. The only exception is /search, whose hero logo is the brand
   // there (and is itself a Home button; see SearchPage). U15: in the
   // /search RESULTS view the hero steps aside and SearchPage renders
-  // the same small centered BrandLockup itself, so the rule — logo
+  // the same small BrandLockup itself, so the rule — logo
   // always on top — holds in every state of every page.
   const showBrand = showNav && pathname !== "/search";
 
