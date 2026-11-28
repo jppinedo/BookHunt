@@ -27,6 +27,14 @@ import { Check } from "react-feather";
  * The gap slot and the loose book's color are randomized on mount
  * and on Reset. Solved state is reported through onSolve(boolean);
  * Reset reports false so the parent can re-gate the submit.
+ *
+ * U24: registration is now a multi-round flow — the parent mounts
+ * a fresh ShelveCaptcha per round (key remount, so the gap
+ * re-randomizes). The anti-bot timing guard moved in here from the
+ * register page: a "solve" landing less than a second after THIS
+ * shelf mounted can't be a human drag, so it doesn't count — the
+ * book springs back like a miss and nothing is reported. Each
+ * round's shelf times itself.
  */
 
 // The shelf's seven slots. Heights/widths vary like real books; two
@@ -61,6 +69,9 @@ const ShelveCaptcha = ({ onSolve }) => {
 
     const bookRef = useRef(null);
     const gapRef = useRef(null);
+    // U24: when this shelf mounted — the too-fast-solve guard is
+    // measured against it (see endDrag).
+    const mountRef = useRef(Date.now());
     // Active drag: the pointer it belongs to, where it started, and
     // the book offset at that moment. Null between drags.
     const dragRef = useRef(null);
@@ -129,6 +140,14 @@ const ShelveCaptcha = ({ onSolve }) => {
         const gapCy = gapRect.top + gapRect.height / 2;
 
         if (Math.hypot(gapCx - bookCx, gapCy - bookCy) <= SNAP_DISTANCE) {
+            // U24: a solve less than a second after this shelf
+            // mounted is inhuman — it doesn't count. The book
+            // springs back to its tray spot like a miss and the
+            // round stays open.
+            if (Date.now() - mountRef.current < 1000) {
+                setOffset({ x: 0, y: 0 });
+                return;
+            }
             // Park it exactly: shift the offset by the center delta.
             setOffset({ x: offset.x + (gapCx - bookCx), y: offset.y + (gapCy - bookCy) });
             setSolved(true);
