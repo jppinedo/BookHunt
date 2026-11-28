@@ -13,8 +13,12 @@ import { Eye, EyeOff } from 'react-feather';
  * in Lienzo and not clickable. The label is rendered here (with
  * htmlFor) rather than via Input's label prop so the overlay can be
  * positioned against the field box alone, not the label + field stack.
+ *
+ * U25: forwards `name` as well as `id`/`autoComplete` — password
+ * managers pair a credential by the fields' name + autoComplete
+ * semantics, and this wrapper was dropping `name` on the floor.
  */
-const PasswordInput = ({ id, label, value, onChange, hint, placeholder, autoComplete }) => {
+const PasswordInput = ({ id, name, label, value, onChange, hint, placeholder, autoComplete }) => {
     const [visible, setVisible] = useState(false);
 
     return (
@@ -30,6 +34,7 @@ const PasswordInput = ({ id, label, value, onChange, hint, placeholder, autoComp
             <div className="relative">
                 <Input
                     id={id}
+                    name={name}
                     htmlType={visible ? "text" : "password"}
                     autoComplete={autoComplete}
                     placeholder={placeholder}

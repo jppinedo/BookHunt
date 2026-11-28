@@ -8,6 +8,7 @@ import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
 import ShelveCaptcha from '@custom/Shared/ShelveCaptcha';
+import { storePasswordCredential } from '@utils/credential-store';
 import './RegistrationPage.css';
 
 /**
@@ -56,6 +57,18 @@ import './RegistrationPage.css';
  * a shelf mounts doesn't count) now lives inside ShelveCaptcha,
  * since each round's shelf mounts separately. Errors from the
  * server sign-up surface through onShowError exactly as before.
+ *
+ * U25: the browser never offered to save the new account's
+ * credentials — this flow submits nothing in the classic sense
+ * (button → captcha step → async sign-up → timed redirect), so the
+ * save heuristic never fires. performSignUp now stores the
+ * credential explicitly via the Credential Management API right
+ * after signUp resolves (see @utils/credential-store). The fields
+ * also carry the name/autoComplete pairing password managers key
+ * on: email name="email" + autoComplete="username" (it was the
+ * unpairable "email"), password name="password", both password
+ * fields autoComplete="new-password"; given-name/family-name were
+ * already correct.
  */
 
 const CAPTCHA_ROUNDS = 3;
@@ -209,6 +222,14 @@ const RegistrationPage = () => {
         setStep('submitting');
         try {
             await signUp(email, { firstName, lastName, password });
+            // U25: ask the browser to save the new credential —
+            // fire-and-forget; the success screen and its timing
+            // are unaffected (see @utils/credential-store).
+            storePasswordCredential({
+                id: email,
+                password,
+                name: `${firstName} ${lastName}`.trim(),
+            });
             setStep('success');
         } catch (error) {
             resetToForm();
@@ -303,7 +324,8 @@ const RegistrationPage = () => {
                                 <Input
                                     label="Email"
                                     htmlType="email"
-                                    autoComplete="email"
+                                    name="email"
+                                    autoComplete="username"
                                     placeholder="you@example.edu"
                                     value={email}
                                     onChange={(e) => {setEmail(e.target.value)}}
@@ -314,6 +336,7 @@ const RegistrationPage = () => {
                             <div className="w-full text-left">
                                 <PasswordInput
                                     id="crPassword"
+                                    name="password"
                                     label="Password"
                                     autoComplete="new-password"
                                     placeholder="At least 6 characters"

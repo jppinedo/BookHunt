@@ -6,6 +6,7 @@ import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from '@state/AuthContext';
+import { storePasswordCredential } from '@utils/credential-store';
 
 /**
  * LoginPage — was MUI Button/TextField/Typography/Card + Firebase
@@ -35,6 +36,16 @@ import { AuthContext } from '@state/AuthContext';
  * Button type="green" (pio-teal-dark) at xl padding, full-width on
  * the auth cards — because the pale default submit was too easy to
  * miss. Coral stays reserved for nav/tabs/links, per his call.
+ *
+ * U25: the browser autofilled the password but never the email —
+ * the email field carried autoComplete="email" and no name, so the
+ * password manager couldn't pair it with the password field as one
+ * credential. The login pair is now name="email" +
+ * autoComplete="username" and name="password" +
+ * autoComplete="current-password" (the pairing browsers key on),
+ * and a successful sign-in also stores the credential explicitly
+ * via the Credential Management API (see @utils/credential-store),
+ * which reinforces future autofill.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -49,6 +60,10 @@ const LoginPage = () => {
         e.preventDefault();
         try {
             await signIn(email, password);
+            // U25: refresh what the browser's password manager
+            // holds for this account (fire-and-forget, silent on
+            // browsers without the Credential Management API).
+            storePasswordCredential({ id: email, password });
             navigate("/search");
         } catch (error) {
             console.log(error);
@@ -89,7 +104,8 @@ const LoginPage = () => {
                                 <Input
                                     label="Email"
                                     htmlType="email"
-                                    autoComplete="email"
+                                    name="email"
+                                    autoComplete="username"
                                     placeholder="you@example.edu"
                                     value={email}
                                     onChange={(e) => {setEmail(e.target.value)}}
@@ -98,6 +114,7 @@ const LoginPage = () => {
                             <div className="mt-3 max-w-[340px] mx-auto text-left">
                                 <PasswordInput
                                     id="logPass"
+                                    name="password"
                                     label="Password"
                                     autoComplete="current-password"
                                     value={password}
