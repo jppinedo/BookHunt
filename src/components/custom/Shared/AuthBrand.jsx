@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchContext } from '@state/SearchContext';
-import BrandLockup from '@custom/Shared/BrandLockup';
+import { StackedBrandLockup } from '@custom/Shared/BrandLockup';
 
 /**
  * AuthBrand — the brand lockup above the Login, Register and Reset
@@ -21,26 +21,26 @@ import BrandLockup from '@custom/Shared/BrandLockup';
  * to /login by the Protected route, and a signed-in one lands on Book
  * Search.
  *
- * U15: the lockup itself is now the shared BrandLockup — the same
- * compact horizontal mark + wordmark that tops every logged-in
- * page — so the auth screens carry the identical brand. Only the
- * generous top/bottom spacing around it is auth-specific (the
- * cards sit lower on the page than app content). The click also
- * takes the U7 homecoming now (resetSearch before navigating),
- * like every other instance of the lockup.
+ * U15: the lockup became the shared BrandLockup — the same compact
+ * horizontal mark + wordmark that tops every logged-in page. U16
+ * then left-aligned it to the auth card's box.
  *
- * U16: like PageBrand, the lockup is LEFT-aligned now — the
- * wrapper takes the exact box of the auth card under it (Login /
- * Reset: max-w-[24em] centered; Register passes `wide` for its
- * 26rem card), so the mark sits flush with the card's left edge
- * instead of floating centered above it.
+ * U21 (Juan's review of the U20 preview): the auth screens go back
+ * to being special — they get the HOME HERO treatment instead: the
+ * StackedBrandLockup, the large mark with "Book Hunt" as HTML text
+ * below it, the whole lockup centered above the card. The click
+ * keeps the U7 homecoming (resetSearch before navigating) and the
+ * same aria-label. Only the generous top/bottom spacing around it
+ * is auth-specific (the cards sit lower on the page than app
+ * content). The logged-in pages keep the U16 small left-aligned
+ * horizontal lockup — untouched by this change.
  */
-const AuthBrand = ({ wide = false }) => {
+const AuthBrand = () => {
     const navigate = useNavigate();
     const { resetSearch } = useContext(SearchContext);
     return (
-        <div className={`flex mt-12 mb-10 mx-auto ${wide ? 'max-w-[26rem] w-[calc(100%-2rem)]' : 'max-w-[24em] w-full'}`}>
-            <BrandLockup
+        <div className="flex justify-center mt-12 mb-10">
+            <StackedBrandLockup
                 ariaLabel="Home — Book Search"
                 onClick={() => { resetSearch(); navigate('/search'); }}
             />
