@@ -216,3 +216,33 @@ body {
     line-height: 2rem;
   }
 }
+
+/* U19 — the search HOME state's viewport fit. The hero container
+   vertically centers the logo + search in a min-height box. U17 put
+   the app footer in normal flow AFTER that box, so the home page
+   grew by the footer's full height past the viewport and the footer
+   only appeared on scroll (Juan's review). The box now subtracts
+   the footer's rendered height too, so hero + footer total the
+   pre-U17 100dvh - 5.5rem again (the 5.5rem term is the original
+   headroom the calc always kept). Footer height, measured from
+   Footer.jsx's own styles:
+     margin-top mt-10 (2.5rem) + border-top (1px) + padding-top
+     pt-5 (1.25rem) + copyright line 13px × 1.375 leading-snug
+     (≈17.9px) + gap-2 (0.5rem) + logo line 20px (the logo is
+     taller than its own 17.9px text) + padding-bottom
+   = 4.25rem + 38.9px + padding-bottom, where padding-bottom is
+   pb-24 (6rem) below lg and lg:pb-8 (2rem) at lg — hence the two
+   subtractions below. The px part rounds UP to 39px so the page
+   can only ever land a hair UNDER the viewport height, never a
+   pixel over it. If the footer's styles change, this math must be
+   redone — the two are deliberately kept in sync by this comment. */
+.search-home-state {
+  min-height: calc(100dvh - 5.5rem - 10.25rem - 39px);
+  padding-bottom: 4.5rem;
+}
+
+@media (min-width: 1024px) {
+  .search-home-state {
+    min-height: calc(100dvh - 5.5rem - 6.25rem - 39px);
+  }
+}

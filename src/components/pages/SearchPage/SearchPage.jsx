@@ -93,12 +93,16 @@ const SearchPage = () => {
   // logo + search sit vertically centered in the viewport. Once results
   // exist the page switches to normal top-aligned flow so the grid can
   // grow downward. The min-height leaves room for the floating hub nav.
+  // U19: the sizing lives in the .search-home-state rule in index.css
+  // now — U17's in-flow footer used to stack on top of this box and
+  // push the home page past 100dvh, and the footer's height differs
+  // below/above lg (its bottom padding), which an inline style can't
+  // express. The rule subtracts the footer's measured height there.
   const isHomeState = !books.length;
 
   return (
     <div
-      className={isHomeState ? 'flex flex-col justify-center box-border' : undefined}
-      style={isHomeState ? { minHeight: 'calc(100dvh - 5.5rem)', paddingBottom: '4.5rem' } : undefined}
+      className={isHomeState ? 'search-home-state flex flex-col justify-center box-border' : undefined}
     >
       {/* U1.1: this page has no PageBrand header — its hero logo IS the
           brand lockup, so the logo itself is the Home button (Juan's

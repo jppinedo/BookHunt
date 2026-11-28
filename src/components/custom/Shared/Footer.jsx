@@ -16,6 +16,15 @@ import LienzoHorizontalLogo from './LienzoHorizontalLogo';
  * rail replaces the pill and normal padding returns. The wrapper is
  * .page-shell, and App.jsx renders the footer inside the shell's
  * content column, so the lg rail offset (lg:pl-[72px]) applies.
+ *
+ * U19 (Juan's review): line 2 is now ONE link to the Lienzo site —
+ * "Built with [logo] design system" — opening lienzo.pinedo.cl in a
+ * new tab. The hover state (underline on the words, slight fade)
+ * and the coral focus ring mark it as clickable without leaving the
+ * footer's muted register. NOTE: this footer's rendered height is
+ * measured into the .search-home-state min-height in index.css so
+ * the home page fits one viewport WITH the footer visible — if the
+ * spacing or line count here changes, redo that math.
  */
 const Footer = () => (
     <footer className="page-shell mt-10 pb-24 lg:pb-8">
@@ -23,10 +32,16 @@ const Footer = () => (
             <p className="text-[13px] leading-snug text-pio-text-muted m-0">
                 © 2026 Juan Pablo Pinedo
             </p>
-            <p className="flex items-center gap-1.5 text-[13px] leading-snug text-pio-text-muted m-0">
+            <a
+                href="https://lienzo.pinedo.cl/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-[13px] leading-snug text-pio-text-muted no-underline rounded-sm transition hover:underline hover:underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pio-coral"
+            >
                 Built with
                 <LienzoHorizontalLogo width={82} height={20} />
-            </p>
+                design system
+            </a>
         </div>
     </footer>
 );
