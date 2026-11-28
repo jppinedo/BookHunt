@@ -8,7 +8,9 @@ import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
 import ShelveCaptcha from '@custom/Shared/ShelveCaptcha';
+import TurnstileWidget from '@custom/Shared/TurnstileWidget';
 import { storePasswordCredential } from '@utils/credential-store';
+import { isTurnstileEnabled, isCaptchaError } from '@utils/turnstile';
 import './RegistrationPage.css';
 
 /**
@@ -69,6 +71,31 @@ import './RegistrationPage.css';
  * unpairable "email"), password name="password", both password
  * fields autoComplete="new-password"; given-name/family-name were
  * already correct.
+ *
+ * U28: a Cloudflare Turnstile widget rides on the captcha step
+ * (only when VITE_TURNSTILE_SITE_KEY is configured — see
+ * @utils/turnstile) and resolves in the background while the user
+ * plays the Shelve rounds. performSignUp sends its token with the
+ * sign-up, because once Supabase's CAPTCHA protection is enabled
+ * server-side a tokenless call is rejected. If the third round
+ * ends before a token exists, the submit PARKS on the busy state
+ * until the token lands (15s cap, then it recovers like a failed
+ * verification) — a tokenless request is never posted. If Supabase
+ * still rejects the token, recovery stays on the captcha step:
+ * widget reset for a fresh token, rounds reset, friendly error,
+ * form data preserved.
+ *
+ * U29: the background resolution is gone — the widget is
+ * invisible at rest and does nothing during the Shelve rounds.
+ * When the third round completes, the submitting step starts by
+ * EXECUTING the widget (see TurnstileWidget): for most humans it
+ * passes invisibly behind the "Creating your account…" state; if
+ * Cloudflare wants interaction, its box appears inside this step
+ * as the extra verification. Only a resolved token fires
+ * performSignUp — an execute that fails or times out (the
+ * widget's own 15s cap, replacing the U28 park) recovers on the
+ * captcha step exactly like a rejected token. The token-parking
+ * refs and timer from U28 are deleted.
  */
 
 const CAPTCHA_ROUNDS = 3;
@@ -106,6 +133,12 @@ const RegistrationPage = () => {
     // the form step, but the value is page state, so the final
     // submit (two steps later) can still check it.
     const [website, setWebsite] = useState('');
+
+    // U29: the mounted Turnstile widget (invisible at rest — see
+    // TurnstileWidget). No token is stored any more: the
+    // submitting step executes the widget and uses the token the
+    // execute() promise resolves with.
+    const turnstileWidgetRef = useRef(null);
 
     // U24 success screen: hold for ~3s, then land on /search. The
     // cleanup cancels the redirect if the page unmounts first.
@@ -202,11 +235,53 @@ const RegistrationPage = () => {
                 return; // Back was pressed during the beat
             }
             if (next >= CAPTCHA_ROUNDS) {
-                void performSignUp();
+                // U29: enter the submitting step, which executes
+                // Turnstile before the sign-up may post (see
+                // submitAfterRounds).
+                setStep('submitting');
+                void submitAfterRounds(flow);
             } else {
                 setShelfKey((k) => k + 1);
             }
         }, SOLVE_BEAT_MS);
+    };
+
+    // U29: the submitting step's front half. With Turnstile
+    // configured, execute the (invisible) widget now — its token
+    // is the only thing allowed to fire performSignUp, because
+    // Supabase verifies the token as part of the sign-up request.
+    // An execute that resolves null (challenge failed, timed out,
+    // script blocked) recovers like a rejected token. Without
+    // Turnstile the sign-up fires directly, as pre-U28.
+    const submitAfterRounds = async (flow) => {
+        if (!isTurnstileEnabled) {
+            await performSignUp(null);
+            return;
+        }
+        const token = (await turnstileWidgetRef.current?.execute()) || null;
+        if (flowRef.current !== flow) {
+            return; // the flow was reset while the challenge ran
+        }
+        if (!token) {
+            recoverFromCaptchaFailure();
+            return;
+        }
+        await performSignUp(token);
+    };
+
+    // U28: shared recovery for "the verification didn't produce a
+    // usable token" — the U29 execute failed/timed out, or
+    // Supabase rejected the token performSignUp sent. Stay on the
+    // captcha step (NOT back to the form): widget reset so the
+    // next submit executes a fresh challenge, rounds reset,
+    // friendly error shown, typed form data kept.
+    const recoverFromCaptchaFailure = () => {
+        turnstileWidgetRef.current?.reset();
+        flowRef.current += 1;
+        setRoundsDone(0);
+        setShelfKey((k) => k + 1);
+        setStep('captcha');
+        onShowError(new Error("Verification didn't go through — please try once more."));
     };
 
     // U24 step 2 → 3/4: the actual sign-up, with the form data held
@@ -214,14 +289,18 @@ const RegistrationPage = () => {
     // "website" field means a bot, so abort silently back to the
     // form step. A server failure does the same trip, but with the
     // error shown the way errors have always been shown here.
-    async function performSignUp(){
+    // U29: `token` is the Turnstile token the submitting step's
+    // execute() resolved with (null when Turnstile isn't
+    // configured — the signUp call is then exactly the pre-U28
+    // one).
+    async function performSignUp(token){
         if (website) {
             resetToForm();
             return;
         }
         setStep('submitting');
         try {
-            await signUp(email, { firstName, lastName, password });
+            await signUp(email, { firstName, lastName, password, captchaToken: token || undefined });
             // U25: ask the browser to save the new credential —
             // fire-and-forget; the success screen and its timing
             // are unaffected (see @utils/credential-store).
@@ -232,8 +311,16 @@ const RegistrationPage = () => {
             });
             setStep('success');
         } catch (error) {
-            resetToForm();
-            onShowError(error);
+            // U28: a captcha rejection recovers HERE on the captcha
+            // step with a fresh widget — the raw Supabase wording
+            // would only confuse. Every other failure keeps the
+            // U24 path: back to the form, error as always shown.
+            if (isTurnstileEnabled && isCaptchaError(error)) {
+                recoverFromCaptchaFailure();
+            } else {
+                resetToForm();
+                onShowError(error);
+            }
         }
     }
 
@@ -433,6 +520,20 @@ const RegistrationPage = () => {
                                     Back
                                 </button>
                             </>
+                        )}
+                        {/* U29: Turnstile rides along inside this
+                            step block so the same widget survives
+                            'captcha' → 'submitting', but it is
+                            invisible and idle at rest — it only
+                            executes when the submitting step starts
+                            (see submitAfterRounds). If Cloudflare
+                            asks for interaction, its box appears
+                            here as the extra verification. Rendered
+                            bare (no wrapper) so its parked zero-size
+                            container adds no gap to this column.
+                            Renders nothing when no site key is set. */}
+                        {isTurnstileEnabled && (
+                            <TurnstileWidget ref={turnstileWidgetRef} />
                         )}
                     </div>
                 )}

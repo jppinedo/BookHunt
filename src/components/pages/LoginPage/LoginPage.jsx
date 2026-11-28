@@ -1,12 +1,14 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef } from 'react'
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, Title } from "@jppinedo/lienzo";
 import AuthBrand from '@custom/Shared/AuthBrand';
 import AuthSwitch from '@custom/Shared/AuthSwitch';
 import PasswordInput from '@custom/Shared/PasswordInput';
+import TurnstileWidget from '@custom/Shared/TurnstileWidget';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from '@state/AuthContext';
 import { storePasswordCredential } from '@utils/credential-store';
+import { isTurnstileEnabled, isCaptchaError } from '@utils/turnstile';
 
 /**
  * LoginPage — was MUI Button/TextField/Typography/Card + Firebase
@@ -46,6 +48,27 @@ import { storePasswordCredential } from '@utils/credential-store';
  * and a successful sign-in also stores the credential explicitly
  * via the Credential Management API (see @utils/credential-store),
  * which reinforces future autofill.
+ *
+ * U28: a Cloudflare Turnstile widget (only when
+ * VITE_TURNSTILE_SITE_KEY is configured — see @utils/turnstile)
+ * sits under each form, Managed/invisible, and its token rides
+ * along on signIn and on the password-reset request, because
+ * Supabase rejects tokenless calls once CAPTCHA protection is
+ * enabled server-side. Tokens are single-use, so the token clears
+ * on every view switch and attempt; a captcha rejection resets
+ * the widget for a fresh token and swaps in a friendly retry
+ * message — every other error (wrong password included) displays
+ * exactly as before.
+ *
+ * U29 (Juan's screenshot review): the U28 widget's box sat
+ * visibly under the Login button at all times. The widget is now
+ * invisible at rest (see TurnstileWidget) — nothing renders or
+ * runs when the page loads. On submit, the handler first awaits
+ * widget.execute() (the button wears the busy treatment while it
+ * runs; for most humans it passes without showing anything) and
+ * only then calls signIn / requestPasswordReset with the fresh
+ * token, because Supabase verifies the token as part of the auth
+ * request itself. A submit already in flight ignores repeats.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -56,10 +79,60 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // U29: the mounted Turnstile widget (invisible at rest — see
+    // TurnstileWidget). Only one view shows at a time, so one ref
+    // serves both forms. No token is stored any more: each submit
+    // executes the widget and uses the token it resolves with,
+    // because tokens are single-use and Supabase checks the token
+    // as part of the auth request.
+    const turnstileWidgetRef = useRef(null);
+
+    // U29: a submit in flight (Turnstile executing, then the auth
+    // call) — the ref is the synchronous re-entry guard (the form
+    // onSubmit AND the Button onClick both call the handlers),
+    // the state drives the button's busy treatment.
+    const [busy, setBusy] = useState(false);
+    const busyRef = useRef(false);
+
+    const switchView = (next) => {
+        setView(next);
+    };
+
+    // U28: a captcha rejection gets the widget reset (fresh
+    // challenge on the next submit) plus a friendly retry
+    // message; returns true when it handled the error so callers
+    // skip their normal path.
+    const handleCaptchaFailure = (error) => {
+        if (!isTurnstileEnabled || !isCaptchaError(error)) {
+            return false;
+        }
+        turnstileWidgetRef.current?.reset();
+        onShowError(new Error("Verification didn't go through — please try once more."));
+        return true;
+    };
+
+    // U29: run the invisible challenge and return its token (null
+    // when Turnstile isn't configured, or when the challenge
+    // produced none — the auth call then goes tokenless and
+    // Supabase arbitrates, with handleCaptchaFailure recovering
+    // if it rejects).
+    const obtainTurnstileToken = async () => {
+        if (!isTurnstileEnabled) {
+            return null;
+        }
+        return turnstileWidgetRef.current?.execute() ?? null;
+    };
+
     async function handleLogin(e){
         e.preventDefault();
+        if (busyRef.current) {
+            return;
+        }
+        busyRef.current = true;
+        setBusy(true);
         try {
-            await signIn(email, password);
+            const token = await obtainTurnstileToken();
+            await signIn(email, password, token || undefined);
             // U25: refresh what the browser's password manager
             // holds for this account (fire-and-forget, silent on
             // browsers without the Credential Management API).
@@ -67,18 +140,34 @@ const LoginPage = () => {
             navigate("/search");
         } catch (error) {
             console.log(error);
-            onShowError(error);
+            if (!handleCaptchaFailure(error)) {
+                onShowError(error);
+            }
+        } finally {
+            busyRef.current = false;
+            setBusy(false);
         }
     }
 
     async function handleResetRequest(e){
         e.preventDefault();
+        if (busyRef.current) {
+            return;
+        }
+        busyRef.current = true;
+        setBusy(true);
         try {
-            await requestPasswordReset(email);
-            setView('sent');
+            const token = await obtainTurnstileToken();
+            await requestPasswordReset(email, token || undefined);
+            switchView('sent');
         } catch (error) {
             console.log(error);
-            onShowError(error);
+            if (!handleCaptchaFailure(error)) {
+                onShowError(error);
+            }
+        } finally {
+            busyRef.current = false;
+            setBusy(false);
         }
     }
 
@@ -122,11 +211,11 @@ const LoginPage = () => {
                                 />
                             </div>
                             <div className="mt-2 max-w-[340px] mx-auto text-right">
-                                <button type="button" style={forgotLinkStyle} onClick={() => setView('forgot')}>
+                                <button type="button" style={forgotLinkStyle} onClick={() => switchView('forgot')}>
                                     Forgot password?
                                 </button>
                             </div>
-                            <div className="mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full">
+                            <div className={`mt-4 mb-2 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none opacity-50' : ''}`} aria-disabled={busy}>
                                 <Button
                                     label="Login"
                                     ariaLabel="Login"
@@ -135,6 +224,17 @@ const LoginPage = () => {
                                     onClick={(e) => {handleLogin(e)}}
                                 />
                             </div>
+                            {/* U29: Turnstile, invisible at rest —
+                                the container is parked at zero size
+                                (no gap under the button) and only
+                                takes up space here if a submit-time
+                                challenge needs interaction. Nothing
+                                renders when no site key is set. */}
+                            {isTurnstileEnabled && (
+                                <div className="max-w-[340px] mx-auto flex justify-center">
+                                    <TurnstileWidget ref={turnstileWidgetRef} />
+                                </div>
+                            )}
                         </form>
                     </>
                 )}
@@ -152,7 +252,7 @@ const LoginPage = () => {
                                 onChange={(e) => {setEmail(e.target.value)}}
                             />
                         </div>
-                        <div className="mt-4 max-w-[340px] mx-auto [&>button]:w-full">
+                        <div className={`mt-4 max-w-[340px] mx-auto [&>button]:w-full ${busy ? 'pointer-events-none opacity-50' : ''}`} aria-disabled={busy}>
                             <Button
                                 label="Send reset link"
                                 ariaLabel="Send reset link"
@@ -161,8 +261,17 @@ const LoginPage = () => {
                                 onClick={(e) => {handleResetRequest(e)}}
                             />
                         </div>
+                        {/* U29: the reset-email call needs a token
+                            too once protection is on — same widget,
+                            same invisible-at-rest treatment as the
+                            login form. */}
+                        {isTurnstileEnabled && (
+                            <div className="max-w-[340px] mx-auto flex justify-center">
+                                <TurnstileWidget ref={turnstileWidgetRef} />
+                            </div>
+                        )}
                         <div className="mt-3 mb-2 max-w-[340px] mx-auto">
-                            <button type="button" style={textLinkStyle} onClick={() => setView('login')}>
+                            <button type="button" style={textLinkStyle} onClick={() => switchView('login')}>
                                 Back to login
                             </button>
                         </div>
@@ -181,7 +290,7 @@ const LoginPage = () => {
                                 ariaLabel="Back to login"
                                 type="green"
                                 size="xl"
-                                onClick={() => setView('login')}
+                                onClick={() => switchView('login')}
                             />
                         </div>
                     </>

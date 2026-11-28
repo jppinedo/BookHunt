@@ -69,17 +69,33 @@ export async function searchGoogleBooks(query) {
   // the breadcrumb bar is this list's length, i.e. post-dedupe.
   if (!hasKey) return dedupeGoogleBooks(mockSearch(query));
   const isISBN = isBookCode(query);
+  const fetchVolumes = (q) =>
+    axios
+      .get(GOOGLE_BASE_URL, {
+        params: { q, orderBy: 'relevance', maxResults: 20, key: API_KEY },
+      })
+      .then((response) => response.data);
   try {
-    const response = await axios.get(GOOGLE_BASE_URL, {
-      params: {
-        q: isISBN ? cleanQuery(query) : `intitle:${query}`, // Search by title
-        orderBy: 'relevance', // Sort by relevance
-        maxResults: 20,
-        key: API_KEY,
-      },
-    });
-    if (!response.data.items?.length) return dedupeGoogleBooks(mockSearch(query));
-    return dedupeGoogleBooks(response.data.items.map((item) => formatGoogleBook(item)));
+    // U27: an ISBN typed as the query needs the `isbn:` qualifier. The bare
+    // digits were sent as a general keyword query, and Google Books does
+    // NOT match the ISBN field that way — q=9780132350884 returns ~9
+    // unrelated volumes, none of them the book with that ISBN, while
+    // q=isbn:9780132350884 returns exactly it (verified live). Hyphenated
+    // input is fine: isBookCode/cleanQuery strip punctuation first.
+    if (isISBN) {
+      const isbnData = await fetchVolumes(`isbn:${cleanQuery(query)}`).catch((error) => {
+        console.error('ISBN lookup failed, falling back to general search:', error);
+        return null;
+      });
+      if (isbnData?.items?.length) {
+        return dedupeGoogleBooks(isbnData.items.map((item) => formatGoogleBook(item)));
+      }
+      // Zero ISBN hits: fall through to the previous general search below,
+      // so anything that worked before keeps working.
+    }
+    const data = await fetchVolumes(isISBN ? cleanQuery(query) : `intitle:${query}`);
+    if (!data.items?.length) return dedupeGoogleBooks(mockSearch(query));
+    return dedupeGoogleBooks(data.items.map((item) => formatGoogleBook(item)));
   } catch (error) {
     console.error('Error fetching books, falling back to mock data:', error);
     return dedupeGoogleBooks(mockSearch(query));
