@@ -21,10 +21,16 @@ import LienzoHorizontalLogo from './LienzoHorizontalLogo';
  * "Built with [logo] design system" — opening lienzo.pinedo.cl in a
  * new tab. The hover state (underline on the words, slight fade)
  * and the coral focus ring mark it as clickable without leaving the
- * footer's muted register. NOTE: this footer's rendered height is
- * measured into the .search-home-state min-height in index.css so
- * the home page fits one viewport WITH the footer visible — if the
- * spacing or line count here changes, redo that math.
+ * footer's muted register.
+ *
+ * U20: the footer is the last item of the shell's flex column
+ * (App.jsx), so it rests at the bottom of the viewport on short
+ * pages and follows the content on long ones. U19 briefly measured
+ * this footer's height into the home hero's min-height calc(); the
+ * flex layout absorbs the footer's height now, so spacing or line
+ * changes here need no matching math elsewhere. The deep pb-24
+ * below lg still applies, so on a short mobile page the footer TEXT
+ * (not just its box) clears the fixed HubNav pill.
  */
 const Footer = () => (
     <footer className="page-shell mt-10 pb-24 lg:pb-8">

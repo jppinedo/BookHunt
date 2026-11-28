@@ -93,11 +93,12 @@ const SearchPage = () => {
   // logo + search sit vertically centered in the viewport. Once results
   // exist the page switches to normal top-aligned flow so the grid can
   // grow downward. The min-height leaves room for the floating hub nav.
-  // U19: the sizing lives in the .search-home-state rule in index.css
-  // now — U17's in-flow footer used to stack on top of this box and
-  // push the home page past 100dvh, and the footer's height differs
-  // below/above lg (its bottom padding), which an inline style can't
-  // express. The rule subtracts the footer's measured height there.
+  // U20: the sizing lives in the .search-home-state rule in index.css
+  // — under the sticky-footer flex shell the hero root simply grows
+  // (flex: 1) to fill the space above the footer and centers its
+  // content there, so the home page is exactly one viewport tall.
+  // (U19's min-height calc() that subtracted the footer's measured
+  // height is gone; the flex layout absorbs the footer instead.)
   const isHomeState = !books.length;
 
   return (

@@ -103,11 +103,21 @@ function AppShell() {
           wrapper has no transform/filter to trap them. Below lg the
           padding is absent and everything renders exactly as before. */}
       {showNav && <AppRail />}
-      <div className={showNav ? 'lg:pl-[72px]' : undefined}>
+      {/* U20: the shell is a flex column at least one viewport tall —
+          the classic sticky footer. The routed region (<main>) grows
+          to fill whatever the brand header and footer don't use, so
+          on short pages (Sell a Book is just a search input) the
+          footer rests at the BOTTOM of the viewport instead of
+          hugging the content near the top; on long pages it simply
+          follows the content as before. The fixed/absolute overlays
+          (MenuNav, HubNav, toasts, ErrorModal) don't participate in
+          the flex layout and are unaffected. */}
+      <div className={`flex min-h-dvh flex-col${showNav ? ' lg:pl-[72px]' : ''}`}>
       {showNav && <MenuNav />}
       {showBrand && <PageBrand />}
       <RedirectHandler /> {/* Handles site load up for logged in or not logged in */}
 
+      <main className="flex flex-1 flex-col">
       <Routes>
         <Route path="/search" element={<Protected><SearchPage /></Protected>} />
         <Route path="/login" element={<LoginPage />} />
@@ -123,6 +133,7 @@ function AppShell() {
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
         <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
       </Routes>
+      </main>
 
       {/* U17: the footer is unconditional — it closes the auth pages
           too, where showNav is false. It sits inside this wrapper, so
