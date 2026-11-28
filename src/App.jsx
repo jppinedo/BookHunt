@@ -12,6 +12,7 @@ import BrandLockup from '@custom/Shared/BrandLockup';
 import { AppContext } from '@state/AppContext';
 import { AuthContext } from "@state/AuthContext";
 import { SearchContext } from '@state/SearchContext';
+import Footer from '@custom/Shared/Footer';
 import MenuNav from '@custom/Navigation/MenuNav';
 import HubNav from '@custom/Navigation/HubNav';
 import AppRail from '@custom/Navigation/AppRail';
@@ -122,6 +123,11 @@ function AppShell() {
         <Route path="/saved" element={<Protected><BooksSavedPage /></Protected>} />
         <Route path="*" element={<h1 className="on-bg-text" style={{marginTop: '4rem'}}>404 - Page Not Found</h1>} /> {/* Catch-all route */}
       </Routes>
+
+      {/* U17: the footer is unconditional — it closes the auth pages
+          too, where showNav is false. It sits inside this wrapper, so
+          the lg rail offset above applies to it as well. */}
+      <Footer />
 
       {showNav && <HubNav />}
       {/* U4: toast stack — rendered at shell level so a toast fired
