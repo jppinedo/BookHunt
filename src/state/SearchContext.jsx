@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useState } from 'react';
+import React, { createContext, useCallback, useRef, useState } from 'react';
 import { searchGoogleBooks } from '@services/GoogleAPI';
 
 export const SearchContext = createContext();
@@ -22,18 +22,30 @@ export const SearchProvider = ({ children }) => {
   const [searchedQuery, setSearchedQuery] = useState('');
   const [lastDealsUrl, setLastDealsUrl] = useState(null);
 
+  // U26: search epoch. Every runSearch captures the epoch it started
+  // in; resetSearch (and each new runSearch) bumps it. A resolution
+  // whose epoch is no longer current is DROPPED — a search still in
+  // flight when the user hits Home can no longer land after the reset
+  // and resurrect the results it was fetching.
+  const searchEpochRef = useRef(0);
+
   const runSearch = useCallback(async (query) => {
+    const epoch = ++searchEpochRef.current;
     setStatus('loading');
     try {
       const results = await searchGoogleBooks(query);
+      if (searchEpochRef.current !== epoch) return; // superseded / reset
       setBooks(results);
       setSearchedQuery(query);
     } catch (err) {
+      if (searchEpochRef.current !== epoch) return; // superseded / reset
       console.error('Search failed:', err);
       setBooks([]);
       setSearchedQuery(query);
     } finally {
-      setStatus('done');
+      if (searchEpochRef.current === epoch) {
+        setStatus('done');
+      }
     }
   }, []);
 
@@ -45,6 +57,10 @@ export const SearchProvider = ({ children }) => {
   // the "Results" crumb, which keep the U1 behavior of returning to the
   // preserved results.
   const resetSearch = useCallback(() => {
+    // U26: bump the epoch FIRST so any in-flight search resolution is
+    // already stale when the cleared state commits — the reset is
+    // final, nothing async can repopulate the session afterwards.
+    searchEpochRef.current += 1;
     setBooks([]);
     setStatus('idle');
     setSearchedQuery('');

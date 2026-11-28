@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 import { SearchContext } from '@state/SearchContext';
@@ -76,8 +76,29 @@ const SearchPage = () => {
   // preserved results instead of wiping them and searching again. The old
   // code reset the page on every bare /search visit, which is exactly
   // what threw the user's results away.
+  //
+  // U26: lastHandledUrlQueryRef remembers the URL query this effect has
+  // already turned into a search, and the effect never searches for the
+  // same URL query twice. That closes the Home-reset bounce: the reset
+  // click zeroes searchedQuery and navigates to bare /search, but the
+  // two updates don't commit in the same render — this effect used to
+  // run on the in-between render (searchedQuery already '', ?query=
+  // still in the URL), read the mismatch as a brand-new search, and
+  // its results landed a moment later, throwing the user back onto
+  // the results view. Now that in-between render sees a URL query the
+  // effect has already handled and stays quiet; once the navigation
+  // commits (no ?query=) the ref clears, so a later genuine search —
+  // even for the same term — still runs. Navigation to the results
+  // view stays a product of an explicit submit (setQueryParam writes
+  // a NEW ?query=), never of results merely arriving.
+  const lastHandledUrlQueryRef = useRef(null);
   useEffect(() => {
-    if (urlQuery?.length && urlQuery !== searchedQuery) {
+    if (!urlQuery?.length) {
+      lastHandledUrlQueryRef.current = null;
+      return;
+    }
+    if (urlQuery !== searchedQuery && urlQuery !== lastHandledUrlQueryRef.current) {
+      lastHandledUrlQueryRef.current = urlQuery;
       runSearch(urlQuery);
     }
   }, [urlQuery, searchedQuery, runSearch])
