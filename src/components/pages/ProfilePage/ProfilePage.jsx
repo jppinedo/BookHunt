@@ -30,6 +30,13 @@ import './ProfilePage.css';
  * books with it. Both re-auth calls carry a Turnstile token when
  * Turnstile is configured, because CAPTCHA protection is enabled on
  * the project and signInWithPassword requires one.
+ * U32: the two flows no longer share one widget instance. When
+ * Cloudflare demanded interaction during a delete, the challenge
+ * rendered in the page BEHIND the modal's overlay — visible but
+ * unclickable; Juan had to close the modal to reach it. The delete
+ * flow now executes its own TurnstileWidget mounted inside the
+ * modal, so the challenge appears there, above the overlay.
+ * Change Password keeps the page-level instance (no overlay there).
  * U9: this page used to carry a second tab, "Book Listings", inside this
  * narrow form card. A list doesn't belong in a form container — the
  * listings are now their own page (/my-listings, MyListingsPage), the
@@ -68,11 +75,18 @@ const ProfilePage = () => {
     const [passwordFormError, setPasswordFormError] = useState('');
     const [changeBusy, setChangeBusy] = useState(false);
 
-    // U31: one invisible-at-rest Turnstile widget serves both
-    // re-authentication flows on this page (change + delete). It
-    // renders nothing and loads nothing until execute() is called
-    // at submit time (see TurnstileWidget / U29).
+    // U31: an invisible-at-rest Turnstile widget serves the
+    // re-authentication flows on this page. It renders nothing
+    // and loads nothing until execute() is called at submit time
+    // (see TurnstileWidget / U29).
+    // U32: TWO instances now — this page-level one serves Change
+    // Password only; the delete flow has its own, mounted inside
+    // the confirmation modal (see the Modal JSX below), so an
+    // interactive challenge renders inside the modal instead of
+    // behind its overlay. The instances share the singleton API
+    // script but no promise state.
     const turnstileWidgetRef = useRef(null);
+    const deleteTurnstileWidgetRef = useRef(null);
 
     // Pull first/last name from the (mock) profiles table
     useEffect(() => {
@@ -97,33 +111,37 @@ const ProfilePage = () => {
         getName()
     }, [user])
 
-    // U31: run the invisible Turnstile challenge and return its
-    // token (null when Turnstile isn't configured — the re-auth
-    // call then goes tokenless, the pre-U28 behavior).
-    const obtainTurnstileToken = async () => {
+    // U31: run the invisible Turnstile challenge on the given
+    // widget instance and return its token (null when Turnstile
+    // isn't configured — the re-auth call then goes tokenless,
+    // the pre-U28 behavior). U32: the widget is a parameter
+    // because each flow executes its OWN instance (page-level
+    // for Change Password, modal-level for Delete Account).
+    const obtainTurnstileToken = async (widgetRef) => {
         if (!isTurnstileEnabled) {
             return null;
         }
-        return turnstileWidgetRef.current?.execute() ?? null;
+        return widgetRef.current?.execute() ?? null;
     };
 
     // U31: prove the user knows the current password by signing in
     // with it again. CAPTCHA protection is enabled on the project,
     // so the re-auth carries a Turnstile token when configured.
     // Throws whatever signIn throws; callers map the error.
-    const reauthenticate = async (password) => {
-        const token = await obtainTurnstileToken();
+    const reauthenticate = async (password, widgetRef) => {
+        const token = await obtainTurnstileToken(widgetRef);
         await signIn(user.email, password, token || undefined);
     };
 
     // U31: turn a re-auth failure into the line the user sees —
-    // a captcha rejection gets the reset-and-retry treatment, a
+    // a captcha rejection gets the reset-and-retry treatment
+    // (applied to the instance that produced the token), a
     // credential rejection gets the caller's "incorrect" wording,
     // anything else (e.g. a network failure, already humanized by
     // AuthContext) speaks for itself.
-    const passwordCheckErrorMessage = (error, incorrectText) => {
+    const passwordCheckErrorMessage = (error, incorrectText, widgetRef) => {
         if (isTurnstileEnabled && isCaptchaError(error)) {
-            turnstileWidgetRef.current?.reset();
+            widgetRef.current?.reset();
             return "Verification didn't go through — please try once more.";
         }
         if (/invalid login credentials/i.test((error && error.message) || '')) {
@@ -153,10 +171,10 @@ const ProfilePage = () => {
         }
         setChangeBusy(true);
         try {
-            await reauthenticate(oldPassword);
+            await reauthenticate(oldPassword, turnstileWidgetRef);
         }
         catch (error) {
-            setPasswordFormError(passwordCheckErrorMessage(error, "Your old password is incorrect."));
+            setPasswordFormError(passwordCheckErrorMessage(error, "Your old password is incorrect.", turnstileWidgetRef));
             setChangeBusy(false);
             return;
         }
@@ -193,10 +211,13 @@ const ProfilePage = () => {
         setDeleteBusy(true);
         setDeleteError('');
         try {
-            await reauthenticate(deletePassword);
+            // U32: the token comes from the modal's own widget
+            // instance, so an interactive challenge opens inside
+            // this modal, not in the page behind it.
+            await reauthenticate(deletePassword, deleteTurnstileWidgetRef);
         }
         catch (error) {
-            setDeleteError(passwordCheckErrorMessage(error, "Incorrect password — your account was not deleted."));
+            setDeleteError(passwordCheckErrorMessage(error, "Incorrect password — your account was not deleted.", deleteTurnstileWidgetRef));
             setDeleteBusy(false);
             return;
         }
@@ -216,6 +237,14 @@ const ProfilePage = () => {
     }
 
     function showDelete(option) {
+        if (option !== true) {
+            // U32: closing mid-challenge settles the modal widget's
+            // in-flight execute() right away (its unmount cleanup
+            // would settle it too — the Modal renders nothing when
+            // closed — but the explicit reset makes the cancel
+            // immediate rather than teardown-dependent).
+            deleteTurnstileWidgetRef.current?.reset();
+        }
         setDeleteVisible(option === true);
         if (option !== true) {
             setDeletePassword('');
@@ -254,8 +283,10 @@ const ProfilePage = () => {
 
     const ProfileSettings = (
         <div className={"info-area"} style={{padding: '2rem'}}>
-            {/* U31: invisible at rest; executed only by the two
-                re-authentication flows above. */}
+            {/* U31: invisible at rest; executed only at submit
+                time. U32: this page-level instance now serves the
+                Change Password re-auth alone — Delete Account has
+                its own instance inside the modal below. */}
             <TurnstileWidget ref={turnstileWidgetRef} />
             {readOnlyField("Name", fullName)}
             {readOnlyField("Email", user?.email || '')}
@@ -329,6 +360,17 @@ const ProfilePage = () => {
                 {deleteError && (
                     <p className="mt-3 text-sm font-medium text-pio-coral-dark">{deleteError}</p>
                 )}
+                {/* U32: the delete flow's OWN Turnstile instance,
+                    mounted inside the modal. Parked at zero size
+                    while idle, so the modal looks exactly as
+                    before; if Cloudflare requires interaction, the
+                    widget flips in-flow right here — inside the
+                    modal body, above the overlay, clickable — and
+                    the modal grows to fit it. The flex wrapper
+                    only centers it when it does appear. */}
+                <div className="flex justify-center">
+                    <TurnstileWidget ref={deleteTurnstileWidgetRef} />
+                </div>
                 <div className="mt-5 flex justify-center gap-3" style={deleteBusy ? { pointerEvents: 'none', opacity: 0.6 } : undefined}>
                     <Button label={deleteBusy ? "Deleting…" : "Delete my account"} type="red" onClick={(e) => handleDeleteAccount(e)} />
                     <Button label="Cancel" onClick={() => showDelete(false)} />

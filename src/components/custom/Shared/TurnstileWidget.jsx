@@ -125,6 +125,10 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(_, ref) {
             sitekey: TURNSTILE_SITE_KEY,
             execution: "execute",
             appearance: "interaction-only",
+            // U33: the app is light-theme only, so pin the widget
+            // to light — the default follows the OS theme and
+            // rendered dark on Juan's machine.
+            theme: "light",
             callback: (token) => {
                 executedRef.current = true;
                 setInteractive(false);
