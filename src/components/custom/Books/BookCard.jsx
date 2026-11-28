@@ -427,7 +427,11 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
         />
         <div className="flex flex-col flex-1 min-w-0">
           <div className="p-3">
-            <Title size="md" className="book-list-card-title leading-tight mb-2">
+            {/* U18: list-mode title drops one step (md/text-lg →
+                sm/text-base) — Juan: the card content type read too
+                big. The detail view's headline is a separate branch
+                above and keeps its size. */}
+            <Title size="sm" className="book-list-card-title leading-tight mb-2">
               {book.title}
             </Title>
             {book.authors?.length ? (
@@ -445,7 +449,10 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
                 {/* U3 / D3: condition appears ONCE — the pill below. The
                     old "Condition: Good" text line duplicated it on the
                     deals, detail, and Saved Books screens. */}
-                <p className="my-1">Sold by: {book.sellerName} ({book.sellerType})</p>
+                {/* U18: the seller line drops below the title —
+                    text-sm in the muted token, quieter but still
+                    readable (Juan's review of the card type). */}
+                <p className="my-1 text-sm text-pio-text-muted">Sold by: {book.sellerName} ({book.sellerType})</p>
                 {/* U12: seller trust — feedback summary under the Sold by
                     line, Top Rated pill beside the condition badge. */}
                 {showDetailExtras && book.sellerFeedbackPercentage && (
@@ -543,7 +550,11 @@ const BookCard = ({ book, type, onCardClick, isSingle }) => {
                 )}
                 {book.price !== undefined && book.price !== null && (
                   <span className="text-sm font-semibold tabular-nums text-pio-coral-dark">
-                    {`$${book.price} ${book.currency}`}
+                    {/* U18: list-mode prices drop the currency code
+                        ("$6.00", not "$6.00 USD") — symbol and
+                        amount formatting unchanged. The detail
+                        price box keeps the code. */}
+                    {`$${book.price}`}
                   </span>
                 )}
               </div>

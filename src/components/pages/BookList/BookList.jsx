@@ -254,7 +254,16 @@ const BookList = () => {
             hasMore={hasMore}
             loader={<LoadingResults className="mt-6 mb-16"/>}
             scrollThreshold={1}
-            style={{ paddingBottom: '15rem' }}
+            // U18: the library hardcodes overflow:'auto' on this
+            // wrapper (its defaults sit UNDER the style prop), and
+            // that box clipped the first-row cards' hover lift +
+            // shadow at the grid's top edge — Juan's screenshot
+            // shows the hovered card cut off at the top. No height
+            // or scrollableTarget is passed, so the library listens
+            // to page scroll (document) and this wrapper never
+            // actually scrolls: overflow:'visible' only stops the
+            // clipping, fetch behavior is unchanged.
+            style={{ overflow: 'visible', paddingBottom: '15rem' }}
           >
             <div className="card-grid">{ebayListings.map(renderCard)}</div>
           </InfiniteScroll>
